@@ -190,4 +190,60 @@ footer {
   <a href="#"><i class="fab fa-linkedin"></i></a>
 </div>
 
-<a href="https://wa.me/971509507079" class="whatsap
+<a href="https://wa.me/971509507079" class="whatsapp-float">
+  <i class="fab fa-whatsapp"></i> WhatsApp Me
+</a>
+
+<button class="lang-toggle" onclick="toggleLang()">🇦🇪 عربي</button>
+
+<header class="hero">
+  <img src="profile.jpeg" alt="Muhammad Umer">
+  <h1>MUHAMMAD UMER</h1>
+  <p class="subtitle" id="title">DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪</p>
+</header>
+
+<section>
+
+<div class="card" id="about">
+<h2>ABOUT ME</h2>
+<p>I HELP AMBITIOUS BUSINESSES <strong>ATTRACT HIGH-VALUE CUSTOMERS, GENERATE QUALIFIED LEADS, AND SCALE REVENUE</strong> THROUGH DATA-DRIVEN DIGITAL MARKETING.</p>
+<p>WITH OVER <strong>8+ YEARS OF EXPERIENCE</strong>, I DELIVER END-TO-END MARKETING SOLUTIONS ACROSS THE UAE MARKET.</p>
+</div>
+
+<div class="card" id="services">
+<h2>SERVICES</h2>
+<div class="services">
+  <div class="service"><h3>PAID ADVERTISING</h3><p>Google, Meta & TikTok Ads</p></div>
+  <div class="service"><h3>SOCIAL MEDIA</h3><p>Instagram, Snapchat, YouTube</p></div>
+  <div class="service"><h3>LEAD GENERATION</h3><p>Funnels & campaigns</p></div>
+  <div class="service"><h3>BRANDING</h3><p>High-impact creatives</p></div>
+</div>
+</div>
+
+<div class="cta">
+<h2>READY TO SCALE YOUR BUSINESS?</h2>
+<p>Let’s build a profitable digital growth system.</p>
+<a href="https://wa.me/971509507079" class="submit-btn">Book Consultation</a>
+</div>
+
+</section>
+
+<footer>
+© 2026 MUHAMMAD UMER — DIGITAL MARKETING CONSULTANT UAE
+</footer>
+
+<script>
+let isArabic=false;
+function toggleLang(){
+  const html=document.getElementById("htmlRoot");
+  isArabic=!isArabic;
+  if(isArabic){
+    html.classList.add("rtl");
+    document.querySelector(".lang-toggle").innerText="🇬🇧 English";
+    document.getElementById("title").innerText="مستشار التسويق الرقمي والإعلانات المدفوعة — الإمارات 🇦🇪";
+  } else location.reload();
+}
+</script>
+
+</body>
+</html>
