@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" id="htmlRoot">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MUHAMMAD UMER | DIGITAL MARKETING CONSULTANT UAE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>MUHAMMAD UMER | DIGITAL MARKETING CONSULTANT UAE</title>
 
-<!-- Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- SEO -->
+  <meta name="description" content="Elite Digital Marketing & Paid Advertising Consultant in UAE. Helping businesses attract high-value customers, generate qualified leads, and scale revenue."/>
+  <meta name="author" content="Muhammad Umer"/>
+  <link rel="alternate" hreflang="en" href="https://translink.ae/" />
+  <link rel="alternate" hreflang="ar" href="https://translink.ae/ar/" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
-:root {
+:root{
   --primary:#1B9AAA;
   --secondary:#DDDBCB;
   --dark:#0F172A;
@@ -20,115 +27,77 @@
   --white:#ffffff;
 }
 
-* { box-sizing:border-box; margin:0; padding:0; }
+*{margin:0;padding:0;box-sizing:border-box}
 
-body {
+body{
   font-family:'Inter',sans-serif;
   background:var(--secondary);
   color:var(--text);
-  line-height:1.6;
+  line-height:1.7;
+}
+
+/* LANGUAGE */
+.lang-switch{
+  position:absolute;
+  top:20px;
+  right:20px;
+}
+.lang-btn{
+  background:var(--primary);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:600;
 }
 
 /* HEADER */
-header {
-  background:var(--white);
-  padding:40px 20px;
+header{
+  background:#fff;
+  padding:60px 20px;
   text-align:center;
   position:relative;
 }
 
-.lang-toggle {
-  position:absolute;
-  top:20px;
-  right:20px;
-  background:var(--primary);
-  color:white;
-  border:none;
-  padding:10px 16px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
-}
-
-.hero img {
+.hero img{
   width:160px;
   height:160px;
   border-radius:50%;
-  border:4px solid var(--primary);
   object-fit:cover;
   margin-bottom:20px;
+  border:4px solid transparent;
+  background:
+    linear-gradient(#fff,#fff) padding-box,
+    linear-gradient(120deg,#1B9AAA,#38bdf8,#1B9AAA) border-box;
+  animation:borderGlow 4s linear infinite;
 }
 
-h1 { font-size:36px; color:var(--dark); }
-.subtitle { font-size:18px; margin-top:8px; }
+@keyframes borderGlow{
+  to{background-position:200% center}
+}
 
-.socials a {
+h1{
+  font-size:36px;
+  color:var(--dark);
+}
+
+.subtitle{
+  margin-top:8px;
+  font-size:18px;
+}
+
+.socials{
+  margin-top:20px;
+}
+.socials a{
   color:var(--primary);
   font-size:22px;
   margin:0 10px;
   text-decoration:none;
 }
 
-/* SECTIONS */
-section {
-  max-width:1100px;
-  margin:auto;
-  padding:60px 20px;
-}
-
-.card {
-  background:var(--white);
-  border-radius:18px;
-  padding:32px;
-  margin-bottom:30px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
-
-h2 { font-size:28px; margin-bottom:16px; color:var(--dark); }
-
-/* SERVICES */
-.services {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
-}
-
-.service {
-  border:1px solid #e2e8f0;
-  border-radius:14px;
-  padding:22px;
-}
-
-.service h3 { color:var(--primary); }
-
-/* CTA */
-.cta {
-  background:var(--primary);
-  color:white;
-  text-align:center;
-  padding:50px 20px;
-  border-radius:22px;
-}
-
-.submit-btn {
-  display:inline-block;
-  margin-top:20px;
-  background:white;
-  color:var(--primary);
-  padding:14px 32px;
-  border-radius:12px;
-  font-weight:700;
-  text-decoration:none;
-  transition:.3s;
-}
-
-.submit-btn:hover {
-  transform:translateY(-2px);
-  box-shadow:0 10px 20px rgba(27,154,170,.25);
-}
-
-/* LEFT SOCIALS */
-.social-left {
+/* LEFT SOCIAL */
+.social-left{
   position:fixed;
   left:15px;
   top:50%;
@@ -138,39 +107,114 @@ h2 { font-size:28px; margin-bottom:16px; color:var(--dark); }
   gap:14px;
   z-index:999;
 }
-
-.social-left a {
-  width:42px;
-  height:42px;
-  background:white;
-  color:var(--primary);
+.social-left a{
+  width:42px;height:42px;
+  background:#fff;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
+  color:var(--primary);
   box-shadow:0 6px 18px rgba(0,0,0,.2);
 }
 
+/* SECTIONS */
+section{
+  max-width:1100px;
+  margin:auto;
+  padding:60px 20px;
+}
+
+.card{
+  background:#fff;
+  padding:32px;
+  border-radius:18px;
+  margin-bottom:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  animation:fadeUp .6s ease both;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:none}
+}
+
+h2{
+  color:var(--dark);
+  margin-bottom:16px;
+}
+
+/* SERVICES */
+.services{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
+.service{
+  border:1px solid #e2e8f0;
+  padding:22px;
+  border-radius:14px;
+}
+.service h3{
+  color:var(--primary);
+}
+
+/* CONTACT FORM */
+.contact-form{
+  display:grid;
+  gap:14px;
+  max-width:520px;
+}
+.contact-form input,
+.contact-form select{
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+  font-size:15px;
+}
+.submit-btn{
+  background:var(--primary);
+  color:#fff;
+  padding:16px;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.3s;
+}
+.submit-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 20px rgba(27,154,170,.25);
+}
+
+/* CTA */
+.cta{
+  background:var(--primary);
+  color:#fff;
+  padding:60px 20px;
+  text-align:center;
+  border-radius:22px;
+}
+
 /* WHATSAPP */
-.whatsapp-float {
+.whatsapp-float{
   position:fixed;
   bottom:20px;
   right:20px;
   background:#25D366;
-  color:white;
-  padding:14px 18px;
+  color:#fff;
+  padding:14px 20px;
   border-radius:50px;
   font-weight:700;
   text-decoration:none;
   display:flex;
   gap:10px;
+  align-items:center;
   z-index:999;
 }
 
-/* RTL */
-.rtl { direction:rtl; text-align:right; }
-
-footer {
+/* FOOTER */
+footer{
   text-align:center;
   padding:30px;
   font-size:14px;
@@ -184,22 +228,37 @@ footer {
 <div class="social-left">
   <a href="#"><i class="fab fa-facebook"></i></a>
   <a href="#"><i class="fab fa-instagram"></i></a>
-  <a href="#"><i class="fab fa-tiktok"></i></a>
   <a href="#"><i class="fab fa-youtube"></i></a>
   <a href="#"><i class="fab fa-snapchat"></i></a>
+  <a href="#"><i class="fab fa-tiktok"></i></a>
   <a href="#"><i class="fab fa-linkedin"></i></a>
 </div>
 
-<a href="https://wa.me/971509507079" class="whatsapp-float">
+<a class="whatsapp-float" href="https://wa.me/971509507079" target="_blank">
   <i class="fab fa-whatsapp"></i> WhatsApp Me
 </a>
 
-<button class="lang-toggle" onclick="toggleLang()">🇦🇪 عربي</button>
-
 <header class="hero">
+  <div class="lang-switch">
+    <a href="/ar/" class="lang-btn">عربي</a>
+  </div>
+
   <img src="profile.jpeg" alt="Muhammad Umer">
   <h1>MUHAMMAD UMER</h1>
-  <p class="subtitle" id="title">DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪</p>
+  <p class="subtitle">DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪</p>
+
+  <p style="margin-top:14px;font-weight:600;color:#64748b">
+    Trusted by UAE Businesses • ROI-Driven • Confidential & Discreet
+  </p>
+
+  <div class="socials">
+   <a href="#"><i class="fab fa-facebook"></i></a>
+   <a href="#"><i class="fab fa-instagram"></i></a>
+   <a href="#"><i class="fab fa-youtube"></i></a>
+   <a href="#"><i class="fab fa-snapchat"></i></a>
+   <a href="#"><i class="fab fa-tiktok"></i></a>
+   <a href="#"><i class="fab fa-linkedin"></i></a>
+  </div>
 </header>
 
 <section>
@@ -213,7 +272,7 @@ footer {
   </p>
 
   <p>
-    WITH OVER <strong>8+ YEARS OF PROFESSIONAL EXPERIENCE</strong>, I DELIVER
+    WITH OVER <strong>5+ YEARS OF PROFESSIONAL EXPERIENCE</strong>, I DELIVER
     END-TO-END MARKETING SOLUTIONS — FROM PREMIUM BRAND POSITIONING AND
     HIGH-IMPACT CONTENT CREATION TO ADVANCED SOCIAL MEDIA MANAGEMENT AND
     ROI-DRIVEN PAID ADVERTISING CAMPAIGNS.
@@ -226,22 +285,40 @@ footer {
   </p>
 </section>
 
-</div>
-
-<div class="card" id="services">
+<div class="card">
 <h2>SERVICES</h2>
 <div class="services">
   <div class="service"><h3>PAID ADVERTISING</h3><p>Google, Meta & TikTok Ads</p></div>
   <div class="service"><h3>SOCIAL MEDIA</h3><p>Instagram, Snapchat, YouTube</p></div>
-  <div class="service"><h3>LEAD GENERATION</h3><p>Funnels & campaigns</p></div>
-  <div class="service"><h3>BRANDING</h3><p>High-impact creatives</p></div>
+  <div class="service"><h3>LEAD GENERATION</h3><p>Funnels & Conversion Systems</p></div>
+  <div class="service"><h3>BRANDING</h3><p>Premium Content & Creatives</p></div>
 </div>
 </div>
 
+<div class="card">
+<h2>PRIVATE CONSULTATION REQUEST</h2>
+
+<form class="contact-form" onsubmit="sendWhatsApp(event)">
+  <input type="text" placeholder="FULL NAME" required>
+  <input type="text" placeholder="COMPANY NAME">
+  <input type="tel" placeholder="CONTACT NUMBER" required>
+  <input type="email" placeholder="EMAIL ADDRESS" required>
+
+  <select>
+    <option>Preferred Time to Call</option>
+    <option>Morning</option>
+    <option>Afternoon</option>
+    <option>Evening</option>
+    <option>Physical Meeting</option>
+  </select>
+
+  <button class="submit-btn">REQUEST VIA WHATSAPP</button>
+</form>
+</div>
+
 <div class="cta">
-<h2>READY TO SCALE YOUR BUSINESS?</h2>
-<p>Let’s build a profitable digital growth system.</p>
-<a href="https://wa.me/971509507079" class="submit-btn">Book Consultation</a>
+  <h2>PRIVATE GROWTH CONSULTATION FOR SERIOUS BRANDS</h2>
+  <p>Let’s build a profitable digital growth system.</p>
 </div>
 
 </section>
@@ -251,15 +328,16 @@ footer {
 </footer>
 
 <script>
-let isArabic=false;
-function toggleLang(){
-  const html=document.getElementById("htmlRoot");
-  isArabic=!isArabic;
-  if(isArabic){
-    html.classList.add("rtl");
-    document.querySelector(".lang-toggle").innerText="🇬🇧 English";
-    document.getElementById("title").innerText="مستشار التسويق الرقمي والإعلانات المدفوعة — الإمارات 🇦🇪";
-  } else location.reload();
+function sendWhatsApp(e){
+  e.preventDefault();
+  const inputs=document.querySelectorAll(".contact-form input, .contact-form select");
+  const msg=`NEW CONSULTATION REQUEST
+NAME: ${inputs[0].value}
+COMPANY: ${inputs[1].value}
+PHONE: ${inputs[2].value}
+EMAIL: ${inputs[3].value}
+TIME: ${inputs[4].value}`;
+  window.open("https://wa.me/971509507079?text="+encodeURIComponent(msg),"_blank");
 }
 </script>
 
