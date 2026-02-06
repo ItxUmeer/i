@@ -1,256 +1,251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MUHAMMAD UMER | DIGITAL MARKETING CONSULTANT UAE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MUHAMMAD UMER | DIGITAL MARKETING CONSULTANT UAE</title>
 
-<style>
-:root {
-    --bg: #f4f4f4;
-    --card: #ffffff;
-    --text: #222;
-    --subtext: #555;
-    --accent: #0077ff;
-}
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-body.dark {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f1f5f9;
-    --subtext: #cbd5e1;
-    --accent: #38bdf8;
-}
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-* { box-sizing: border-box; }
+  <style>
+    :root {
+      --primary: #1B9AAA;
+      --secondary: #DDDBCB;
+      --dark: #0F172A;
+      --text: #334155;
+      --white: #ffffff;
+    }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-  background: #0f172a;
-  color: #e5e7eb;
-}
+      font-family: 'Inter', sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+      line-height: 1.6;
+    }
 
-}
+    header {
+      background: var(--white);
+      padding: 40px 20px;
+      text-align: center;
+    }
 
-.container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px;
-}
+    .lang-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-header {
-    text-align: center;
-    padding: 40px 10px;
-}
+    .hero img {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid var(--primary);
+      margin-bottom: 20px;
+    }
 
-header h1 {
-    font-size: 2.8rem;
-    letter-spacing: 1px;
-}
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--dark);
+    }
 
-header p {
-    color: var(--subtext);
-    font-size: 1.1rem;
-    margin-top: 10px;
-}
+    .subtitle {
+      font-size: 18px;
+      margin-top: 8px;
+    }
 
-button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    margin: 5px;
-}
+    .socials {
+      margin-top: 20px;
+    }
 
-section {
-    background: var(--card);
-    padding: 30px;
-    margin-top: 30px;
-    border-radius: 14px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-}
+    .socials a {
+      color: var(--primary);
+      font-size: 22px;
+      margin: 0 10px;
+      text-decoration: none;
+    }
 
-.services {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-    text-align: center;
-}
+    section {
+      max-width: 1100px;
+      margin: auto;
+      padding: 60px 20px;
+    }
 
-.service img {
-    width: 50px;
-    margin-bottom: 10px;
-}
+    .card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
 
-.stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    text-align: center;
-    gap: 20px;
-}
+    h2 {
+      margin-bottom: 16px;
+      color: var(--dark);
+      font-size: 28px;
+    }
 
-.stat h3 {
-    font-size: 2rem;
-    color: var(--accent);
-}
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
 
-.whatsapp {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #25D366;
-    color: white;
-    padding: 14px 20px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: bold;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+    .service {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 22px;
+    }
 
-.cta {
-    text-align: center;
-}
+    .service h3 {
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
 
-footer {
-    text-align: center;
-    margin: 40px 0;
-    color: var(--subtext);
-    font-size: 14px;
-}
-</style>
+    .cta {
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+      border-radius: 22px;
+    }
+
+    .cta a {
+      display: inline-block;
+      margin-top: 20px;
+      background: white;
+      color: var(--primary);
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      font-size: 14px;
+    }
+
+    /* RTL */
+    .rtl {
+      direction: rtl;
+      text-align: right;
+    }
+  </style>
 </head>
 
 <body>
 
-<a class="whatsapp"
-   href="https://wa.me/971509507079?text=Hi%20Muhammad,%20I%20need%20digital%20marketing%20services%20for%20my%20business%20in%20UAE"
-   target="_blank">
-   💬 WhatsApp Me
-</a>
+<button class="lang-toggle" onclick="toggleLang()">🇦🇪 عربي</button>
 
-<div class="container">
+<header class="hero">
+  <img src="profile.jpg" alt="Muhammad Umer">
+  <h1 id="name">MUHAMMAD UMER</h1>
+  <p class="subtitle" id="title">
+    DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪
+  </p>
 
-<header>
-    <h1>MUHAMMAD UMER</h1>
-    <p>DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪</p>
-    <br>
-    <button onclick="toggleDarkMode()">🌙 Dark Mode</button>
-    <button onclick="toggleLanguage()">🇦🇪 العربية / EN</button>
+  <div class="socials">
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-tiktok"></i></a>
+    <a href="#"><i class="fab fa-youtube"></i></a>
+    <a href="#"><i class="fab fa-snapchat"></i></a>
+    <a href="#"><i class="fab fa-linkedin"></i></a>
+  </div>
 </header>
 
-<!-- ABOUT -->
 <section>
-<h2 id="about-title">🚀 ABOUT ME</h2>
+  <div class="card" id="about">
+    <h2>ABOUT ME</h2>
+    <p>
+      I help businesses <strong>attract customers, generate high-quality leads,
+      and scale revenue</strong> using proven digital marketing strategies.
+      With <strong>8+ years of experience</strong>, I manage branding, content,
+      social media, and performance-driven paid advertising campaigns across
+      the UAE market.
+    </p>
+  </div>
 
-<div id="about-en">
-<p>
-I HELP UAE BUSINESSES <strong>ATTRACT CUSTOMERS, GENERATE HIGH-QUALITY LEADS,
-AND SCALE REVENUE</strong> USING <strong>PROVEN, DATA-DRIVEN SOCIAL MEDIA
-MARKETING AND ADVERTISING STRATEGIES</strong>.
-</p>
+  <div class="card" id="services">
+    <h2>SERVICES</h2>
+    <div class="services">
+      <div class="service">
+        <h3>PAID ADVERTISING</h3>
+        <p>Google Ads, Meta Ads, TikTok Ads optimized for ROI.</p>
+      </div>
+      <div class="service">
+        <h3>SOCIAL MEDIA MANAGEMENT</h3>
+        <p>Instagram, Snapchat, TikTok & YouTube growth.</p>
+      </div>
+      <div class="service">
+        <h3>LEAD GENERATION</h3>
+        <p>Funnels & campaigns for UAE businesses.</p>
+      </div>
+      <div class="service">
+        <h3>BRANDING & CONTENT</h3>
+        <p>High-impact visuals & ad creatives.</p>
+      </div>
+    </div>
+  </div>
 
-<p>
-WITH <strong>5+ YEARS OF HANDS-ON EXPERIENCE IN THE UAE MARKET</strong>, I HAVE
-WORKED WITH <strong>REAL ESTATE COMPANIES, E-COMMERCE BRANDS, LOCAL BUSINESSES,
-SERVICE PROVIDERS, AND STARTUPS</strong>.
-</p>
-
-<p>
-MY FOCUS IS SIMPLE:
-<strong>TURN AD SPEND INTO REAL LEADS, REAL CUSTOMERS, AND REAL PROFIT</strong>.
-</p>
-</div>
-
-<div id="about-ar" style="display:none; direction:rtl; text-align:right;">
-<p>
-أُسَاعِدُ الشَّرِكَاتِ فِي دَوْلَةِ الإِمَارَات 🇦🇪 عَلَى
-<strong>جَذْبِ العُمَلَاءِ، تَوْلِيدِ عُمَلَاءَ مُحْتَمَلِينَ عَالِيِي الجَوْدَة،
-وَزِيَادَةِ الأَرْبَاح</strong>
-مِنْ خِلَالِ <strong>اسْتِرَاتِيجِيَّاتِ التَّسْوِيقِ الرَّقْمِي
-وَالإِعْلَانَاتِ المُمَوَّلَة المُعْتَمِدَة عَلَى البَيَانَات</strong>.
-</p>
-
-<p>
-أَمْلِكُ أَكْثَرَ مِنْ <strong>5 سَنَوَات خِبْرَة فِي سُوق الإِمَارَات</strong>،
-وَعَمِلْتُ مَعَ <strong>شَرِكَات عَقَارِيَّة، مَتَاجِر إِلِكْتُرُونِيَّة،
-وَأَعْمَال مَحَلِّيَّة</strong>.
-</p>
-
-<p>
-هَدَفِي وَاضِح:
-<strong>تَحْوِيلُ مِيزَانِيَّة الإِعْلَان إِلَى عُمَلَاء حَقِيقِيِّين وَأَرْبَاح فِعْلِيَّة</strong>.
-</p>
-</div>
-</section>
-
-<!-- RESULTS -->
-<section>
-<h2>📊 PROVEN RESULTS</h2>
-<div class="stats">
-<div class="stat"><h3>5+</h3><p>YEARS EXPERIENCE</p></div>
-<div class="stat"><h3>200+</h3><p>AD CAMPAIGNS</p></div>
-<div class="stat"><h3>500+</h3><p>LEADS GENERATED</p></div>
-</div>
-</section>
-
-<!-- SERVICES -->
-<section>
-<h2 id="services-title">📈 ADVERTISING & MARKETING SERVICES</h2>
-
-<div id="services-en" class="services">
-<div class="service"><img src="https://img.icons8.com/color/96/facebook.png"/><p><strong>Facebook Ads (UAE)</strong></p></div>
-<div class="service"><img src="https://img.icons8.com/color/96/instagram-new.png"/><p><strong>Instagram Ads</strong></p></div>
-<div class="service"><img src="https://img.icons8.com/color/96/tiktok.png"/><p><strong>TikTok Advertising</strong></p></div>
-<div class="service"><img src="https://img.icons8.com/color/96/youtube-play.png"/><p><strong>YouTube Ads</strong></p></div>
-<div class="service"><img src="https://img.icons8.com/color/96/snapchat.png"/><p><strong>Snapchat Ads</strong></p></div>
-<div class="service"><img src="https://img.icons8.com/color/96/google-ads.png"/><p><strong>Paid Lead Campaigns</strong></p></div>
-</div>
-
-<div id="services-ar" class="services" style="display:none; direction:rtl;">
-<div class="service"><p><strong>إعلانات فيسبوك – الإمارات</strong></p></div>
-<div class="service"><p><strong>إعلانات إنستغرام</strong></p></div>
-<div class="service"><p><strong>إعلانات تيك توك</strong></p></div>
-<div class="service"><p><strong>إعلانات يوتيوب</strong></p></div>
-<div class="service"><p><strong>إعلانات سناب شات</strong></p></div>
-<div class="service"><p><strong>حملات توليد العملاء المحتملين</strong></p></div>
-</div>
-</section>
-
-<!-- CTA -->
-<section class="cta">
-<h2>📞 FREE CONSULTATION — UAE 🇦🇪</h2>
-<p><strong>READY TO SCALE YOUR BUSINESS?</strong></p>
-<a href="https://wa.me/971509507079" class="whatsapp" style="position:static;">💬 Book Free Consultation</a>
+  <div class="cta">
+    <h2>READY TO SCALE YOUR BUSINESS?</h2>
+    <p>Let’s build a profitable digital growth system.</p>
+    <a href="mailto:Umerfalakshair@gmail.com">CONTACT ME</a>
+  </div>
 </section>
 
 <footer>
-© 2026 MUHAMMAD UMER — DIGITAL MARKETING CONSULTANT UAE
+  © 2026 MUHAMMAD UMER — DIGITAL MARKETING CONSULTANT UAE
 </footer>
 
-</div>
-
 <script>
-function toggleDarkMode() {
-    document.body.classList.toggle("dark");
-}
+  let isArabic = false;
 
-let isArabic = false;
-function toggleLanguage() {
+  function toggleLang() {
+    const html = document.getElementById("htmlRoot");
     isArabic = !isArabic;
-    document.getElementById("about-en").style.display = isArabic ? "none" : "block";
-    document.getElementById("about-ar").style.display = isArabic ? "block" : "none";
-    document.getElementById("services-en").style.display = isArabic ? "none" : "grid";
-    document.getElementById("services-ar").style.display = isArabic ? "grid" : "none";
-    document.getElementById("about-title").innerText = isArabic ? "🚀 نبذة عني" : "🚀 ABOUT ME";
-    document.getElementById("services-title").innerText = isArabic ? "📈 خدمات التسويق والإعلانات" : "📈 ADVERTISING & MARKETING SERVICES";
-}
+
+    if (isArabic) {
+      html.classList.add("rtl");
+      document.querySelector(".lang-toggle").innerText = "🇬🇧 English";
+      document.getElementById("title").innerText =
+        "مستشار التسويق الرقمي والإعلانات المدفوعة — الإمارات 🇦🇪";
+      document.getElementById("about").innerHTML = `
+        <h2>نبذة عني</h2>
+        <p>
+        أساعد الشركات على <strong>جذب العملاء، توليد العملاء المحتملين،
+        وزيادة الإيرادات</strong> من خلال استراتيجيات تسويق رقمي مجربة.
+        خبرة أكثر من <strong>8 سنوات</strong> في إدارة الحملات الإعلانية
+        وصناعة المحتوى وبناء العلامات التجارية داخل دولة الإمارات.
+        </p>`;
+      document.getElementById("services").innerHTML = `
+        <h2>الخدمات</h2>
+        <div class="services">
+          <div class="service"><h3>الإعلانات المدفوعة</h3><p>جوجل، ميتا، تيك توك</p></div>
+          <div class="service"><h3>إدارة السوشيال ميديا</h3><p>إنستغرام، سناب شات، يوتيوب</p></div>
+          <div class="service"><h3>توليد العملاء</h3><p>حملات مخصصة للسوق الإماراتي</p></div>
+          <div class="service"><h3>الهوية والمحتوى</h3><p>تصميم وإبداع إعلاني</p></div>
+        </div>`;
+    } else {
+      location.reload();
+    }
+  }
 </script>
 
 </body>
