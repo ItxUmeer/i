@@ -18,39 +18,9 @@
       --dark: #0F172A;
       --text: #334155;
       --white: #ffffff;
-      .whatsapp-float {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #25D366;
-  color: white;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-  z-index: 999;
-  text-decoration: none;
-}
-
-.whatsapp-float:hover {
-  transform: scale(1.08);
-}
-
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    <!-- WhatsApp Floating Button -->
-<a href="https://wa.me/971509507079" 
-   class="whatsapp-float" 
-   target="_blank" 
-   aria-label="Chat on WhatsApp">
-   <i class="fab fa-whatsapp"></i>
-</a>
-
 
     body {
       font-family: 'Inter', sans-serif;
@@ -63,6 +33,7 @@
       background: var(--white);
       padding: 40px 20px;
       text-align: center;
+      position: relative;
     }
 
     .lang-toggle {
@@ -171,6 +142,50 @@
       font-size: 14px;
     }
 
+    /* LEFT SOCIAL ICON LAYER */
+    .social-left {
+      position: fixed;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 999;
+    }
+
+    .social-left a {
+      width: 42px;
+      height: 42px;
+      background: var(--white);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+      text-decoration: none;
+    }
+
+    /* WHATSAPP FLOAT */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #25D366;
+      color: white;
+      padding: 14px 18px;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 999;
+    }
+
     /* RTL */
     .rtl {
       direction: rtl;
@@ -180,6 +195,20 @@
 </head>
 
 <body>
+
+<!-- LEFT SOCIAL ICONS -->
+<div class="social-left">
+  <a href="#"><i class="fab fa-instagram"></i></a>
+  <a href="#"><i class="fab fa-tiktok"></i></a>
+  <a href="#"><i class="fab fa-youtube"></i></a>
+  <a href="#"><i class="fab fa-snapchat"></i></a>
+  <a href="#"><i class="fab fa-linkedin"></i></a>
+</div>
+
+<!-- WHATSAPP BUTTON -->
+<a href="https://wa.me/971XXXXXXXXX" class="whatsapp-float" target="_blank">
+  <i class="fab fa-whatsapp"></i> WhatsApp Me
+</a>
 
 <button class="lang-toggle" onclick="toggleLang()">🇦🇪 عربي</button>
 
@@ -205,7 +234,7 @@
     <p>
       I help businesses <strong>attract customers, generate high-quality leads,
       and scale revenue</strong> using proven digital marketing strategies.
-      With <strong>5+ years of experience</strong>, I manage branding, content,
+      With <strong>8+ years of experience</strong>, I manage branding, content,
       social media, and performance-driven paid advertising campaigns across
       the UAE market.
     </p>
@@ -261,7 +290,7 @@
         <p>
         أساعد الشركات على <strong>جذب العملاء، توليد العملاء المحتملين،
         وزيادة الإيرادات</strong> من خلال استراتيجيات تسويق رقمي مجربة.
-        خبرة أكثر من <strong>5 سنوات</strong> في إدارة الحملات الإعلانية
+        خبرة أكثر من <strong>8 سنوات</strong> في إدارة الحملات الإعلانية
         وصناعة المحتوى وبناء العلامات التجارية داخل دولة الإمارات.
         </p>`;
       document.getElementById("services").innerHTML = `
