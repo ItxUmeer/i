@@ -49,13 +49,35 @@
       font-weight: 600;
     }
 
-    .hero img {
-      width: 160px;
-      height: 160px;
-      object-fit: cover;
+    /* PROFILE IMAGE WITH GRADIENT BORDER */
+    .profile-wrap {
+      width: 170px;
+      height: 170px;
+      margin: 0 auto 20px;
+      padding: 5px;
       border-radius: 50%;
-      border: 4px solid var(--primary);
-      margin-bottom: 20px;
+      background: linear-gradient(
+        270deg,
+        #1B9AAA,
+        #0F172A,
+        #1B9AAA
+      );
+      background-size: 600% 600%;
+      animation: borderFlow 6s ease infinite;
+    }
+
+    .profile-wrap img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: white;
+    }
+
+    @keyframes borderFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
@@ -142,7 +164,7 @@
       font-size: 14px;
     }
 
-    /* LEFT SOCIAL ICON LAYER */
+    /* LEFT SOCIAL ICONS */
     .social-left {
       position: fixed;
       left: 15px;
@@ -168,7 +190,7 @@
       text-decoration: none;
     }
 
-    /* WHATSAPP FLOAT */
+    /* WHATSAPP */
     .whatsapp-float {
       position: fixed;
       bottom: 20px;
@@ -205,15 +227,18 @@
   <a href="#"><i class="fab fa-linkedin"></i></a>
 </div>
 
-<!-- WHATSAPP BUTTON -->
-<a href="https://wa.me/971XXXXXXXXX" class="whatsapp-float" target="_blank">
+<!-- WHATSAPP -->
+<a href="https://wa.me/971509507079" class="whatsapp-float" target="_blank">
   <i class="fab fa-whatsapp"></i> WhatsApp Me
 </a>
 
 <button class="lang-toggle" onclick="toggleLang()">🇦🇪 عربي</button>
 
 <header class="hero">
-  <img src="profile.jpeg" alt="Muhammad Umer">
+  <div class="profile-wrap">
+    <img src="profile.jpg" alt="Muhammad Umer">
+  </div>
+
   <h1 id="name">MUHAMMAD UMER</h1>
   <p class="subtitle" id="title">
     DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪
@@ -243,22 +268,10 @@
   <div class="card" id="services">
     <h2>SERVICES</h2>
     <div class="services">
-      <div class="service">
-        <h3>PAID ADVERTISING</h3>
-        <p>Google Ads, Meta Ads, TikTok Ads optimized for ROI.</p>
-      </div>
-      <div class="service">
-        <h3>SOCIAL MEDIA MANAGEMENT</h3>
-        <p>Instagram, Snapchat, TikTok & YouTube growth.</p>
-      </div>
-      <div class="service">
-        <h3>LEAD GENERATION</h3>
-        <p>Funnels & campaigns for UAE businesses.</p>
-      </div>
-      <div class="service">
-        <h3>BRANDING & CONTENT</h3>
-        <p>High-impact visuals & ad creatives.</p>
-      </div>
+      <div class="service"><h3>PAID ADVERTISING</h3><p>Google Ads, Meta Ads, TikTok Ads optimized for ROI.</p></div>
+      <div class="service"><h3>SOCIAL MEDIA MANAGEMENT</h3><p>Instagram, Snapchat, TikTok & YouTube growth.</p></div>
+      <div class="service"><h3>LEAD GENERATION</h3><p>Funnels & campaigns for UAE businesses.</p></div>
+      <div class="service"><h3>BRANDING & CONTENT</h3><p>High-impact visuals & ad creatives.</p></div>
     </div>
   </div>
 
@@ -278,11 +291,14 @@
 
   function toggleLang() {
     const html = document.getElementById("htmlRoot");
+    const name = document.getElementById("name");
+
     isArabic = !isArabic;
 
     if (isArabic) {
       html.classList.add("rtl");
       document.querySelector(".lang-toggle").innerText = "🇬🇧 English";
+      name.innerText = "محمد عمر";
       document.getElementById("title").innerText =
         "مستشار التسويق الرقمي والإعلانات المدفوعة — الإمارات 🇦🇪";
       document.getElementById("about").innerHTML = `
