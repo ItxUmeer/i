@@ -193,6 +193,33 @@
     }
   </style>
 </head>
+<script>
+function sendWhatsApp(e) {
+  e.preventDefault();
+
+  const name = document.querySelector('[placeholder="FULL NAME"]').value;
+  const company = document.querySelector('[placeholder="COMPANY NAME"]').value;
+  const phone = document.querySelector('[placeholder="CONTACT NUMBER"]').value;
+  const email = document.querySelector('[placeholder="EMAIL ADDRESS"]').value;
+  const time = document.querySelector('select').value;
+
+  const message = 
+`NEW CONSULTATION REQUEST
+
+NAME: ${name}
+COMPANY: ${company}
+PHONE: ${phone}
+EMAIL: ${email}
+CALL TIME: ${time}
+
+SOURCE: WEBSITE`;
+
+  const whatsappNumber = "971509507079"; // YOUR NUMBER (NO +)
+
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+</script>
 
 <body>
 
@@ -282,41 +309,7 @@
   <div class="cta">
     <h2>READY TO SCALE YOUR BUSINESS?</h2>
     <p>Let’s build a profitable digital growth system.</p>
-    .contact-form {
-  margin-top: 30px;
-}
-
-.form-group {
-  margin-bottom: 18px;
-}
-
-.contact-form input,
-.contact-form select {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-}
-
-.contact-form input:focus,
-.contact-form select:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-.submit-btn {
-  width: 100%;
-  background: var(--primary);
-  color: white;
-  padding: 16px;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
 }
 
 .submit-btn:hover {
