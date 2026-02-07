@@ -259,7 +259,26 @@ footer{
  <p style="margin-top:16px;font-weight:700;color:#64748b">
           
         “Hassle-Free MOHRE, Immigration & PRO Services You Can Trust”🇦🇪</p>
-              <a href="services.html" class="view-services-btn">
+              .view-services-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.25),transparent);
+  transform:translateX(-100%);
+  transition:.6s ease;
+}
+
+.view-services-btn:hover::before{
+  transform:translateX(100%);
+}
+
+.view-services-btn:hover{
+  transform:translateY(-4px);
+  box-shadow:
+    0 18px 45px rgba(15,23,42,.55),
+    inset 0 0 0 2px rgba(255,255,255,.25);
+}
+
   VIEW ALL SERVICES
 </a>
 
