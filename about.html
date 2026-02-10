@@ -2,51 +2,70 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>About Us | Translink Digital</title>
+<title>About Us | Translink Digital Media Services</title>
+<meta name="description" content="About Translink Digital Media Services – a Dubai-focused digital marketing agency serving elite businesses.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
 <header>
   <div class="navbar">
-    <div class="logo">Translink <span>Digital</span></div>
+    <div class="logo">Translink Digital</div>
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
     <nav class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="services.html">Services</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
+      <div class="lang-toggle" onclick="toggleLang()">EN / AR</div>
     </nav>
   </div>
 </header>
 
-<script>
-function toggleMenu() {
-  document.getElementById("navLinks").classList.toggle("active");
-}
-</script>
-
 <section>
-<h1>About Translink Digital</h1>
-<p>
-Translink Digital Media Services was founded to help Dubai-based
-businesses build strong digital authority in a highly competitive market.
+<h1 class="section-title"
+data-en="Who We Are"
+data-alt="من نحن">
+Who We Are
+</h1>
+
+<p class="section-desc">
+Translink Digital Media Services was established to help ambitious
+businesses in Dubai build strong digital authority, generate quality
+leads, and scale sustainably.
 </p>
 
 <p>
-We combine strategy, creativity, and performance marketing to deliver
-measurable business growth — not vanity metrics.
+We operate at the intersection of strategy, creativity, and performance.
+Our work is guided by one principle: results matter more than vanity.
 </p>
 
 <p>
-Our mission is simple: help brands look premium, attract quality leads,
-and scale sustainably in the UAE.
+Dubai is a unique market — fast, diverse, and premium. We understand
+local audience behavior, cultural expectations, and international
+business standards.
+</p>
+
+<p>
+Whether you are a startup, SME, or enterprise, we design digital
+solutions that align with your growth vision and long-term success.
 </p>
 </section>
 
-<footer>© 2026 Translink Digital</footer>
+<footer>© 2026 Translink Digital Media Services</footer>
+
+<script>
+function toggleMenu(){document.getElementById("navLinks").classList.toggle("active");}
+function toggleLang(){
+document.body.classList.toggle("rtl");
+document.querySelectorAll("[data-en]").forEach(el=>{
+const t=el.innerText;
+el.innerText=el.getAttribute("data-alt");
+el.setAttribute("data-alt",t);
+});
+}
+</script>
 
 </body>
 </html>
