@@ -2,60 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Contact Us | Translink Digital Media Services</title>
-<meta name="description" content="Contact Translink Digital Media Services to grow your business in Dubai with elite digital marketing strategies.">
+<title>Contact Us | Translink Digital</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
-  <div class="navbar">
+  <div class="nav-container">
     <div class="logo">Translink Digital</div>
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Home</a>
-      <a href="services.html">Services</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <div class="lang-toggle" onclick="toggleLang()">EN / AR</div>
+    <nav id="navMenu">
+      <a href="index.html" data-en="Home" data-ar="الرئيسية">Home</a>
+      <a href="services.html" data-en="Services" data-ar="الخدمات">Services</a>
+      <a href="about.html" data-en="About" data-ar="من نحن">About</a>
+      <a href="contact.html" data-en="Contact" data-ar="تواصل معنا">Contact</a>
+      <button class="lang-btn" onclick="toggleLang()">AR | EN</button>
     </nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
   </div>
 </header>
 
 <section>
-<h1 class="section-title"
-data-en="Let’s Build Your Growth Strategy"
-data-alt="لنبدأ في بناء استراتيجية نموك">
-Let’s Build Your Growth Strategy
-</h1>
+  <div class="container">
+    <h1 data-en="Get in Touch"
+        data-ar="تواصل معنا">
+      Get in Touch
+    </h1>
 
-<p class="section-desc">
-Tell us about your business, goals, and challenges.
-Our team will respond with clarity, strategy, and actionable insights.
-</p>
+    <p data-en="Tell us about your business and goals."
+       data-ar="أخبرنا عن عملك وأهدافك.">
+    Tell us about your business and goals.
+    </p>
 
-<form action="https://wa.me/971XXXXXXXXX" target="_blank">
-<input type="text" placeholder="Your Name" required>
-<input type="email" placeholder="Your Email" required>
-<textarea placeholder="Describe your business and goals" rows="5"></textarea>
-<button class="btn" type="submit">Contact via WhatsApp</button>
-</form>
+    <form class="contact-form" onsubmit="sendWhatsApp(); return false;">
+      <input type="text" id="name" placeholder="Your Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <textarea id="message" placeholder="Your Message" rows="5"></textarea>
+      <button type="submit">Send via WhatsApp</button>
+    </form>
+  </div>
 </section>
 
-<footer>© 2026 Translink Digital Media Services – Dubai, UAE</footer>
-
 <script>
-function toggleMenu(){document.getElementById("navLinks").classList.toggle("active");}
-function toggleLang(){
-document.body.classList.toggle("rtl");
-document.querySelectorAll("[data-en]").forEach(el=>{
-const t=el.innerText;
-el.innerText=el.getAttribute("data-alt");
-el.setAttribute("data-alt",t);
-});
-}
-</script>
-
-</body>
-</html>
+function sendWhatsApp() {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const msg = document.getElementById("message").value;
+  const url = `https://wa.me/971XXXXXXXXX?text=
