@@ -3,79 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <title>Translink Digital Media Services | Dubai</title>
-<meta name="description" content="Elite digital marketing, paid advertising, web development & lead generation services in Dubai, UAE.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
-  <div class="navbar">
+  <div class="nav-container">
     <div class="logo">Translink Digital</div>
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <nav class="nav-links" id="navLinks">
+    <nav id="navMenu">
       <a href="index.html">Home</a>
       <a href="services.html">Services</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
-      <div class="lang-toggle" onclick="toggleLang()">EN / AR</div>
     </nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
   </div>
 </header>
 
 <section class="hero">
   <div class="hero-content">
-    <h1 data-en="Elite Digital Growth for Dubai Businesses"
-        data-alt="نمو رقمي متطور للشركات في دبي">
-        Elite Digital Growth for Dubai Businesses
-    </h1>
-    <p data-en="We help ambitious brands dominate Dubai’s competitive market with premium digital strategies."
-       data-alt="نساعد العلامات التجارية الطموحة على السيطرة على سوق دبي من خلال استراتيجيات رقمية متقدمة.">
-       We help ambitious brands dominate Dubai’s competitive market with premium digital strategies.
+    <h1>Dubai’s Elite Digital Advertising & Growth Agency</h1>
+    <p>
+      We help ambitious UAE businesses dominate online through
+      paid advertising, branding, web development and lead generation.
     </p>
-    <a class="btn" href="contact.html">Start Your Growth</a>
   </div>
 </section>
 
 <section>
-<h2 class="section-title">Why Dubai Brands Trust Us</h2>
-<p class="section-desc">
-Dubai is a global hub of innovation, luxury, and rapid business growth.
-Translink Digital Media Services understands the expectations of elite
-business communities and delivers marketing systems built on trust,
-clarity, and measurable performance.
-</p>
-
-<div class="counters">
-  <div class="counter-box">
-    <div class="counter">120+</div>
-    <p>Projects Delivered</p>
+  <div class="container stats">
+    <div class="stat-box">
+      <h2 class="counter" data-target="500">0</h2>
+      <p>Campaigns Launched</p>
+    </div>
+    <div class="stat-box">
+      <h2 class="counter" data-target="120">0</h2>
+      <p>UAE Clients</p>
+    </div>
+    <div class="stat-box">
+      <h2 class="counter" data-target="15">0</h2>
+      <p>Industries Served</p>
+    </div>
   </div>
-  <div class="counter-box">
-    <div class="counter">8+</div>
-    <p>Years Experience</p>
-  </div>
-  <div class="counter-box">
-    <div class="counter">95%</div>
-    <p>Client Retention</p>
-  </div>
-</div>
 </section>
 
-<footer>© 2026 Translink Digital Media Services – Dubai, UAE</footer>
+<section>
+  <div class="container">
+    <h2>Why Translink Digital?</h2>
+    <p>
+      Translink Digital Media Services is built for Dubai’s elite business ecosystem.
+      We work with real estate firms, consultants, luxury brands, startups,
+      and service companies who want **measurable growth**.
+    </p>
+    <p>
+      Our strategies are not generic. Every campaign is built using
+      market research, audience psychology, and data-driven execution.
+    </p>
+    <p>
+      From first click to final conversion, we control the full digital journey.
+    </p>
+  </div>
+</section>
 
-<!-- COMMON SCRIPT -->
-<script>
-function toggleMenu(){document.getElementById("navLinks").classList.toggle("active");}
-function toggleLang(){
-document.body.classList.toggle("rtl");
-document.querySelectorAll("[data-en]").forEach(el=>{
-const temp=el.innerText;
-el.innerText=el.getAttribute("data-alt");
-el.setAttribute("data-alt",temp);
-});
-}
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
