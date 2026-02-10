@@ -2,57 +2,48 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Contact | Translink Digital Media</title>
+<title>Contact Us | Translink Digital</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <!-- NAVBAR -->
-<nav>
-  <div class="logo">Translink <span>Digital</span></div>
-  <ul>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="services.html">Services</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-  </ul>
-</nav>
-
-<!-- PAGE HERO -->
-<section class="page-hero">
-  <h1>Contact Us</h1>
-  <p>Let’s grow your business in Dubai</p>
-</section>
-
-<section class="contact-box glass">
-  <form onsubmit="sendWhatsApp(); return false;">
-    <input id="name" placeholder="Your Name" required>
-    <input id="email" placeholder="Email" required>
-    <textarea id="message" placeholder="Tell us about your project"></textarea>
-    <button class="btn" type="submit">Send via WhatsApp</button>
-  </form>
-</section>
+<header>
+  <div class="navbar">
+    <div class="logo">Translink <span>Digital</span></div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
 
 <script>
-function sendWhatsApp(){
-  let n = name.value;
-  let e = email.value;
-  let m = message.value;
-  let phone = "971XXXXXXXXX";
-  window.open(
-    `https://wa.me/${phone}?text=Name:%20${n}%0AEmail:%20${e}%0AMessage:%20${m}`,
-    "_blank"
-  );
+function toggleMenu() {
+  document.getElementById("navLinks").classList.toggle("active");
 }
 </script>
 
-<footer>
-© 2026 Translink Digital Media Services • Dubai UAE
-</footer>
+<section>
+<h1>Let’s Talk Growth</h1>
+<p>
+Tell us about your business and we’ll show you how to scale
+in Dubai’s competitive digital landscape.
+</p>
+
+<form action="https://wa.me/971XXXXXXXXX" target="_blank">
+<input type="text" placeholder="Your Name" required>
+<input type="email" placeholder="Email Address" required>
+<textarea placeholder="Describe your business & goals"></textarea>
+<button type="submit">Contact via WhatsApp</button>
+</form>
+</section>
+
+<footer>© 2026 Translink Digital</footer>
 
 </body>
 </html>
