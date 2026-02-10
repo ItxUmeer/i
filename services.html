@@ -2,69 +2,90 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Services | Translink Digital Media</title>
+<title>Our Services | Translink Digital</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <!-- NAVBAR -->
-<nav>
-  <div class="logo">Translink <span>Digital</span></div>
-  <ul>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="services.html">Services</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-  </ul>
-</nav>
+<header>
+  <div class="navbar">
+    <div class="logo">Translink <span>Digital</span></div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
 
-<!-- PAGE HERO -->
-<section class="page-hero">
-  <h1>Our Premium Services</h1>
-  <p>Designed for elite Dubai businesses</p>
+<script>
+function toggleMenu() {
+  document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
+
+<section>
+<h1>Our Digital Services</h1>
+<p>
+We build complete digital ecosystems — not isolated services.
+Every solution is designed to attract, convert, and scale.
+</p>
 </section>
 
-<section class="services-grid">
+<section class="grid">
+<div class="card">
+<h3>Web Development</h3>
+<p>
+High-conversion, mobile-first websites with premium UI, fast loading,
+and SEO-ready architecture built for Dubai’s professional market.
+</p>
+</div>
 
-  <div class="glass">
-    <h3>Web Development</h3>
-    <p>High-performance websites built for speed, trust and conversions.</p>
-  </div>
+<div class="card">
+<h3>Paid Advertising & Media Buying</h3>
+<p>
+Google, Meta, YouTube & LinkedIn ads with advanced targeting,
+creative testing, and budget optimization.
+</p>
+</div>
 
-  <div class="glass">
-    <h3>Paid Advertising & Media Buying</h3>
-    <p>Meta, Google & TikTok ads optimized for ROI in UAE markets.</p>
-  </div>
+<div class="card">
+<h3>Lead Generation Systems</h3>
+<p>
+Landing pages, WhatsApp automation, CRM pipelines,
+and conversion tracking systems.
+</p>
+</div>
 
-  <div class="glass">
-    <h3>Lead Generation Systems</h3>
-    <p>Funnels, automation and CRM-ready lead systems.</p>
-  </div>
+<div class="card">
+<h3>Social Media Management</h3>
+<p>
+Authority-driven content, brand storytelling, and audience growth
+across all platforms.
+</p>
+</div>
 
-  <div class="glass">
-    <h3>Branding & Digital Identity</h3>
-    <p>Luxury visuals and brand positioning that builds authority.</p>
-  </div>
+<div class="card">
+<h3>Branding & Digital Identity</h3>
+<p>
+Visual identity, logo systems, brand tone, and market positioning
+aligned with UAE standards.
+</p>
+</div>
 
-  <div class="glass">
-    <h3>Social Media Management</h3>
-    <p>Elite content strategy, posting and audience growth.</p>
-  </div>
-
-  <div class="glass">
-    <h3>Marketing Consulting</h3>
-    <p>Strategic guidance for scaling in Dubai’s competitive market.</p>
-  </div>
-
+<div class="card">
+<h3>Business Marketing Consulting</h3>
+<p>
+Strategic audits, competitor analysis, and scalable growth roadmaps.
+</p>
+</div>
 </section>
 
-<footer>
-© 2026 Translink Digital Media Services • Dubai UAE
-</footer>
+<footer>© 2026 Translink Digital</footer>
 
 </body>
 </html>
