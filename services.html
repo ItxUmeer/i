@@ -2,90 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Our Services | Translink Digital</title>
+<title>Services | Translink Digital Media Services</title>
+<meta name="description" content="Web development, paid advertising, lead generation, branding & digital marketing consulting in Dubai, UAE.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
 <header>
   <div class="navbar">
-    <div class="logo">Translink <span>Digital</span></div>
+    <div class="logo">Translink Digital</div>
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
     <nav class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="services.html">Services</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
+      <div class="lang-toggle" onclick="toggleLang()">EN / AR</div>
     </nav>
   </div>
 </header>
 
+<section>
+<h1 class="section-title"
+ data-en="Our Digital Services"
+ data-alt="خدماتنا الرقمية">
+Our Digital Services
+</h1>
+
+<p class="section-desc"
+data-en="We build complete digital growth systems designed specifically for Dubai’s competitive and premium business environment."
+data-alt="نقوم ببناء أنظمة نمو رقمية متكاملة مصممة خصيصًا لبيئة الأعمال التنافسية والمتميزة في دبي.">
+We build complete digital growth systems designed specifically for Dubai’s competitive and premium business environment.
+</p>
+
+<div class="grid">
+
+<div class="card">
+<h3 data-en="Web Development"
+data-alt="تطوير المواقع الإلكترونية">Web Development</h3>
+<p>
+We design and develop high-performance, conversion-focused websites that
+reflect trust, authority, and premium positioning. Our websites are fully
+responsive, SEO-ready, and optimized for paid traffic campaigns.
+</p>
+<p>
+From corporate websites to advanced landing pages and lead funnels,
+we ensure fast load speeds, clean UI, and intuitive user experience
+tailored for UAE audiences.
+</p>
+</div>
+
+<div class="card">
+<h3 data-en="Paid Advertising & Media Buying"
+data-alt="الإعلانات المدفوعة وإدارة الحملات">Paid Advertising & Media Buying</h3>
+<p>
+We manage high-budget, high-precision advertising campaigns across
+Google, Meta (Facebook & Instagram), YouTube, and LinkedIn.
+</p>
+<p>
+Our approach focuses on audience segmentation, creative testing,
+conversion tracking, and ROI optimization — ideal for Dubai’s elite
+and professional market segments.
+</p>
+</div>
+
+<div class="card">
+<h3 data-en="Lead Generation Systems"
+data-alt="أنظمة توليد العملاء المحتملين">Lead Generation Systems</h3>
+<p>
+We don’t just generate leads — we build systems. From landing pages
+and WhatsApp integrations to CRM pipelines and automation, every lead
+is tracked, qualified, and nurtured.
+</p>
+<p>
+Perfect for real estate, professional services, agencies, and
+high-value B2B businesses in the UAE.
+</p>
+</div>
+
+<div class="card">
+<h3 data-en="Social Media Management"
+data-alt="إدارة وسائل التواصل الاجتماعي">Social Media Management</h3>
+<p>
+We position your brand as an authority through strategic content,
+consistent branding, and community engagement.
+</p>
+<p>
+Our team handles content planning, captions, visuals, posting schedules,
+and analytics to build trust and long-term brand equity.
+</p>
+</div>
+
+<div class="card">
+<h3 data-en="Branding & Digital Identity"
+data-alt="الهوية الرقمية والعلامة التجارية">Branding & Digital Identity</h3>
+<p>
+Your brand is more than a logo. We create complete digital identities
+including visual systems, color psychology, messaging tone, and
+market positioning.
+</p>
+<p>
+Designed to appeal to Dubai’s premium and international audience.
+</p>
+</div>
+
+<div class="card">
+<h3 data-en="Business Marketing Consulting"
+data-alt="الاستشارات التسويقية للأعمال">Business Marketing Consulting</h3>
+<p>
+We provide strategic consulting for businesses looking to scale,
+optimize marketing spend, or enter the UAE market.
+</p>
+<p>
+Includes audits, competitor analysis, go-to-market strategies,
+and scalable digital roadmaps.
+</p>
+</div>
+
+</div>
+</section>
+
+<footer>© 2026 Translink Digital Media Services</footer>
+
 <script>
-function toggleMenu() {
-  document.getElementById("navLinks").classList.toggle("active");
+function toggleMenu(){document.getElementById("navLinks").classList.toggle("active");}
+function toggleLang(){
+document.body.classList.toggle("rtl");
+document.querySelectorAll("[data-en]").forEach(el=>{
+const t=el.innerText;
+el.innerText=el.getAttribute("data-alt");
+el.setAttribute("data-alt",t);
+});
 }
 </script>
-
-<section>
-<h1>Our Digital Services</h1>
-<p>
-We build complete digital ecosystems — not isolated services.
-Every solution is designed to attract, convert, and scale.
-</p>
-</section>
-
-<section class="grid">
-<div class="card">
-<h3>Web Development</h3>
-<p>
-High-conversion, mobile-first websites with premium UI, fast loading,
-and SEO-ready architecture built for Dubai’s professional market.
-</p>
-</div>
-
-<div class="card">
-<h3>Paid Advertising & Media Buying</h3>
-<p>
-Google, Meta, YouTube & LinkedIn ads with advanced targeting,
-creative testing, and budget optimization.
-</p>
-</div>
-
-<div class="card">
-<h3>Lead Generation Systems</h3>
-<p>
-Landing pages, WhatsApp automation, CRM pipelines,
-and conversion tracking systems.
-</p>
-</div>
-
-<div class="card">
-<h3>Social Media Management</h3>
-<p>
-Authority-driven content, brand storytelling, and audience growth
-across all platforms.
-</p>
-</div>
-
-<div class="card">
-<h3>Branding & Digital Identity</h3>
-<p>
-Visual identity, logo systems, brand tone, and market positioning
-aligned with UAE standards.
-</p>
-</div>
-
-<div class="card">
-<h3>Business Marketing Consulting</h3>
-<p>
-Strategic audits, competitor analysis, and scalable growth roadmaps.
-</p>
-</div>
-</section>
-
-<footer>© 2026 Translink Digital</footer>
 
 </body>
 </html>
