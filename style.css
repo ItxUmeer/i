@@ -1,233 +1,148 @@
-/* =====================
-   GLOBAL
-===================== */
+:root {
+  --blue: #0EA5E9;
+  --orange: #F97316;
+  --red: #EF4444;
+  --yellow: #FACC15;
+  --dark: #0F172A;
+  --light: #F8FAFC;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
 body {
-  background: #f7f9fc;
-  color: #222;
-  line-height: 1.8;
-  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, var(--blue), var(--orange), var(--yellow));
+  color: var(--dark);
 }
 
-body.rtl {
-  direction: rtl;
-  text-align: right;
-}
-
-/* =====================
-   NAVBAR
-===================== */
-header {
+/* NAVBAR */
+.navbar {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 999;
-  background: linear-gradient(90deg, #ff9a00, #ff3d00, #ffd000);
-  box-shadow: 0 6px 20px rgba(0,0,0,.15);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 14px 20px;
+  padding: 15px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(14px);
+  z-index: 1000;
 }
 
-.logo {
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
+.navbar img {
+  height: 42px;
 }
 
-nav {
-  display: flex;
-  gap: 22px;
-  align-items: center;
-}
-
-nav a {
-  color: #fff;
+.navbar nav a {
+  margin: 0 14px;
+  font-weight: 600;
+  color: var(--dark);
   text-decoration: none;
-  font-weight: 500;
 }
 
-.lang-btn {
-  background: rgba(255,255,255,.2);
-  border: none;
+#langToggle {
+  background: none;
+  border: 2px solid var(--dark);
   padding: 6px 12px;
-  border-radius: 6px;
-  color: #fff;
+  border-radius: 20px;
   cursor: pointer;
 }
 
 .menu-toggle {
   display: none;
   font-size: 28px;
-  color: #fff;
-  cursor: pointer;
 }
 
-/* =====================
-   MOBILE NAV
-===================== */
-@media (max-width: 768px) {
-  nav {
-    position: absolute;
-    top: 70px;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(180deg, #ff3d00, #ff9a00);
-    flex-direction: column;
-    display: none;
-    padding: 20px;
-  }
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 80px;
+}
 
-  nav.active {
-    display: flex;
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.stats {
+  margin-top: 30px;
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* SECTIONS */
+section {
+  padding: 100px 15%;
+  background: var(--light);
+}
+
+.services, .about, .contact {
+  margin-top: 40px;
+}
+
+.services h2,
+.about h2,
+.contact h2 {
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+}
+
+.service {
+  margin-bottom: 30px;
+}
+
+.service h3 {
+  font-size: 1.4rem;
+  color: var(--orange);
+  margin-bottom: 10px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  section {
+    padding: 80px 8%;
   }
 
   .menu-toggle {
     display: block;
   }
+
+  nav {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  nav.show {
+    display: block;
+  }
+
+  .stats {
+    flex-direction: column;
+  }
 }
 
-/* =====================
-   HERO – DUBAI SKYLINE
-===================== */
-.hero {
-  height: 100vh;
-  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
-  position: relative;
-  overflow: hidden;
-  margin-top: 70px;
-}
-
-.skyline {
-  position: absolute;
-  bottom: 0;
-  width: 200%;
-  height: 300px;
-  background: url('https://svgshare.com/i/uQG.svg') repeat-x;
-  animation: skylineMove 60s linear infinite;
-  opacity: 0.9;
-}
-
-@keyframes skylineMove {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.hero-content {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  text-align: center;
-  padding: 20px;
-}
-
-.hero h1 {
-  font-size: 42px;
-  max-width: 900px;
-}
-
-.hero p {
-  margin-top: 18px;
-  font-size: 18px;
-  max-width: 720px;
-  opacity: .95;
-}
-
-/* =====================
-   SECTIONS
-===================== */
-section {
-  padding: 80px 20px;
-}
-
-.container {
-  max-width: 1200px;
-  margin: auto;
-}
-
-/* =====================
-   STATS
-===================== */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
-  gap: 30px;
-  text-align: center;
-}
-
-.stat-box {
-  background: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.08);
-}
-
-.stat-box h2 {
-  font-size: 42px;
-  color: #ff6a00;
-}
-
-/* =====================
-   SERVICES
-===================== */
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
-  gap: 30px;
-}
-
-.service-card {
-  background: #fff;
-  padding: 34px;
-  border-radius: 18px;
-  box-shadow: 0 12px 35px rgba(0,0,0,.1);
-}
-
-.service-card h3 {
-  color: #ff3d00;
-  margin-bottom: 12px;
-}
-
-/* =====================
-   CONTACT
-===================== */
-.contact-form {
-  max-width: 600px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.contact-form input,
-.contact-form textarea {
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-.contact-form button {
-  background: linear-gradient(90deg, #ff3d00, #ffd000);
-  border: none;
-  color: #fff;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
+/* RTL */
+body.rtl {
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
 }
