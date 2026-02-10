@@ -2,70 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>About Us | Translink Digital Media Services</title>
-<meta name="description" content="About Translink Digital Media Services – a Dubai-focused digital marketing agency serving elite businesses.">
+<title>About Us | Translink Digital</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
-  <div class="navbar">
+  <div class="nav-container">
     <div class="logo">Translink Digital</div>
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Home</a>
-      <a href="services.html">Services</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <div class="lang-toggle" onclick="toggleLang()">EN / AR</div>
+    <nav id="navMenu">
+      <a href="index.html" data-en="Home" data-ar="الرئيسية">Home</a>
+      <a href="services.html" data-en="Services" data-ar="الخدمات">Services</a>
+      <a href="about.html" data-en="About" data-ar="من نحن">About</a>
+      <a href="contact.html" data-en="Contact" data-ar="تواصل معنا">Contact</a>
+      <button class="lang-btn" onclick="toggleLang()">AR | EN</button>
     </nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
   </div>
 </header>
 
 <section>
-<h1 class="section-title"
-data-en="Who We Are"
-data-alt="من نحن">
-Who We Are
-</h1>
+  <div class="container">
+    <h1 data-en="Who We Are"
+        data-ar="من نحن">
+      Who We Are
+    </h1>
 
-<p class="section-desc">
-Translink Digital Media Services was established to help ambitious
-businesses in Dubai build strong digital authority, generate quality
-leads, and scale sustainably.
-</p>
+    <p data-en="Translink Digital Media Services is a Dubai-based digital growth agency."
+       data-ar="ترانسلينك ديجيتال ميديا سيرفيسز هي وكالة نمو رقمي مقرها دبي.">
+    Translink Digital Media Services is a Dubai-based digital growth agency.
+    </p>
 
-<p>
-We operate at the intersection of strategy, creativity, and performance.
-Our work is guided by one principle: results matter more than vanity.
-</p>
-
-<p>
-Dubai is a unique market — fast, diverse, and premium. We understand
-local audience behavior, cultural expectations, and international
-business standards.
-</p>
-
-<p>
-Whether you are a startup, SME, or enterprise, we design digital
-solutions that align with your growth vision and long-term success.
-</p>
-</section>
-
-<footer>© 2026 Translink Digital Media Services</footer>
-
-<script>
-function toggleMenu(){document.getElementById("navLinks").classList.toggle("active");}
-function toggleLang(){
-document.body.classList.toggle("rtl");
-document.querySelectorAll("[data-en]").forEach(el=>{
-const t=el.innerText;
-el.innerText=el.getAttribute("data-alt");
-el.setAttribute("data-alt",t);
-});
-}
-</script>
-
-</body>
-</html>
+    <p data-en="We help businesses build strong digital foundations and scalable growth systems."
+       data-ar="نساعد الشركات على
