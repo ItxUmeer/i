@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contact | Translink Digital Media</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<section class="page-hero">
+<h1>Contact Us</h1>
+<p>Let’s grow your business in Dubai</p>
+</section>
+
+<section class="contact-box glass">
+<form onsubmit="sendWhatsApp(); return false;">
+<input id="name" placeholder="Your Name" required>
+<input id="email" placeholder="Email" required>
+<textarea id="message" placeholder="Tell us about your project"></textarea>
+<button type="submit" class="btn">Send via WhatsApp</button>
+</form>
+</section>
+
+<script>
+function sendWhatsApp(){
+  let n=name.value,e=email.value,m=message.value;
+  let phone="971XXXXXXXXX";
+  window.open(`https://wa.me/${phone}?text=Name:%20${n}%0AEmail:%20${e}%0AMessage:%20${m}`);
+}
+</script>
+
+<footer>
+© 2026 Translink Digital Media Services • Dubai UAE
+</footer>
+
+</body>
+</html>
