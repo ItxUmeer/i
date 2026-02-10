@@ -1,0 +1,235 @@
+/* ===============================
+   TRANSINK DIGITAL – MASTER STYLE
+   =============================== */
+
+:root {
+  --bg-dark: #0b0f1a;
+  --bg-light: #12172a;
+  --blue: #00e5ff;
+  --purple: #6a00ff;
+  --gold: #d4af37;
+  --white: #ffffff;
+  --muted: #b5b8c5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--white);
+  line-height: 1.7;
+}
+
+/* ===============================
+   HERO SECTIONS
+   =============================== */
+
+.hero {
+  height: 100vh;
+  background: url("images/dubai-skyline.jpg") center/cover no-repeat;
+  position: relative;
+}
+
+.hero .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(11, 15, 26, 0.85),
+    rgba(11, 15, 26, 0.95)
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: 0 8%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  max-width: 750px;
+}
+
+.hero p {
+  margin-top: 15px;
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 650px;
+}
+
+/* PAGE HERO */
+.page-hero {
+  padding: 120px 8% 80px;
+  text-align: center;
+}
+
+.page-hero h1 {
+  font-size: 46px;
+  font-weight: 800;
+}
+
+.page-hero p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+.btn {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 14px 36px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.45);
+  transition: 0.3s;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* ===============================
+   SECTIONS
+   =============================== */
+
+section {
+  padding: 80px 8%;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 50px;
+}
+
+/* ===============================
+   GLASSMORPHISM CARDS
+   =============================== */
+
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+  transition: 0.4s;
+}
+
+.glass:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 60px rgba(0, 229, 255, 0.35);
+}
+
+/* ===============================
+   HOME – WHY CARDS
+   =============================== */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  text-align: center;
+}
+
+/* ===============================
+   SERVICES PAGE
+   =============================== */
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.icon {
+  font-size: 36px;
+  color: var(--blue);
+  margin-bottom: 15px;
+}
+
+/* ===============================
+   ABOUT PAGE
+   =============================== */
+
+.about-content {
+  max-width: 900px;
+  margin: auto;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.about-content p {
+  margin-bottom: 20px;
+}
+
+/* ===============================
+   CONTACT PAGE
+   =============================== */
+
+.contact-box {
+  max-width: 600px;
+  margin: auto;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+/* ===============================
+   FOOTER
+   =============================== */
+
+footer {
+  text-align: center;
+  padding: 30px;
+  color: var(--muted);
+  font-size: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ===============================
+   RESPONSIVE (MOBILE)
+   =============================== */
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 38px;
+  }
+
+  .page-hero h1 {
+    font-size: 34px;
+  }
+
+  section {
+    padding: 60px 6%;
+  }
+}
