@@ -1,177 +1,181 @@
-:root {
-  --bg-dark: #0b1220;
-  --bg-card: rgba(255,255,255,0.1);
-  --blue: #00e5ff;
-  --orange: #ffb703;
-  --white: #f8f9ff;
-  --muted: #b9c0d4;
-}
-
+/* =====================
+   GLOBAL RESET
+===================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 body {
-  background: var(--bg-dark);
-  color: var(--white);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
   line-height: 1.7;
 }
 
-/* ================= NAVBAR ================= */
-nav {
-  position: fixed;
+/* =====================
+   NAVBAR
+===================== */
+header {
+  position: sticky;
   top: 0;
-  width: 100%;
-  padding: 18px 8%;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.4);
+}
+
+.navbar {
+  max-width: 1200px;
+  margin: auto;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(11,18,32,0.85);
-  backdrop-filter: blur(12px);
-  z-index: 999;
 }
 
-nav .logo {
+.logo {
   font-size: 22px;
-  font-weight: 800;
-}
-nav .logo span {
-  color: var(--orange);
+  font-weight: 700;
+  color: #6ee7b7;
 }
 
-nav ul {
-  list-style: none;
+.logo span {
+  color: #38bdf8;
+}
+
+.nav-links {
   display: flex;
-  gap: 30px;
+  gap: 25px;
 }
 
-nav ul li a {
+.nav-links a {
   text-decoration: none;
-  color: var(--white);
+  color: #fff;
   font-weight: 500;
-  transition: 0.3s;
 }
 
-nav ul li a:hover {
-  color: var(--orange);
+.menu-toggle {
+  display: none;
+  font-size: 26px;
+  cursor: pointer;
 }
 
-/* ================= HERO ================= */
+/* =====================
+   MOBILE NAV
+===================== */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 65px;
+    left: 0;
+    width: 100%;
+    background: rgba(15,32,39,0.95);
+    flex-direction: column;
+    display: none;
+    padding: 20px;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
+
+/* =====================
+   SECTIONS
+===================== */
+section {
+  max-width: 1200px;
+  margin: auto;
+  padding: 80px 20px;
+}
+
 .hero {
-  height: 100vh;
-  background: url("images/dubai-skyline.jpg") center/cover no-repeat;
-  position: relative;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    rgba(11,18,32,0.75),
-    rgba(11,18,32,0.95)
-  );
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-  padding: 0 8%;
+  min-height: 90vh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 60px;
+  align-items: center;
 }
 
 .hero h1 {
-  font-size: 54px;
-  font-weight: 800;
-  max-width: 750px;
+  font-size: clamp(32px, 5vw, 56px);
+  margin-bottom: 20px;
 }
 
 .hero p {
-  margin-top: 15px;
+  max-width: 700px;
+  opacity: 0.9;
   font-size: 18px;
-  color: var(--muted);
-  max-width: 650px;
 }
 
-/* ================= BUTTON ================= */
-.btn {
+.cta {
+  margin-top: 30px;
+}
+
+.cta a {
   display: inline-block;
-  margin-top: 25px;
-  padding: 14px 36px;
-  border-radius: 40px;
-  background: linear-gradient(135deg, var(--orange), var(--blue));
+  background: linear-gradient(90deg, #38bdf8, #6ee7b7);
+  padding: 14px 30px;
+  border-radius: 30px;
   color: #000;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 0 30px rgba(255,183,3,0.5);
 }
 
-/* ================= SECTIONS ================= */
-section {
-  padding: 90px 8%;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 38px;
-  font-weight: 800;
-  margin-bottom: 50px;
-}
-
-/* ================= GLASS CARDS ================= */
-.glass {
-  background: var(--bg-card);
-  backdrop-filter: blur(18px);
-  border-radius: 20px;
-  padding: 30px;
-  border: 1px solid rgba(255,255,255,0.15);
-  transition: 0.4s;
-}
-
-.glass:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 0 50px rgba(0,229,255,0.4);
-}
-
-/* ================= GRIDS ================= */
-.cards, .services-grid {
+/* =====================
+   CARDS
+===================== */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap: 25px;
 }
 
-/* ================= PAGE HERO ================= */
-.page-hero {
-  padding: 140px 8% 80px;
-  text-align: center;
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 30px;
 }
 
-.page-hero h1 {
-  font-size: 46px;
-  font-weight: 800;
+.card h3 {
+  margin-bottom: 12px;
+  color: #6ee7b7;
 }
 
-/* ================= FORMS ================= */
+/* =====================
+   FORMS
+===================== */
+form {
+  max-width: 600px;
+  margin-top: 40px;
+}
+
 input, textarea {
   width: 100%;
   padding: 14px;
   margin-bottom: 15px;
   border-radius: 10px;
   border: none;
-  outline: none;
 }
 
-/* ================= FOOTER ================= */
+button {
+  background: linear-gradient(90deg, #38bdf8, #6ee7b7);
+  padding: 14px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* =====================
+   FOOTER
+===================== */
 footer {
   text-align: center;
   padding: 30px;
-  color: var(--muted);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.4);
 }
