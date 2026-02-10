@@ -1,5 +1,5 @@
 /* =====================
-   GLOBAL RESET
+   GLOBAL
 ===================== */
 * {
   margin: 0;
@@ -9,19 +9,27 @@
 }
 
 body {
-  background: #f9fbff;
+  background: #f7f9fc;
   color: #222;
-  line-height: 1.7;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
 }
 
 /* =====================
    NAVBAR
 ===================== */
 header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-  background: linear-gradient(90deg, #ff9800, #ff5722, #ffc107);
+  width: 100%;
+  z-index: 999;
+  background: linear-gradient(90deg, #ff9a00, #ff3d00, #ffd000);
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
 }
 
 .nav-container {
@@ -42,6 +50,7 @@ header {
 nav {
   display: flex;
   gap: 22px;
+  align-items: center;
 }
 
 nav a {
@@ -50,13 +59,18 @@ nav a {
   font-weight: 500;
 }
 
-nav a:hover {
-  text-decoration: underline;
+.lang-btn {
+  background: rgba(255,255,255,.2);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
 }
 
 .menu-toggle {
   display: none;
-  font-size: 26px;
+  font-size: 28px;
   color: #fff;
   cursor: pointer;
 }
@@ -67,10 +81,10 @@ nav a:hover {
 @media (max-width: 768px) {
   nav {
     position: absolute;
-    top: 64px;
+    top: 70px;
     left: 0;
     width: 100%;
-    background: linear-gradient(180deg, #ff5722, #ff9800);
+    background: linear-gradient(180deg, #ff3d00, #ff9a00);
     flex-direction: column;
     display: none;
     padding: 20px;
@@ -86,19 +100,29 @@ nav a:hover {
 }
 
 /* =====================
-   HERO
+   HERO – DUBAI SKYLINE
 ===================== */
 .hero {
-  height: 90vh;
-  background: url('https://images.unsplash.com/photo-1504274066651-8d31a536b11a') center/cover no-repeat;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
   position: relative;
+  overflow: hidden;
+  margin-top: 70px;
 }
 
-.hero::after {
-  content: "";
+.skyline {
   position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
+  bottom: 0;
+  width: 200%;
+  height: 300px;
+  background: url('https://svgshare.com/i/uQG.svg') repeat-x;
+  animation: skylineMove 60s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes skylineMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .hero-content {
@@ -119,16 +143,17 @@ nav a:hover {
 }
 
 .hero p {
-  margin-top: 16px;
+  margin-top: 18px;
   font-size: 18px;
-  max-width: 700px;
+  max-width: 720px;
+  opacity: .95;
 }
 
 /* =====================
    SECTIONS
 ===================== */
 section {
-  padding: 70px 20px;
+  padding: 80px 20px;
 }
 
 .container {
@@ -137,44 +162,46 @@ section {
 }
 
 /* =====================
+   STATS
+===================== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 30px;
+  text-align: center;
+}
+
+.stat-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+
+.stat-box h2 {
+  font-size: 42px;
+  color: #ff6a00;
+}
+
+/* =====================
    SERVICES
 ===================== */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
   gap: 30px;
 }
 
 .service-card {
   background: #fff;
-  padding: 30px;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  transition: transform .3s;
-}
-
-.service-card:hover {
-  transform: translateY(-8px);
+  padding: 34px;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.1);
 }
 
 .service-card h3 {
-  color: #ff5722;
-  margin-bottom: 10px;
-}
-
-/* =====================
-   COUNTERS
-===================== */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  gap: 30px;
-  text-align: center;
-}
-
-.stat-box h2 {
-  font-size: 40px;
-  color: #ff9800;
+  color: #ff3d00;
+  margin-bottom: 12px;
 }
 
 /* =====================
@@ -191,16 +218,16 @@ section {
 .contact-form input,
 .contact-form textarea {
   padding: 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
 }
 
 .contact-form button {
-  background: linear-gradient(90deg, #ff5722, #ffc107);
+  background: linear-gradient(90deg, #ff3d00, #ffd000);
   border: none;
   color: #fff;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
 }
