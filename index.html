@@ -1,450 +1,281 @@
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <title>MUHAMMAD UMER | DIGITAL MARKETING CONSULTANT UAE</title>
-
-  <!-- SEO -->
-  <meta name="description" content="Elite Digital Marketing & Paid Advertising Consultant in UAE. Helping businesses attract high-value customers, generate qualified leads, and scale revenue."/>
-  <meta name="author" content="Muhammad Umer"/>
-  <link rel="alternate" hreflang="en" href="https://translink.ae/" />
- 
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Consultant | UAE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --primary:#1B9AAA;
-  --secondary:#DDDBCB;
-  --dark:#0F172A;
-  --text:#334155;
-  --white:#ffffff;
-}
-
-*{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  font-family:'Inter',sans-serif;
-  background:var(--secondary);
-  color:var(--text);
-  line-height:1.7;
+    margin:0;
+    font-family:'Cairo', sans-serif;
+    background:linear-gradient(to right,#f4f7fb,#eef3f9);
+    color:#1a1a1a;
 }
 
-/* LANGUAGE */
-.lang-switch{
-  position:absolute;
-  top:20px;
-  right:20px;
-}
-.lang-btn{
-  background:var(--primary);
-  color:#fff;
-  padding:8px 14px;
-  border-radius:8px;
-  text-decoration:none;
-  font-weight:600;
-}
+/* HERO SECTION */
 
-/* HEADER */
 header{
-  background:#fff;
-  padding:60px 20px;
-  text-align:center;
-  position:relative;
+    background:linear-gradient(135deg,#002147,#004aad,#00a8cc);
+    color:white;
+    padding:80px 20px;
 }
 
-.hero img{
-  width:160px;
-  height:160px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-bottom:20px;
-  border:4px solid transparent;
-  background:
-    linear-gradient(#fff,#fff) padding-box,
-    linear-gradient(120deg,#1B9AAA,#38bdf8,#1B9AAA) border-box;
-  animation:borderGlow 4s linear infinite;
+.hero-container{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    max-width:1200px;
+    margin:auto;
 }
 
-@keyframes borderGlow{
-  to{background-position:200% center}
+.hero-text{
+    flex:1;
+    min-width:300px;
 }
 
-h1{
-  font-size:36px;
-  color:var(--dark);
+.hero-text h1{
+    font-size:40px;
+    margin-bottom:10px;
 }
 
-.subtitle{
-  margin-top:8px;
-  font-size:18px;
+.hero-text p{
+    font-size:18px;
+    opacity:0.95;
 }
 
-.socials{
-  margin-top:20px;
-}
-.socials a{
-  color:var(--primary);
-  font-size:22px;
-  margin:0 10px;
-  text-decoration:none;
+.profile-pic{
+    flex:1;
+    text-align:center;
+    min-width:250px;
 }
 
-/* LEFT SOCIAL */
-.social-left{
-  position:fixed;
-  left:15px;
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  z-index:999;
+.profile-pic img{
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    object-fit:cover;
+    border:6px solid white;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
-.social-left a{
-  width:42px;height:42px;
-  background:#fff;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--primary);
-  box-shadow:0 6px 18px rgba(0,0,0,.2);
+
+.btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 30px;
+    background:#00c6ff;
+    color:white;
+    text-decoration:none;
+    border-radius:30px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.btn:hover{
+    background:#009edb;
 }
 
 /* SECTIONS */
+
 section{
-  max-width:1100px;
-  margin:auto;
-  padding:60px 20px;
-}
-
-.card{
-  background:#fff;
-  padding:32px;
-  border-radius:18px;
-  margin-bottom:30px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  animation:fadeUp .6s ease both;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:none}
+    padding:60px 20px;
+    max-width:1200px;
+    margin:auto;
 }
 
 h2{
-  color:var(--dark);
-  margin-bottom:16px;
+    text-align:center;
+    margin-bottom:40px;
+    color:#002147;
 }
 
-/* SERVICES */
-.services{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:20px;
-}
-.service{
-  border:1px solid #e2e8f0;
-  padding:22px;
-  border-radius:14px;
-}
-.service h3{
-  color:var(--primary);
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
 }
 
-/* CONTACT FORM */
-.contact-form{
-  display:grid;
-  gap:14px;
-  max-width:520px;
-}
-.contact-form input,
-.contact-form select{
-  padding:14px;
-  border-radius:10px;
-  border:1px solid #e2e8f0;
-  font-size:15px;
-}
-.submit-btn{
-  background:var(--primary);
-  color:#fff;
-  padding:16px;
-  border:none;
-  border-radius:12px;
-  font-weight:700;
-  cursor:pointer;
-  transition:.3s;
-}
-.submit-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 20px rgba(27,154,170,.25);
+.card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+    transition:0.3s;
+    border-top:4px solid #00a8cc;
 }
 
-/* CTA */
-.cta{
-  background:var(--primary);
-  color:#fff;
-  padding:60px 20px;
-  text-align:center;
-  border-radius:22px;
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* WHATSAPP */
-.whatsapp-float{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#25D366;
-  color:#fff;
-  padding:14px 20px;
-  border-radius:50px;
-  font-weight:700;
-  text-decoration:none;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  z-index:999;
+.card h3{
+    margin-top:0;
+    color:#004aad;
 }
 
-/* FOOTER */
+/* CONTACT */
+
+.contact{
+    background:linear-gradient(135deg,#002147,#003b73);
+    color:white;
+    text-align:center;
+    padding:60px 20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border-radius:8px;
+    border:none;
+}
+
+button{
+    padding:12px 30px;
+    border:none;
+    background:#00c6ff;
+    color:white;
+    font-weight:600;
+    border-radius:30px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#009edb;
+}
+
 footer{
-  text-align:center;
-  padding:30px;
-  font-size:14px;
+    background:#001530;
+    color:white;
+    text-align:center;
+    padding:15px;
+    font-size:14px;
 }
+
+/* WhatsApp Button */
+
+.whatsapp{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#25D366;
+    color:white;
+    padding:15px 18px;
+    border-radius:50%;
+    font-size:20px;
+    text-decoration:none;
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- LEFT SOCIAL -->
-<div class="social-left">
-   <a href="#"><i class="fab fa-facebook"></i></a>
-   <a href="#"><i class="fab fa-instagram"></i></a>
-   <a href="#"><i class="fab fa-youtube"></i></a>
-   <a href="#"><i class="fab fa-snapchat"></i></a>
-   <a href="#"><i class="fab fa-tiktok"></i></a>
-   <a href="#"><i class="fab fa-linkedin"></i></a>
+<header>
+<div class="hero-container">
 
+<div class="hero-text">
+<h1>Maintenance Administrator & Technical Consultant</h1>
+<p>
+Professional Maintenance Planning | Asset Management | MEP & Facility Consultancy – UAE
+</p>
+<a href="#contact" class="btn">Book Consultation</a>
 </div>
 
-<a class="whatsapp-float" href="https://wa.me/971509507079" target="_blank">
-  <i class="fab fa-whatsapp"></i> Let's Talk
-</a>
+<div class="profile-pic">
+<img src="profile.jpg" alt="Profile Picture">
+</div>
 
-<header class="hero">
-  
-  </div>
-
-  <img src="profile.jpg" alt="Muhammad Umer">
-  <h1>MUHAMMAD UMER</h1>
-  <p class="subtitle">DIGITAL MARKETING & PAID ADVERTISING CONSULTANT — UAE 🇦🇪</p>
-
-   </p>
-
-  <div class="socials">
-   <a href="#"><i class="fab fa-facebook"></i></a>
-   <a href="#"><i class="fab fa-instagram"></i></a>
-   <a href="#"><i class="fab fa-youtube"></i></a>
-   <a href="#"><i class="fab fa-snapchat"></i></a>
-   <a href="#"><i class="fab fa-tiktok"></i></a>
-   <a href="#"><i class="fab fa-linkedin"></i></a>
- <p style="margin-top:16px;font-weight:700;color:#64748b">
-          
-        “Hassle-Free MOHRE, Immigration & PRO Services You Can Trust”🇦🇪</p>
-         <a href="services.html"
-   style="display:inline-flex;align-items:center;gap:6px;
-          padding:8px 14px;
-          background:#1e3a8a;
-          color:#ffffff;
-          font-weight:700;
-          font-size:14px;
-          text-decoration:none;
-          border-radius:6px;">
-  <span>SERVICES</span>
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-    <path d="M5 12h14M13 5l6 7-6 7"
-          stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</a>
-
-</a>
-
-</a>
-</a>
-
-
-  </p>
-  <div class="socials">
-   <a href="#"><i class="fas fa-landmark"></i></a>   <!-- Govt -->
-   <a href="#"><i class="fas fa-id-card"></i></a>    <!-- ICP -->
-   <a href="#"><i class="fas fa-passport"></i></a>   <!-- GDRFA -->
-   <a href="#"><i class="fas fa-road"></i></a>       <!-- RTA -->
-   <a href="#"><i class="fas fa-city"></i></a>       <!-- Smart Dubai -->
-   <a href="#"><i class="fas fa-briefcase"></i></a> <!-- MOHRE -->
-
-  </div>
+</div>
 </header>
 
 <section>
-
-<section class="card" id="about">
-  <h2>SOCIAL MEDIA SERVICES</h2>
+<h2>About Me</h2>
 <p>
-  I help ambitious businesses<br>
-  <strong>Attract high-value customers</strong><br>
-  <strong>Generate qualified leads</strong><br>
-  <strong>Scale revenue</strong><br>
-  through data-driven, performance-focused digital marketing strategies.
-</p>
-
-<p>
-  With over<br>
-  <strong>5+ years of professional experience</strong><br>
-  I deliver end-to-end marketing solutions — from premium brand positioning
-  and high-impact content creation to advanced social media management and
-  ROI-driven paid advertising campaigns.
-</p>
-
-<p>
-  My expertise is tailored for the<br>
-  <strong>UAE market</strong><br>
-  helping business owners, entrepreneurs, and growth-focused brands achieve
-  measurable results, sustainable growth, and long-term digital authority.
-</p>
-  
-</td>
-</tr>
-  </tbody>
-</table>
+Experienced Maintenance Administrator and Consultant specializing in preventive maintenance planning, facility operations management, asset lifecycle optimization, and technical consultancy across commercial and industrial sectors in the UAE.
 </p>
 </section>
 
-<section style="max-width:1200px;margin:0 auto;padding:50px 20px;">
-  <div style="text-align:center;margin-bottom:40px;">
-    <h2 style="font-size:28px;margin:0;">CORE SERVICES</h2>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;">
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-code" style="font-size:30px;color:#1e3a8a;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">WEB DEVELOPMENT</h3>
-      <p style="margin:0;line-height:1.7;">
-        High-performance websites using <strong>WordPress, PHP, Python, HTML5, CSS3</strong>,
-        SEO-optimized architecture, landing pages, and business websites
-        designed for conversions and credibility.
-      </p>
-    </div>
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-bullhorn" style="font-size:30px;color:#0f766e;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">PAID ADVERTISING & MEDIA BUYING</h3>
-      <p style="margin:0;line-height:1.7;">
-        Data-driven campaigns across <strong>Google Ads, Meta, TikTok & YouTube</strong>,
-        focused on ROI, lead quality, and scalable growth for UAE businesses.
-      </p>
-    </div>
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-chart-line" style="font-size:30px;color:#7c3aed;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">LEAD GENERATION SYSTEMS</h3>
-      <p style="margin:0;line-height:1.7;">
-        End-to-end funnels, high-converting landing pages,
-        CRM integration, and automation to turn clicks
-        into paying customers.
-      </p>
-    </div>
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-share-alt" style="font-size:30px;color:#0369a1;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">SOCIAL MEDIA MANAGEMENT</h3>
-      <p style="margin:0;line-height:1.7;">
-        Premium brand presence across <strong>Instagram, Snapchat, TikTok & YouTube</strong>,
-        including content strategy, growth, and performance analytics.
-      </p>
-    </div>
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-pen-nib" style="font-size:30px;color:#be123c;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">BRANDING & DIGITAL IDENTITY</h3>
-      <p style="margin:0;line-height:1.7;">
-        Executive-level brand positioning, visual identity,
-        high-impact content creation, and ad creatives
-        that command authority and trust.
-      </p>
-    </div>
-
-    <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:30px;">
-      <i class="fas fa-briefcase" style="font-size:30px;color:#92400e;"></i>
-      <h3 style="margin:15px 0 10px;font-size:18px;">BUSINESS MARKETING CONSULTING</h3>
-      <p style="margin:0;line-height:1.7;">
-        Strategic digital consulting for entrepreneurs,
-        startups, and established companies seeking
-        sustainable, long-term digital growth.
-      </p>
-    </div>
-
-  </div>
-</section>
-
-  </div>
-</div>
-
+<section>
+<h2>Maintenance & Technical Services</h2>
+<div class="grid">
 
 <div class="card">
-<h2>Let’s Talk.</h2>
+<h3>Preventive Maintenance</h3>
+<p>Structured PM schedules, asset tracking, CMMS implementation & KPI reporting.</p>
+</div>
 
-<form class="contact-form" onsubmit="sendWhatsApp(event)">
-  <input type="text" placeholder="FULL NAME" required>
-  <input type="text" placeholder="COMPANY NAME">
-  <input type="tel" placeholder="CONTACT NUMBER" required>
-  <input type="email" placeholder="EMAIL ADDRESS" required>
+<div class="card">
+<h3>Painting Works</h3>
+<p>Interior & exterior painting, protective coatings, industrial & commercial finishes.</p>
+</div>
 
-  <select>
-    <option>Preferred Time to Call</option>
-    <option>Morning</option>
-    <option>Afternoon</option>
-    <option>Evening</option>
-    <option>Physical Meeting</option>
-  </select>
+<div class="card">
+<h3>Drywall & Partitions</h3>
+<p>Gypsum partitions, ceiling systems, office fit-out modifications.</p>
+</div>
 
-  <button class="submit-btn">REQUEST VIA WHATSAPP</button>
+<div class="card">
+<h3>Parking Shades Installation</h3>
+<p>Design, fabrication & installation of parking shade structures.</p>
+</div>
+
+<div class="card">
+<h3>Gate Barriers Systems</h3>
+<p>Automatic gate barriers, access control systems & security integration.</p>
+</div>
+
+<div class="card">
+<h3>Electrical Supplies & Installation</h3>
+<p>DB panels, lighting systems, cable management, electrical troubleshooting.</p>
+</div>
+
+<div class="card">
+<h3>MEP Systems</h3>
+<p>Mechanical, Electrical & Plumbing system supervision and maintenance planning.</p>
+</div>
+
+<div class="card">
+<h3>AC Installation & HVAC</h3>
+<p>Split AC, ducted systems, chiller coordination, preventive HVAC maintenance.</p>
+</div>
+
+</div>
+</section>
+
+<section>
+<h2>Industries Served</h2>
+<div class="grid">
+<div class="card"><h3>Commercial Buildings</h3></div>
+<div class="card"><h3>Facility Management Companies</h3></div>
+<div class="card"><h3>Warehouses & Logistics</h3></div>
+<div class="card"><h3>Industrial Plants</h3></div>
+<div class="card"><h3>Retail & Shopping Centers</h3></div>
+<div class="card"><h3>Residential Compounds</h3></div>
+</div>
+</section>
+
+<section id="contact" class="contact">
+<h2>Contact Me</h2>
+<form>
+<input type="text" placeholder="Your Name">
+<input type="email" placeholder="Your Email">
+<textarea rows="4" placeholder="Your Message"></textarea>
+<button type="submit">Send Inquiry</button>
 </form>
-</div>
-
-<div class="cta">
-  <h2>GROWTH CONSULTATION FOR SERIOUS BRANDS</h2>
-  <p>Let’s build a profitable digital growth system.</p>
-</div>
-
 </section>
 
 <footer>
-© 2026 MUHAMMAD UMER — DIGITAL MARKETING CONSULTANT UAE
+© 2026 Maintenance Consultant UAE | All Rights Reserved
 </footer>
 
-<script>
-function sendWhatsApp(e){
-  e.preventDefault();
-  const inputs=document.querySelectorAll(".contact-form input, .contact-form select");
-  const msg=`NEW CONSULTATION REQUEST
-NAME: ${inputs[0].value}
-COMPANY: ${inputs[1].value}
-PHONE: ${inputs[2].value}
-EMAIL: ${inputs[3].value}
-TIME: ${inputs[4].value}`;
-  window.open("https://wa.me/971509507079?text="+encodeURIComponent(msg),"_blank");
-}
-</script>
+<a href="https://wa.me/971XXXXXXXXX" class="whatsapp">WA</a>
 
 </body>
 </html>
