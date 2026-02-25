@@ -6,10 +6,8 @@
 <title>Muhammad Umer | Executive Engineering Supervisor</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-
 /* ===== GLOBAL ===== */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
@@ -22,157 +20,62 @@ position:relative;
 }
 
 /* 3D ORBS / FLOATING GLOW */
-.orb{
-position:fixed;
-border-radius:50%;
-filter:blur(120px);
-z-index:-1;
-animation:float 18s infinite alternate ease-in-out;
-}
-
+.orb{position:fixed;border-radius:50%;filter:blur(120px);z-index:-1;animation:float 18s infinite alternate ease-in-out;}
 .orb1{width:400px;height:400px;background:#ff7f50;top:-100px;left:-100px;}
 .orb2{width:500px;height:500px;background:#32cd32;bottom:-150px;right:-150px;animation-duration:22s;}
 .orb3{width:300px;height:300px;background:#8a2be2;top:20%;left:50%;animation-duration:20s;}
-
-@keyframes float{
-0%{transform:translateY(0px);}
-100%{transform:translateY(80px);}
-}
+@keyframes float{0%{transform:translateY(0px);}100%{transform:translateY(80px);}}
 
 /* PARTICLES */
-.particle{
-position:fixed;
-width:6px;height:6px;
-background:#00c6ff;
-border-radius:50%;
-opacity:0.4;
-animation:particles 25s linear infinite;
-z-index:-1;
-}
-@keyframes particles{
-0%{transform:translateY(100vh);}
-100%{transform:translateY(-10vh);}
-}
+.particle{position:fixed;width:6px;height:6px;background:#00c6ff;border-radius:50%;opacity:0.4;animation:particles 25s linear infinite;z-index:-1;}
+@keyframes particles{0%{transform:translateY(100vh);}100%{transform:translateY(-10vh);}}
 
 /* CURSOR GLOW */
-.cursor-glow{
-position:fixed;
-width:200px;height:200px;
-background:radial-gradient(circle, rgba(255,127,80,0.2) 0%, transparent 70%);
-pointer-events:none;
-border-radius:50%;
-transform:translate(-50%,-50%);
-z-index:9999;
-transition:0.1s;
-}
+.cursor-glow{position:fixed;width:200px;height:200px;background:radial-gradient(circle, rgba(255,127,80,0.2) 0%, transparent 70%);pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);z-index:9999;transition:0.1s;}
 
-/* NAV */
-nav{
-position:fixed;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:25px 60px;
-background:rgba(255,255,255,0.6);
-backdrop-filter:blur(20px);
-box-shadow:0 5px 20px rgba(0,0,0,0.05);
-z-index:1000;
-border-radius:0 0 20px 20px;
-}
-
+/* NAVIGATION */
+nav{position:fixed;width:100%;display:flex;justify-content:space-between;align-items:center;padding:25px 60px;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px);box-shadow:0 5px 20px rgba(0,0,0,0.05);z-index:1000;border-radius:0 0 20px 20px;}
 nav h2{font-weight:800;}
-nav a{margin-left:25px;text-decoration:none;color:#0b2c4d;font-weight:500;transition:0.3s;}
-nav a:hover{color:#ff7f50;}
+.menu-links{display:flex;gap:20px;}
+.menu-links a{text-decoration:none;color:#0b2c4d;font-weight:500;transition:0.3s;}
+.menu-links a:hover{color:#ff7f50;}
+.hamburger{display:none;flex-direction:column;justify-content:space-between;width:25px;height:18px;cursor:pointer;}
+.hamburger div{height:3px;background:#0b2c4d;border-radius:2px;}
+@media(max-width:768px){
+.menu-links{position:absolute;top:75px;right:20px;flex-direction:column;background:rgba(255,255,255,0.8);backdrop-filter:blur(15px);padding:20px;border-radius:15px;display:none;}
+.menu-links.active{display:flex;}
+.hamburger{display:flex;}
+.menu-links a{margin:10px 0;}
+}
 
 /* HERO */
-.hero{
-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-padding:0 20px;
-}
-.hero img{
-width:200px;height:200px;
-border-radius:50%;
-border:5px solid #fff;
-object-fit:cover;
-margin-bottom:20px;
-box-shadow:0 15px 40px rgba(0,0,0,0.2);
-}
-.hero h1{
-font-size:58px;
-font-weight:800;
-background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
-.hero p{
-max-width:750px;
-margin-top:25px;
-font-size:18px;
-color:#355c7d;
-line-height:1.7;
-}
-
-/* BUTTON */
-.btn{
-margin-top:35px;
-padding:14px 40px;
-border-radius:40px;
-background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);
-color:white;
-font-weight:600;
-text-decoration:none;
-transition:0.3s;
-}
-.btn:hover{
-transform:scale(1.05);
-box-shadow:0 0 25px #ff7f50;
-}
+.hero{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 20px;}
+.hero img{width:200px;height:200px;border-radius:50%;border:5px solid #fff;object-fit:cover;margin-bottom:20px;box-shadow:0 15px 40px rgba(0,0,0,0.2);}
+.hero h1{font-size:58px;font-weight:800;background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{max-width:750px;margin-top:25px;font-size:18px;color:#355c7d;line-height:1.7;}
+.btn{margin-top:35px;padding:14px 40px;border-radius:40px;background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);color:white;font-weight:600;text-decoration:none;transition:0.3s;}
+.btn:hover{transform:scale(1.05);box-shadow:0 0 25px #ff7f50;}
 
 /* SECTIONS */
 section{padding:120px 10%;}
 .section-title{text-align:center;font-size:34px;margin-bottom:60px;}
 
-/* GLASS BOX */
+/* GLASS BOXES */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;}
-.card{
-padding:35px;
-border-radius:25px;
-background:rgba(255,255,255,0.7);
-backdrop-filter:blur(20px);
-box-shadow:0 20px 40px rgba(0,0,0,0.05);
-transition:0.4s;
-opacity:0;
-transform:translateY(50px);
-}
+.card{padding:35px;border-radius:25px;background:rgba(255,255,255,0.7);backdrop-filter:blur(20px);box-shadow:0 20px 40px rgba(0,0,0,0.05);transition:0.4s;opacity:0;transform:translateY(50px);}
 .card.visible{opacity:1;transform:translateY(0);}
 .card svg{width:40px;height:40px;margin-bottom:15px;}
 
-/* EXECUTIVE DASHBOARD */
+/* DASHBOARD */
 .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;}
-.metric{
-padding:35px;border-radius:25px;
-background:linear-gradient(145deg,#ffffff,#e6f3ff);
-box-shadow:10px 10px 25px rgba(0,0,0,0.05),-10px -10px 25px rgba(255,255,255,0.8);
-text-align:center;transition:0.3s;
-}
+.metric{padding:35px;border-radius:25px;background:linear-gradient(145deg,#ffffff,#e6f3ff);box-shadow:10px 10px 25px rgba(0,0,0,0.05),-10px -10px 25px rgba(255,255,255,0.8);text-align:center;transition:0.3s;}
 .metric:hover{transform:translateY(-10px);}
 .metric h3{font-size:42px;color:#0072ff;margin-bottom:10px;}
 
-/* PROGRESS BARS */
+/* SKILLS */
 .skill-bar{margin-bottom:25px;}
 .skill-title{margin-bottom:8px;font-weight:600;}
-.skill-fill{
-height:12px;
-border-radius:20px;
-width:0;
-background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);
-transition:2s ease;
-}
+.skill-fill{height:12px;border-radius:20px;width:0;background:linear-gradient(90deg,#ff7f50,#32cd32,#8a2be2);transition:2s ease;}
 
 /* FOOTER */
 footer{text-align:center;padding:50px;color:#355c7d;}
@@ -183,7 +86,6 @@ footer{text-align:center;padding:50px;color:#355c7d;}
 .icon-purple{fill:#8a2be2;}
 </style>
 </head>
-
 <body>
 
 <!-- Floating Orbs -->
@@ -197,12 +99,15 @@ footer{text-align:center;padding:50px;color:#355c7d;}
 <!-- Navigation -->
 <nav>
 <h2>MU</h2>
-<div>
+<div class="menu-links">
 <a href="#expertise">Expertise</a>
 <a href="#projects">Projects</a>
 <a href="#dashboard">Dashboard</a>
 <a href="#skills">Skills</a>
 <a href="#contact">Contact</a>
+</div>
+<div class="hamburger" onclick="toggleMenu()">
+<div></div><div></div><div></div>
 </div>
 </nav>
 
@@ -210,14 +115,11 @@ footer{text-align:center;padding:50px;color:#355c7d;}
 <div class="hero">
 <img src="profile.jpg" alt="Muhammad Umer">
 <h1>Muhammad Umer</h1>
-<p>
-Executive Engineering Supervisor specializing in MEP, HVAC, Civil Works, and Multi-Site AMC Operations across UAE.
-Expert in structured preventive maintenance systems, compliance management, and high-performance project supervision.
-</p>
-<a href="#" class="btn" onclick="downloadCV()">Download CV</a>
+<p>Executive Engineering Supervisor specializing in MEP, HVAC, Civil Works, and Multi-Site AMC Operations across UAE. Expert in structured preventive maintenance systems, compliance management, and high-performance project supervision.</p>
+<a href="cv.pdf" class="btn" download>Download CV</a>
 </div>
 
-<!-- Core Expertise -->
+<!-- Expertise Section -->
 <section id="expertise">
 <h2 class="section-title">Core Expertise</h2>
 <div class="grid">
@@ -226,19 +128,16 @@ Expert in structured preventive maintenance systems, compliance management, and 
 <h3>MEP Supervision</h3>
 <p>Experienced in Mechanical, Electrical & Plumbing supervision. Handles preventive maintenance planning, compliance checks, and structured reporting for large-scale industrial and commercial projects.</p>
 </div>
-
 <div class="card">
 <svg class="icon-green" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48"/></svg>
 <h3>HVAC Systems</h3>
 <p>Skilled in installation, commissioning, and troubleshooting of chillers, FCUs, split AC units, and HVAC pumps. Ensures preventive and corrective maintenance for optimal efficiency.</p>
 </div>
-
 <div class="card">
 <svg class="icon-purple" viewBox="0 0 64 64"><polygon points="32,4 60,60 4,60"/></svg>
 <h3>Civil Works & Renovation</h3>
 <p>Supervises construction of walls, gypsum partitions, decorative majlises, parking shades, and ceiling works. Monitors quality, safety, and timely delivery of renovation projects.</p>
 </div>
-
 <div class="card">
 <svg class="icon-orange" viewBox="0 0 64 64"><path d="M4 32 L60 32"/></svg>
 <h3>Preventive Maintenance & Reporting</h3>
@@ -247,7 +146,7 @@ Expert in structured preventive maintenance systems, compliance management, and 
 </div>
 </section>
 
-<!-- Projects -->
+<!-- Projects Section -->
 <section id="projects">
 <h2 class="section-title">Projects & Experience</h2>
 <div class="grid">
@@ -256,13 +155,11 @@ Expert in structured preventive maintenance systems, compliance management, and 
 <h3>MEP Supervisor – Nestlé Pakistan</h3>
 <p>February 2019 – October 2021. Supervised MEP operations including HVAC, plumbing, electrical panels, and fire safety systems. Managed inspections, cost estimations, manpower allocation, and generated structured maintenance reports with photographic documentation.</p>
 </div>
-
 <div class="card">
 <svg class="icon-purple" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48"/></svg>
-<h3>Project Supervisor – Civil Renovation</h3>
+<h3>Project Supervisor – Dubai Ambulance HQ Renovation</h3>
 <p>August 2022 – March 2023. Supervised civil renovation works ensuring project compliance, safety, and timely execution. Coordinated technicians, carpenters, and masons for high-quality delivery.</p>
 </div>
-
 <div class="card">
 <svg class="icon-orange" viewBox="0 0 64 64"><polygon points="32,4 60,60 4,60"/></svg>
 <h3>MEP & Civil Supervisor – AMC Dubai</h3>
@@ -271,7 +168,7 @@ Expert in structured preventive maintenance systems, compliance management, and 
 </div>
 </section>
 
-<!-- Executive Dashboard -->
+<!-- Dashboard -->
 <section id="dashboard">
 <h2 class="section-title">Executive Dashboard</h2>
 <div class="dashboard">
@@ -285,46 +182,32 @@ Expert in structured preventive maintenance systems, compliance management, and 
 <!-- Skills -->
 <section id="skills">
 <h2 class="section-title">Technical Skills</h2>
-<div class="skill-bar">
-<div class="skill-title">HVAC Installation & Troubleshooting</div>
-<div class="skill-fill" style="width:95%"></div>
-</div>
-<div class="skill-bar">
-<div class="skill-title">MEP Supervision & Reporting</div>
-<div class="skill-fill" style="width:92%"></div>
-</div>
-<div class="skill-bar">
-<div class="skill-title">Civil & Renovation Works</div>
-<div class="skill-fill" style="width:90%"></div>
-</div>
-<div class="skill-bar">
-<div class="skill-title">Preventive Maintenance Scheduling</div>
-<div class="skill-fill" style="width:98%"></div>
-</div>
+<div class="skill-bar"><div class="skill-title">HVAC Installation & Troubleshooting</div><div class="skill-fill" style="width:95%"></div></div>
+<div class="skill-bar"><div class="skill-title">MEP Supervision & Reporting</div><div class="skill-fill" style="width:92%"></div></div>
+<div class="skill-bar"><div class="skill-title">Civil & Renovation Works</div><div class="skill-fill" style="width:90%"></div></div>
+<div class="skill-bar"><div class="skill-title">Preventive Maintenance Scheduling</div><div class="skill-fill" style="width:98%"></div></div>
 </section>
 
-<!-- Contact -->
+<!-- Contact & CV -->
 <section id="contact">
 <h2 class="section-title">Contact & CV</h2>
 <div class="grid">
 <div class="card">
 <p>Available for Executive Maintenance Supervision, AMC Coordination, and Consultancy across UAE. Reach out for professional inquiry or project discussion.</p>
-<a href="#" class="btn" onclick="downloadCV()">Download CV</a>
+<a href="cv.pdf" class="btn" download>Download CV</a>
 </div>
 </div>
 </section>
 
-<footer>
-© 2026 Muhammad Umer | Executive Engineering Supervisor | Dubai, UAE
-</footer>
+<footer>© 2026 Muhammad Umer | Executive Engineering Supervisor | Dubai, UAE</footer>
 
 <script>
+/* MOBILE MENU TOGGLE */
+function toggleMenu(){document.querySelector('.menu-links').classList.toggle('active');}
+
 /* CURSOR GLOW */
 const glow = document.querySelector('.cursor-glow');
-document.addEventListener('mousemove', e => {
-glow.style.left = e.clientX+'px';
-glow.style.top = e.clientY+'px';
-});
+document.addEventListener('mousemove', e => {glow.style.left = e.clientX+'px';glow.style.top = e.clientY+'px';});
 
 /* SCROLL REVEAL */
 const cards = document.querySelectorAll('.card');
@@ -353,19 +236,6 @@ const rect = fill.getBoundingClientRect();
 if(rect.top < window.innerHeight - 50){fill.style.width=fill.style.width || fill.getAttribute('style').replace('width:','');}
 });
 });
-
-/* CV DOWNLOAD */
-function downloadCV(){
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-doc.setFontSize(18);
-doc.text("Muhammad Umer – Executive Engineering Supervisor",20,20);
-doc.setFontSize(12);
-doc.text("MEP, HVAC, Civil Works, AMC Operations, Multi-Site Supervision, UAE",20,30);
-doc.text("Professional Summary:",20,40);
-doc.text("Experienced Executive Supervisor managing large-scale maintenance operations, preventive maintenance, and compliance across multi-site projects.",20,50);
-doc.save("Muhammad_Umer_CV.pdf");
-}
 </script>
 </body>
 </html>
