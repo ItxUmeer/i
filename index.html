@@ -3,276 +3,283 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Muhammad Umer | Maintenance Administrator / Supervisor</title>
+<title>Muhammad Umer | Engineering Maintenance Supervisor</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+
+/* GLOBAL */
+
 body{
     margin:0;
     font-family:'Cairo', sans-serif;
-    background:#f4f8fc;
-    color:#1a1a1a;
-    line-height:1.6;
+    background:linear-gradient(135deg,#001f3f,#002b5c,#003f88);
+    color:white;
+    scroll-behavior:smooth;
+}
+
+section{
+    padding:90px 20px;
+    max-width:1200px;
+    margin:auto;
+}
+
+h2{
+    text-align:center;
+    font-size:34px;
+    margin-bottom:60px;
+    color:#ffd700;
+}
+
+/* GLASS CARD */
+
+.glass{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:20px;
+    padding:30px;
+    transition:0.4s;
+}
+
+.glass:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
 }
 
 /* HERO */
 
 header{
-    background:linear-gradient(135deg,#001f3f,#003366,#00509e);
-    color:white;
-    padding:80px 20px;
+    padding:120px 20px;
+    text-align:center;
 }
 
-.hero{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:center;
-    max-width:1200px;
-    margin:auto;
+header img{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    border:5px solid #ffd700;
+    object-fit:cover;
+    box-shadow:0 15px 40px rgba(0,0,0,0.5);
 }
 
-.hero-text{
-    flex:1;
-    min-width:300px;
-}
-
-.hero-text h1{
+header h1{
     font-size:42px;
-    margin:0;
+    margin:20px 0 10px 0;
 }
 
-.hero-text h2{
+header h3{
+    color:#ffd700;
     font-weight:600;
-    margin:10px 0;
-    color:#00c6ff;
 }
 
-.hero-text p{
+header p{
+    max-width:800px;
+    margin:auto;
     margin-top:20px;
     font-size:17px;
     opacity:0.95;
 }
 
-.profile-pic{
-    flex:1;
-    text-align:center;
-}
-
-.profile-pic img{
-    width:280px;
-    height:280px;
-    border-radius:50%;
-    object-fit:cover;
-    border:6px solid white;
-    box-shadow:0 10px 40px rgba(0,0,0,0.3);
-}
-
-/* SECTION */
-
-section{
-    padding:70px 20px;
-    max-width:1200px;
-    margin:auto;
-}
-
-h3.section-title{
-    text-align:center;
-    font-size:32px;
-    color:#003366;
-    margin-bottom:50px;
-}
+/* GRID */
 
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:25px;
+    gap:30px;
 }
 
-.card{
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 5px 25px rgba(0,0,0,0.05);
-    border-left:5px solid #00509e;
-    transition:0.3s;
+/* KPI SECTION */
+
+.kpi{
+    text-align:center;
 }
 
-.card:hover{
-    transform:translateY(-8px);
+.kpi-number{
+    font-size:48px;
+    font-weight:800;
+    color:#ffd700;
 }
 
-.card h4{
-    margin-top:0;
-    color:#003366;
+.kpi-title{
+    margin-top:10px;
 }
 
-/* EXPERIENCE */
+/* EXPERIENCE TIMELINE */
 
 .timeline{
-    border-left:4px solid #00509e;
-    padding-left:25px;
+    border-left:3px solid #ffd700;
+    padding-left:30px;
 }
 
 .timeline-item{
-    margin-bottom:40px;
+    margin-bottom:50px;
 }
 
 .timeline-item h4{
     margin:0;
-    color:#003366;
+    color:#ffd700;
 }
 
 .timeline-item span{
     font-size:14px;
-    color:#555;
+    opacity:0.8;
 }
 
-/* CONTACT */
+/* BUTTON */
 
-.contact{
-    background:#001f3f;
-    color:white;
-    text-align:center;
-    padding:60px 20px;
+.btn{
+    display:inline-block;
+    padding:14px 40px;
+    background:#ffd700;
+    color:#001f3f;
+    border-radius:40px;
+    font-weight:700;
+    margin-top:30px;
+    text-decoration:none;
+    transition:0.3s;
 }
+
+.btn:hover{
+    background:white;
+}
+
+/* FOOTER */
 
 footer{
-    background:#000c1a;
-    color:white;
     text-align:center;
-    padding:15px;
+    padding:20px;
+    background:#000c1a;
     font-size:14px;
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
-<div class="hero">
-
-<div class="hero-text">
-<h1>Muhammad Umer</h1>
-<h2>Maintenance Administrator / Supervisor</h2>
-<p>
-Highly skilled MEP & Civil Works Supervisor with extensive hands-on experience in HVAC systems, fire safety systems, civil construction, maintenance operations, project supervision, cost estimation, manpower coordination, and technical troubleshooting across residential, commercial, and industrial environments.
-</p>
-</div>
-
-<div class="profile-pic">
 <img src="profile.jpg" alt="Muhammad Umer">
-</div>
-
-</div>
+<h1>Muhammad Umer</h1>
+<h3>Engineering Maintenance Supervisor</h3>
+<p>
+Specialized in MEP, HVAC, Civil Works & AMC Operations. Experienced in large-scale
+maintenance supervision, preventive maintenance systems, fire safety compliance,
+multi-site coordination, and structured asset reporting across Dubai.
+</p>
+<a href="#contact" class="btn">Professional Consultation</a>
 </header>
 
 <section>
-<h3 class="section-title">Core Technical Expertise</h3>
+<h2>Core Engineering Expertise</h2>
 <div class="grid">
 
-<div class="card">
-<h4>MEP Supervision</h4>
-<p>Site supervision, inspections, compliance verification, quantity takeoff, cost estimation, drainage systems, water supply troubleshooting, fire safety systems, and structured PPM reporting.</p>
+<div class="glass">
+<h3>⚙ MEP Systems</h3>
+<p>Full MEP supervision, drainage, water supply, fire systems, compliance checks & PPM reporting.</p>
 </div>
 
-<div class="card">
-<h4>HVAC Systems</h4>
-<p>Chillers monitoring, FCU installation & commissioning, Split AC wiring/testing, HVAC pumps balancing, preventive & corrective maintenance.</p>
+<div class="glass">
+<h3>❄ HVAC Systems</h3>
+<p>Chillers, FCUs, Split AC, pump balancing, monitoring panels & corrective maintenance.</p>
 </div>
 
-<div class="card">
-<h4>Civil Works</h4>
-<p>Walls, beams, gypsum partitions, decorative majlises, ceiling works, painting, parking shades, garage shades, rolling shutters & renovations.</p>
+<div class="glass">
+<h3>🏗 Civil & Structural Works</h3>
+<p>Gypsum partitions, decorative majlises, ceilings, painting, parking shades & renovations.</p>
 </div>
 
-<div class="card">
-<h4>Project & Site Management</h4>
-<p>Manpower allocation, task scheduling, safety compliance, quality verification, before/after photo reporting, multi-site coordination.</p>
-</div>
-
-<div class="card">
-<h4>Maintenance Administration</h4>
-<p>Monthly, quarterly & annual asset reporting, preventive maintenance scheduling, technical troubleshooting across HVAC, MEP & Civil systems.</p>
+<div class="glass">
+<h3>📊 Maintenance Administration</h3>
+<p>Monthly/Quarterly/Annual reporting, asset lifecycle monitoring & manpower allocation.</p>
 </div>
 
 </div>
 </section>
 
 <section>
-<h3 class="section-title">Professional Experience</h3>
+<h2>Performance KPIs</h2>
+<div class="grid">
+
+<div class="glass kpi">
+<div class="kpi-number" data-target="6">0</div>
+<div class="kpi-title">+ Years Experience</div>
+</div>
+
+<div class="glass kpi">
+<div class="kpi-number" data-target="25">0</div>
+<div class="kpi-title">+ Sites Supervised</div>
+</div>
+
+<div class="glass kpi">
+<div class="kpi-number" data-target="100">0</div>
+<div class="kpi-title">% Compliance Focus</div>
+</div>
+
+<div class="glass kpi">
+<div class="kpi-number" data-target="1000">0</div>
+<div class="kpi-title">+ Maintenance Reports Prepared</div>
+</div>
+
+</div>
+</section>
+
+<section>
+<h2>Professional Experience</h2>
 <div class="timeline">
 
 <div class="timeline-item">
-<h4>MEP Supervisor – Nestlé Pakistan, Kabirwala Factory</h4>
-<span>February 2019 – October 2021</span>
-<p>
-Supervised HVAC, plumbing, electrical panels & fire systems. Conducted inspections, troubleshooting, cost estimation, manpower management, and generated structured maintenance reports with photographic documentation.
-</p>
+<h4>MEP Supervisor – Nestlé Pakistan</h4>
+<span>2019 – 2021</span>
+<p>Supervised HVAC, plumbing, panels, fire safety systems. Managed inspections, cost estimation & structured reporting.</p>
 </div>
 
 <div class="timeline-item">
-<h4>Project Supervisor – Bait Al Sain Contracting LLC, Dubai</h4>
-<span>August 2022 – March 2023</span>
-<p>
-Project: Dubai Corporation for Ambulance Services – HQ Civil Renovation. Supervised civil renovation ensuring compliance with specifications, safety standards & project timelines.
-</p>
+<h4>Project Supervisor – Dubai Ambulance HQ Renovation</h4>
+<span>2022 – 2023</span>
+<p>Led civil renovation ensuring safety compliance and quality execution under project deadlines.</p>
 </div>
 
 <div class="timeline-item">
-<h4>MEP & Civil Supervisor – Bait Al Sain Contracting LLC, Dubai</h4>
-<span>June 2023 – February 2025</span>
-<p>
-Project: AMC for MEP & Civil Works – Ambulance HQ Staff Accommodation & Stations. Supervised full AMC operations covering HVAC, plumbing, drainage, civil works & fire safety systems across Dubai.
-</p>
+<h4>MEP & Civil Supervisor – AMC Operations Dubai</h4>
+<span>2023 – 2025</span>
+<p>Supervised multi-site AMC covering HVAC, MEP, civil works & fire safety systems across ambulance stations.</p>
 </div>
 
 </div>
 </section>
 
-<section>
-<h3 class="section-title">Education & Technical Skills</h3>
-<div class="grid">
-
-<div class="card">
-<h4>Education</h4>
-<p>
-Diploma in Mechanical Technology (UAE Attested)<br>
-F.A (Intermediate) (UAE Attested)
-</p>
+<section id="contact" style="text-align:center;">
+<h2>Professional Availability</h2>
+<div class="glass">
+<p>Available for Engineering Supervision, Maintenance Administration & AMC Coordination across UAE.</p>
+<p>Email: your@email.com | Phone: +971XXXXXXXXX</p>
 </div>
-
-<div class="card">
-<h4>Technical Skills</h4>
-<p>
-HVAC Installation & Repair<br>
-Electrical Panels & Load Monitoring<br>
-Water Supply & Drainage Systems<br>
-Preventive Maintenance Scheduling<br>
-Structural & Gypsum Works<br>
-Power Tools & Equipment Handling
-</p>
-</div>
-
-<div class="card">
-<h4>Languages</h4>
-<p>
-English<br>
-Urdu / Hindi
-</p>
-</div>
-
-</div>
-</section>
-
-<section class="contact">
-<h3>Professional Maintenance & AMC Supervision Services</h3>
-<p>Available for Maintenance Administration, Site Supervision & AMC Coordination across UAE.</p>
 </section>
 
 <footer>
-© 2026 Muhammad Umer | Maintenance Administrator / Supervisor
+© 2026 Muhammad Umer | Engineering Maintenance Supervisor
 </footer>
+
+<script>
+const counters = document.querySelectorAll('.kpi-number');
+counters.forEach(counter => {
+  const updateCount = () => {
+    const target = +counter.getAttribute('data-target');
+    const count = +counter.innerText;
+    const increment = target / 200;
+
+    if(count < target){
+        counter.innerText = Math.ceil(count + increment);
+        setTimeout(updateCount, 10);
+    } else {
+        counter.innerText = target;
+    }
+  };
+  updateCount();
+});
+</script>
 
 </body>
 </html>
