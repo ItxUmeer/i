@@ -9,119 +9,114 @@
 <body>
 
 <div class="sidebar">
-  <h2>CMMS Admin</h2>
-  <div id="menu"></div>
-  <a href="#" id="logoutBtn">Logout</a>
+  <h2>CMMS</h2>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="assets.html">Assets</a>
+  <a href="workorders.html">Work Orders</a>
 </div>
 
 <div class="main">
 
-<!-- HEADER -->
 <div class="header-bar">
-  <img src="logo-left.png">
+  <img src="assets/logo-left.png">
   <h2>Admin Dashboard</h2>
-  <img src="logo-right.png">
+  <img src="assets/logo-right.png">
 </div>
 
-<!-- KPI -->
 <div class="kpi-grid">
-  <div class="kpi"><b>Total WO</b><p id="totalWO">0</p></div>
-  <div class="kpi"><b>Open</b><p id="openWO">0</p></div>
-  <div class="kpi"><b>Closed</b><p id="closedWO">0</p></div>
+  <div class="kpi"><b>Total WO</b><p id="total"></p></div>
+  <div class="kpi"><b>Open</b><p id="open"></p></div>
+  <div class="kpi"><b>Closed</b><p id="closed"></p></div>
 </div>
 
-<!-- CHART -->
 <div class="section">
   <canvas id="chart"></canvas>
 </div>
 
-<!-- CREATE WORK ORDER -->
 <div class="section">
   <h3>Create Work Order</h3>
 
   <div class="form-grid">
-    <input id="title" placeholder="Work Order Title">
-    <input id="asset" placeholder="Asset Name">
+    <input id="title" placeholder="Title">
+    <input id="asset" placeholder="Asset">
 
-    <!-- 🔥 USER DROPDOWN -->
-    <select id="userSelect">
-      <option value="">Select User</option>
-    </select>
+    <select id="user"></select>
   </div>
 
-  <button id="createBtn">Create Work Order</button>
+  <button onclick="createWO()">Create</button>
 </div>
 
-<!-- WORK ORDER TABLE -->
 <div class="section">
-  <h3>Work Order List</h3>
-  <div id="woTable"></div>
+  <h3>Work Orders</h3>
+  <div id="list"></div>
 </div>
 
 </div>
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { db } from "./firebase.js";
+import {
+  collection, addDoc, getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { collection, getDocs, addDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-import { renderSidebar } from "./sidebar.js";
-
-let chart;
-
-// 🔐 LOGOUT
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-
-// 🔐 AUTH
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) return (location = "index.html");
-
-  renderSidebar("admin");
-
-  await loadUsers();
-  await loadDashboard();
-  await loadTable();
-});
-
-
-// 👤 LOAD USERS (DROPDOWN FIX)
-async function loadUsers() {
-
-  const snap = await getDocs(collection(db, "users"));
-
-  let html = `<option value="">Select User</option>`;
-
-  snap.forEach(d => {
-    const u = d.data();
-    html += `<option value="${d.id}">
-      ${u.name} (${u.role})
+// USERS DROPDOWN
+async function loadUsers(){
+  const snap = await getDocs(collection(db,"users"));
+  let html="";
+  snap.forEach(d=>{
+    html+=`<option value="${d.id}">
+      ${d.data().name}
     </option>`;
   });
-
-  document.getElementById("userSelect").innerHTML = html;
+  user.innerHTML=html;
 }
 
+// LOAD WO
+async function loadWO(){
+  const snap=await getDocs(collection(db,"workOrders"));
 
-// 📊 DASHBOARD KPI
-async function loadDashboard() {
+  let open=0,closed=0,html="";
 
-  const snap = await getDocs(collection(db, "workOrders"));
+  snap.forEach(d=>{
+    let w=d.data();
 
-  let open = 0, closed = 0;
-
-  snap.forEach(d => {
-    if (d.data().status === "Closed") closed++;
+    if(w.status==="Closed") closed++;
     else open++;
+
+    html+=`<div class="card">${w.title} - ${w.status}</div>`;
   });
 
-  document.getElementById("totalWO").innerText = snap.size;
-  document.getElementById("openWO").innerText = open;
-  document
+  total.innerText=snap.size;
+  open.innerText=open;
+  closed.innerText=closed;
+
+  new Chart(chart,{
+    type:"bar",
+    data:{
+      labels:["Open","Closed"],
+      datasets:[{data:[open,closed],backgroundColor:["#2563eb","#ef4444"]}]
+    }
+  });
+}
+
+// CREATE WO
+window.createWO=async()=>{
+  await addDoc(collection(db,"workOrders"),{
+    title:title.value,
+    asset:asset.value,
+    assignedTo:user.value,
+    status:"Open"
+  });
+
+  loadWO();
+};
+
+loadUsers();
+loadWO();
+
+</script>
+
+</body>
+</html>
