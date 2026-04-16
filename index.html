@@ -1,47 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CMMS Login</title>
+<title>DCAS CMMS</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+body {
+  margin:0;
+  font-family:Segoe UI;
+  background:url("assets/bg.jpg") no-repeat center center fixed;
+  background-size:cover;
+}
+
+.overlay {
+  background:rgba(255,255,255,0.85);
+  height:100vh;
+}
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+}
+
+.header img {
+  height:60px;
+}
+
+.center {
+  text-align:center;
+  margin-top:120px;
+}
+
+.title {
+  font-size:40px;
+  font-weight:bold;
+  color:#2563eb;
+}
+
+.btn {
+  margin-top:20px;
+  padding:12px 25px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+
 </head>
 
 <body>
 
-<div class="login-container">
-  <div class="login-box">
+<div class="overlay">
 
-    <div class="logo-bar">
-      <img src="assets/logo-left.png">
-      <img src="assets/logo-right.png">
-    </div>
-
-    <h2>CMMS Login</h2>
-
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button id="loginBtn">Login</button>
-    <p id="msg"></p>
-
+  <!-- HEADER -->
+  <div class="header">
+    <img src="assets/logo-left.png">
+    <img src="assets/logo-right.png">
   </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="title">CMMS for DCAS</div>
+    <p>Dubai Corporation for Ambulance Services</p>
+
+    <button class="btn" onclick="location='login.html'">
+      Enter System
+    </button>
+  </div>
+
 </div>
-
-<script type="module">
-import { login } from "./auth.js";
-
-loginBtn.onclick = async ()=>{
-  try{
-    const role = await login(email.value,password.value);
-
-    if(role==="admin") location="dashboard.html";
-    else if(role==="assets_officer") location="assets.html";
-    else location="supervisor.html";
-
-  }catch(e){
-    msg.innerText = e.message;
-  }
-};
-</script>
 
 </body>
 </html>
