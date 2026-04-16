@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assets Officer Panel</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+th, td {
+  border:1px solid #ddd;
+  padding:10px;
+  font-size:14px;
+}
+
+th {
+  background:#2563eb;
+  color:white;
+}
+
+tr:hover {
+  background:#f1f5f9;
+}
+
+.btn {
+  padding:5px 10px;
+  border:none;
+  cursor:pointer;
+  border-radius:5px;
+}
+
+.blue { background:#2563eb; color:white; }
+.red { background:#ef4444; color:white; }
+.green { background:#22c55e; color:white; }
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h3>Assets Officer</h3>
+
+  <a href="assets_officer.html">Dashboard</a>
+  <a href="#" onclick="logout()">Logout</a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Assets Officer Control Panel</h2>
+  <img src="logo-right.png">
+</div>
+
+<!-- ASSETS TABLE -->
+<div class="section">
+  <h3>Assets List</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="assetTable"></tbody>
+  </table>
+</div>
+
+<!-- PPM TABLE -->
+<div class="section">
+  <h3>PPM Status</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Task</th>
+        <th>Frequency</th>
+        <th>Due</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="ppmTable"></tbody>
+  </table>
+</div>
+
+<!-- WORK ORDERS TABLE -->
+<div class="section">
+  <h3>Work Orders Monitor</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Assigned To</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="woTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+
+import {
+  collection,
+  getDocs,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+/* ---------------- LOGOUT ---------------- */
+window.logout = async () => {
+  await auth.signOut();
+  location = "login.html";
+};
+
+/* ---------------- LOAD ALL ---------------- */
+auth.onAuthStateChanged(async (user) => {
+
+  if (!user) {
+    location = "login.html";
+    return;
+  }
+
+  loadAssets();
+  loadPPM();
+  loadWorkOrders();
+});
+
+/* ---------------- ASSETS ---------------- */
+async function loadAssets() {
+
+  const snap = await getDocs(collection(db, "assets"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const a = d.data();
+
+    html += `
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.locationGroup}</td>
+        <td>${a.status}</td>
+        <td>
+          <button class="btn blue" onclick="createWO('${a.name}')">
+            Create WO
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("assetTable").innerHTML = html;
+}
+
+/* ---------------- PPM ---------------- */
+async function loadPPM() {
+
+  const snap = await getDocs(collection(db, "ppm"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const p = d.data();
+
+    html += `
+      <tr>
+        <td>${p.assetId}</td>
+        <td>${p.task}</td>
+        <td>${p.frequency}</td>
+        <td>${p.nextDue}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("ppmTable").innerHTML = html;
+}
+
+/* ---------------- WORK ORDERS ---------------- */
+async function loadWorkOrders() {
+
+  const snap = await getDocs(collection(db, "workOrders"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const w = d.data();
+
+    html += `
+      <tr>
+        <td>${w.title}</td>
+        <td>${w.assetId}</td>
+        <td>${w.assignedTo || "-"}</td>
+        <td>${w.status}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("woTable").innerHTML = html;
+}
+
+/* ---------------- CREATE WORK ORDER ---------------- */
+window.createWO = async (assetName) => {
+
+  const title = prompt("Enter Work Order Title");
+
+  if (!title) return;
+
+  await addDoc(collection(db, "workOrders"), {
+    title: title,
+    assetId: assetName,
+    status: "Pending",
+    assignedTo: ""
+  });
+
+  alert("Work Order Created ✔");
+
+  loadWorkOrders();
+};
+
+</script>
+
+</body>
+</html>
