@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Work Orders</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>Work Orders</h2>
+
+  <button onclick="location.href='dashboard.html'">Dashboard</button>
+  <button onclick="location.href='assets.html'">Assets</button>
+  <button onclick="location.href='workorders.html'">Work Orders</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+  <h1>Work Order System</h1>
+
+  <!-- CREATE WORK ORDER -->
+  <div class="card">
+
+    <input id="title" placeholder="Issue Title (e.g. AHU fault)">
+    <input id="asset" placeholder="Asset ID (e.g. AHU-01)">
+    <input id="assignedTo" placeholder="Assign To (Technician Name)">
+
+    <select id="priority">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+
+    <button onclick="createWO()">Create Work Order</button>
+  </div>
+
+  <!-- LIST -->
+  <div id="list"></div>
+
+</div>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs, updateDoc, doc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+
+// 🔐 AUTH CHECK
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    loadWO();
+  }
+});
+
+
+// ➕ CREATE WORK ORDER
+window.createWO = async function () {
+
+  await addDoc(collection(db, "workOrders"), {
+    title: title.value,
+    asset: asset.value,
+    assignedTo: assignedTo.value,
+    priority: priority.value,
+    status: "Open",
+    createdAt: new Date().toISOString()
+  });
+
+  loadWO();
+};
+
+
+// 📥 LOAD WORK ORDERS
+async function loadWO() {
+
+  const snap = await getDocs(collection(db, "workOrders"));
+
+  list.innerHTML = "";
+
+  snap.forEach(docItem => {
+    let d = docItem.data();
+
+    list.innerHTML += `
+      <div class="card">
+
+        <h3>${d.title}</h3>
+        <p>Asset: ${d.asset}</p>
+        <p>Assigned: ${d.assignedTo}</p>
+        <p>Priority: ${d.priority}</p>
+        <p>Status: <b>${d.status}</b></p>
+
+        <button onclick="markDone('${docItem.id}')">
+          Mark Completed
+        </button>
+
+      </div>
+    `;
+  });
+}
+
+
+// ✅ UPDATE STATUS
+window.markDone = async function(id) {
+
+  const ref = doc(db, "workOrders", id);
+
+  await updateDoc(ref, {
+    status: "Completed"
+  });
+
+  loadWO();
+};
+
+</script>
+
+<script type="module" src="auth.js"></script>
+
+</body>
+</html>
