@@ -1,122 +1,88 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Admin Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body>
-
-<div class="sidebar">
-  <h2>CMMS</h2>
-
-  <a href="dashboard.html">Dashboard</a>
-  <a href="assets.html">Assets</a>
-  <a href="workorders.html">Work Orders</a>
-</div>
-
-<div class="main">
-
-<div class="header-bar">
-  <img src="assets/logo-left.png">
-  <h2>Admin Dashboard</h2>
-  <img src="assets/logo-right.png">
-</div>
-
-<div class="kpi-grid">
-  <div class="kpi"><b>Total WO</b><p id="total"></p></div>
-  <div class="kpi"><b>Open</b><p id="open"></p></div>
-  <div class="kpi"><b>Closed</b><p id="closed"></p></div>
-</div>
-
-<div class="section">
-  <canvas id="chart"></canvas>
-</div>
-
-<div class="section">
-  <h3>Create Work Order</h3>
-
-  <div class="form-grid">
-    <input id="title" placeholder="Title">
-    <input id="asset" placeholder="Asset">
-
-    <select id="user"></select>
-  </div>
-
-  <button onclick="createWO()">Create</button>
-</div>
-
-<div class="section">
-  <h3>Work Orders</h3>
-  <div id="list"></div>
-</div>
-
-</div>
-
-<script type="module">
-
-import { db } from "./firebase.js";
-import {
-  collection, addDoc, getDocs
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-// USERS DROPDOWN
-async function loadUsers(){
-  const snap = await getDocs(collection(db,"users"));
-  let html="";
-  snap.forEach(d=>{
-    html+=`<option value="${d.id}">
-      ${d.data().name}
-    </option>`;
-  });
-  user.innerHTML=html;
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:#f8fafc;
 }
 
-// LOAD WO
-async function loadWO(){
-  const snap=await getDocs(collection(db,"workOrders"));
-
-  let open=0,closed=0,html="";
-
-  snap.forEach(d=>{
-    let w=d.data();
-
-    if(w.status==="Closed") closed++;
-    else open++;
-
-    html+=`<div class="card">${w.title} - ${w.status}</div>`;
-  });
-
-  total.innerText=snap.size;
-  open.innerText=open;
-  closed.innerText=closed;
-
-  new Chart(chart,{
-    type:"bar",
-    data:{
-      labels:["Open","Closed"],
-      datasets:[{data:[open,closed],backgroundColor:["#2563eb","#ef4444"]}]
-    }
-  });
+/* LOGIN */
+.login-container{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-// CREATE WO
-window.createWO=async()=>{
-  await addDoc(collection(db,"workOrders"),{
-    title:title.value,
-    asset:asset.value,
-    assignedTo:user.value,
-    status:"Open"
-  });
+.login-box{
+  width:350px;
+  background:white;
+  padding:25px;
+  border-radius:10px;
+  text-align:center;
+}
 
-  loadWO();
-};
+.logo-bar{
+  display:flex;
+  justify-content:space-between;
+}
 
-loadUsers();
-loadWO();
+.logo-bar img{
+  height:45px;
+}
 
-</script>
+/* SIDEBAR */
+.sidebar{
+  width:230px;
+  height:100vh;
+  position:fixed;
+  background:white;
+  border-right:1px solid #ddd;
+  padding:15px;
+}
 
-</body>
-</html>
+.sidebar a{
+  display:block;
+  padding:10px;
+  margin:5px 0;
+  text-decoration:none;
+  color:black;
+}
+
+.sidebar a:hover{
+  background:#e0f2fe;
+}
+
+/* MAIN */
+.main{
+  margin-left:250px;
+  padding:20px;
+}
+
+/* HEADER */
+.header-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header-bar img{
+  height:45px;
+}
+
+/* SECTION */
+.section{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+/* BUTTON */
+button{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:10px;
+  border-radius:6px;
+  cursor:pointer;
+}
