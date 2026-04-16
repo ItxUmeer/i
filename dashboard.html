@@ -8,14 +8,12 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>CMMS</h2>
+  <h2>CMMS Admin</h2>
   <div id="menu"></div>
   <a href="#" id="logoutBtn">Logout</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <!-- HEADER -->
@@ -42,12 +40,22 @@
   <h3>Create Work Order</h3>
 
   <div class="form-grid">
-    <input id="title" placeholder="Title">
-    <input id="asset" placeholder="Asset">
-    <input id="assign" placeholder="Assign User UID">
+    <input id="title" placeholder="Work Order Title">
+    <input id="asset" placeholder="Asset Name">
+
+    <!-- 🔥 USER DROPDOWN -->
+    <select id="userSelect">
+      <option value="">Select User</option>
+    </select>
   </div>
 
   <button id="createBtn">Create Work Order</button>
+</div>
+
+<!-- WORK ORDER TABLE -->
+<div class="section">
+  <h3>Work Order List</h3>
+  <div id="woTable"></div>
 </div>
 
 </div>
@@ -65,104 +73,55 @@ import { renderSidebar } from "./sidebar.js";
 
 let chart;
 
-// ✅ LOGOUT FIX
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+// 🔐 LOGOUT
+document.getElementById("logoutBtn").onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
-});
+};
 
-// 🔐 AUTH CHECK
+// 🔐 AUTH
 onAuthStateChanged(auth, async (user) => {
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+  if (!user) return (location = "index.html");
 
   renderSidebar("admin");
 
+  await loadUsers();
   await loadDashboard();
+  await loadTable();
 });
 
-// 📊 LOAD DASHBOARD
+
+// 👤 LOAD USERS (DROPDOWN FIX)
+async function loadUsers() {
+
+  const snap = await getDocs(collection(db, "users"));
+
+  let html = `<option value="">Select User</option>`;
+
+  snap.forEach(d => {
+    const u = d.data();
+    html += `<option value="${d.id}">
+      ${u.name} (${u.role})
+    </option>`;
+  });
+
+  document.getElementById("userSelect").innerHTML = html;
+}
+
+
+// 📊 DASHBOARD KPI
 async function loadDashboard() {
 
   const snap = await getDocs(collection(db, "workOrders"));
 
-  let open = 0;
-  let closed = 0;
+  let open = 0, closed = 0;
 
   snap.forEach(d => {
-    const w = d.data();
-
-    if (w.status === "Closed") closed++;
+    if (d.data().status === "Closed") closed++;
     else open++;
   });
 
   document.getElementById("totalWO").innerText = snap.size;
   document.getElementById("openWO").innerText = open;
-  document.getElementById("closedWO").innerText = closed;
-
-  renderChart(open, closed);
-}
-
-// 📊 CHART
-function renderChart(open, closed) {
-
-  const ctx = document.getElementById("chart");
-
-  if (chart) chart.destroy(); // FIX duplicate chart bug
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Open", "Closed"],
-      datasets: [{
-        data: [open, closed],
-        backgroundColor: ["#2563eb", "#ef4444"],
-        borderRadius: 6
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false }},
-        y: { grid: { color: "#eee" }}
-      }
-    }
-  });
-}
-
-// ➕ CREATE WORK ORDER
-document.getElementById("createBtn").addEventListener("click", async () => {
-
-  const t = document.getElementById("title").value;
-  const a = document.getElementById("asset").value;
-  const u = document.getElementById("assign").value;
-
-  if (!t || !a || !u) {
-    alert("Fill all fields");
-    return;
-  }
-
-  await addDoc(collection(db, "workOrders"), {
-    title: t,
-    asset: a,
-    assignedTo: u,
-    status: "Open",
-    createdAt: new Date().toISOString()
-  });
-
-  alert("Work Order Created ✔");
-
-  document.getElementById("title").value = "";
-  document.getElementById("asset").value = "";
-  document.getElementById("assign").value = "";
-
-  loadDashboard();
-});
-
-</script>
-
-</body>
-</html>
+  document
