@@ -6,30 +6,24 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    .topbar {
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
 
-    .title {
-      font-size: 22px;
-      font-weight: bold;
-      color: #38bdf8;
-    }
-
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
-      margin-bottom: 20px;
     }
 
     .chart-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 15px;
+      margin-top: 20px;
     }
 
     .chart-box {
@@ -38,11 +32,27 @@
       border-radius: 14px;
       border: 1px solid #1f2937;
     }
+
+    .btn {
+      margin-top: 10px;
+      background: #38bdf8;
+      color: black;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
   </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>CMMS Dubai</h2>
 
@@ -50,16 +60,23 @@
   <button onclick="location.href='assets.html'">Assets</button>
   <button onclick="location.href='workorders.html'">Work Orders</button>
   <button onclick="location.href='ppm.html'">PPM</button>
+  <button onclick="location.href='technician.html'">Technician</button>
+
+  <hr style="border:1px solid #1f2937">
+
   <button onclick="logout()">Logout</button>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
-  <div class="topbar">
-    <div class="title">Facility Management Dashboard</div>
+  <div class="header">
+    <h1 style="color:#38bdf8;">Facility Management Dashboard</h1>
+
+    <button class="btn" onclick="runPPM()">Generate PPM Now</button>
   </div>
 
-  <!-- KPI CARDS -->
+  <!-- KPI -->
   <div class="grid">
 
     <div class="kpi-card">
@@ -111,8 +128,10 @@ import { db, auth } from "./firebase.js";
 import { collection, getDocs } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { onAuthStateChanged } 
+import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+import { generatePPM } from "./ppm-generator.js";
 
 let statusChart, overviewChart;
 
@@ -121,11 +140,24 @@ onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
   } else {
+    generatePPM();   // 🔥 AUTO PPM GENERATION
     loadData();
   }
 });
 
-// LOAD DASHBOARD DATA
+// LOGOUT
+window.logout = function () {
+  signOut(auth);
+  window.location.href = "index.html";
+};
+
+// MANUAL PPM GENERATOR
+window.runPPM = function () {
+  generatePPM();
+  alert("PPM Generated Successfully");
+};
+
+// LOAD DATA
 async function loadData() {
 
   const assetsSnap = await getDocs(collection(db, "assets"));
@@ -151,14 +183,14 @@ async function loadData() {
     }
   });
 
-  // KPI UPDATE
+  // KPIs
   document.getElementById("assetCount").innerText = assetsSnap.size;
   document.getElementById("woCount").innerText = woSnap.size;
   document.getElementById("openCount").innerText = open;
   document.getElementById("ppmCount").innerText = ppmSnap.size;
   document.getElementById("overdueCount").innerText = overdue;
 
-  // STATUS CHART
+  // CHART 1
   if (statusChart) statusChart.destroy();
 
   statusChart = new Chart(document.getElementById("statusChart"), {
@@ -172,7 +204,7 @@ async function loadData() {
     }
   });
 
-  // OVERVIEW CHART
+  // CHART 2
   if (overviewChart) overviewChart.destroy();
 
   overviewChart = new Chart(document.getElementById("overviewChart"), {
@@ -180,7 +212,7 @@ async function loadData() {
     data: {
       labels: ["Assets", "Work Orders", "PPM", "Overdue"],
       datasets: [{
-        label: "System Data",
+        label: "System Overview",
         data: [assetsSnap.size, woSnap.size, ppmSnap.size, overdue],
         backgroundColor: ["#38bdf8", "#6366f1", "#f59e0b", "#ef4444"]
       }]
@@ -190,17 +222,7 @@ async function loadData() {
 }
 
 </script>
-import { generatePPM } from "./ppm-generator.js";
 
-// AUTO RUN EVERY TIME DASHBOARD OPENS
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    generatePPM(); // 🔥 AUTO CREATE PPM
-    loadData();
-  }
-});
 <script type="module" src="auth.js"></script>
 
 </body>
