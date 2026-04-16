@@ -7,110 +7,33 @@
 
 <body>
 
-<div class="sidebar">
-  <h2>CMMS</h2>
-  <div id="menu"></div>
-  <a href="#" onclick="logout()">Logout</a>
-</div>
-
 <div class="main">
-
-<h1>Work Orders</h1>
-
-<div class="card">
-  <input id="title" placeholder="Title">
-  <input id="asset" placeholder="Asset Code">
-  <input id="assignedTo" placeholder="Technician Name">
-
-  <select id="priority">
-    <option>Low</option>
-    <option>Medium</option>
-    <option>High</option>
-  </select>
-
-  <button onclick="createWO()">Create Work Order</button>
-</div>
-
+<h2>Work Orders</h2>
 <div id="list"></div>
-
 </div>
 
 <script type="module">
+import { db } from "./firebase.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+async function load(){
+  const snap = await getDocs(collection(db,"workOrders"));
 
-import { collection, addDoc, getDocs, updateDoc, doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+  let html="";
+  snap.forEach(d=>{
+    const w=d.data();
 
-import { renderSidebar } from "./sidebar.js";
+    let cls="status-open";
+    if(w.status==="In Progress") cls="status-progress";
+    if(w.status==="Closed") cls="status-closed";
 
-let role = "";
-
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) window.location.href = "index.html";
-
-  const snap = await getDoc(doc(db, "users", user.uid));
-  role = snap.data().role;
-
-  renderSidebar(role);
-
-  loadWO();
-});
-
-window.createWO = async function () {
-
-  await addDoc(collection(db, "workOrders"), {
-    title: title.value,
-    asset: asset.value,
-    assignedTo: assignedTo.value,
-    priority: priority.value,
-    status: "Open",
-    createdAt: new Date().toISOString()
+    html+=`<div class="card ${cls}">${w.title}</div>`;
   });
 
-  loadWO();
-};
-
-async function loadWO() {
-
-  const snap = await getDocs(collection(db, "workOrders"));
-
-  let html = "";
-
-  snap.forEach(d => {
-
-    const w = d.data();
-
-    html += `
-      <div class="card">
-        <b>${w.title}</b><br>
-        Asset: ${w.asset}<br>
-        Status: ${w.status}<br>
-
-        <button onclick="closeWO('${d.id}')">Close</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("list").innerHTML = html;
+  list.innerHTML=html;
 }
 
-window.closeWO = async function(id) {
-  await updateDoc(doc(db, "workOrders", id), {
-    status: "Closed"
-  });
-
-  loadWO();
-};
-
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-
+load();
 </script>
 
 </body>
