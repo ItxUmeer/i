@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>CMMS</h2>
+  <button onclick="location.href='dashboard.html'">Dashboard</button>
+  <button onclick="location.href='assets.html'">Assets</button>
+  <button onclick="location.href='workorders.html'">Work Orders</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+  <h1>Dubai CMMS Dashboard</h1>
+
+  <div class="card">Assets: <span id="assetCount">0</span></div>
+  <div class="card">Work Orders: 0</div>
+  <div class="card">PPM: 0</div>
+</div>
+
+<script type="module">
+import { auth } from "./js/firebase.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+window.logout = function () {
+  signOut(auth);
+  location.href = "index.html";
+};
+</script>
+
+</body>
+</html>
