@@ -1,31 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CMMS Login</title>
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-  </style>
+  <title>CMMS TEST</title>
 </head>
 
 <body>
 
-<div class="login-box">
-  <h2 style="text-align:center; color:#38bdf8;">Dubai CMMS Login</h2>
+<h2>CMMS LOGIN TEST PAGE</h2>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+<input id="email" placeholder="email">
+<input id="password" placeholder="password">
 
-  <button onclick="login()">Login</button>
-</div>
+<button onclick="test()">CLICK TEST</button>
 
-<script type="module" src="auth.js"></script>
+<p id="msg"></p>
+
+<script>
+function test() {
+  document.getElementById("msg").innerText = "JS WORKS ✔";
+}
+</script>
 
 </body>
 </html>
