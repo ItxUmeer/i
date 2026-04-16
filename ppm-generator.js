@@ -1,73 +1,28 @@
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 import { db } from "./firebase.js";
-import { collection, getDocs, addDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-// AUTO GENERATOR FUNCTION
 export async function generatePPM() {
 
   const assetsSnap = await getDocs(collection(db, "assets"));
-  const ppmSnap = await getDocs(collection(db, "ppm"));
-
-  let existing = new Set();
-
-  // avoid duplicates
-  ppmSnap.forEach(doc => {
-    let d = doc.data();
-    existing.add(d.assetId + "-" + d.nextDue);
-  });
 
   const today = new Date();
 
-  assetsSnap.forEach(async (docItem) => {
+  assetsSnap.forEach(async (docSnap) => {
 
-    let asset = docItem.data();
+    const a = docSnap.data();
 
-    if (!asset.ppmFrequency) return;
-
-    let nextDue = calculateNextDue(asset.ppmFrequency);
-
-    let key = asset.name + "-" + nextDue;
-
-    if (existing.has(key)) return; // prevent duplicates
+    let next = new Date();
+    next.setMonth(today.getMonth() + 1);
 
     await addDoc(collection(db, "ppm"), {
-      assetId: asset.name,
-      task: "Auto Maintenance - " + asset.type,
-      frequency: asset.ppmFrequency,
-      nextDue: nextDue,
-      status: "Pending",
-      location: asset.locationGroup + " - " + asset.building,
-      createdAt: new Date().toISOString()
+      asset: a.name,
+      location: a.location,
+      frequency: "Monthly",
+      nextDue: next.toISOString().split("T")[0],
+      status: "Pending"
     });
 
   });
 
-  console.log("PPM Generated Successfully");
-}
-
-// DATE CALCULATION
-function calculateNextDue(freq) {
-
-  const date = new Date();
-
-  switch(freq) {
-
-    case "Weekly":
-      date.setDate(date.getDate() + 7);
-      break;
-
-    case "Monthly":
-      date.setMonth(date.getMonth() + 1);
-      break;
-
-    case "Quarterly":
-      date.setMonth(date.getMonth() + 3);
-      break;
-
-    case "Yearly":
-      date.setFullYear(date.getFullYear() + 1);
-      break;
-  }
-
-  return date.toISOString().split("T")[0];
+  console.log("PPM Generated ✔");
 }
