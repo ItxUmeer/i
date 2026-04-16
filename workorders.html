@@ -1,82 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Work Orders</title>
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    .badge {
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      display: inline-block;
-    }
-
-    .high { background: #ef4444; }
-    .medium { background: #f59e0b; }
-    .low { background: #22c55e; }
-
-    .open { color: #f59e0b; }
-    .done { color: #22c55e; }
-  </style>
+<title>Work Orders</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="sidebar">
   <h2>CMMS</h2>
-
-  <button onclick="location.href='dashboard.html'">Dashboard</button>
-  <button onclick="location.href='assets.html'">Assets</button>
-  <button onclick="location.href='workorders.html'">Work Orders</button>
-  <button onclick="logout()">Logout</button>
+  <div id="menu"></div>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <div class="main">
 
-  <h1>Work Orders System</h1>
+<h1>Work Orders</h1>
 
-  <!-- CREATE -->
-  <div class="card">
+<div class="card">
+  <input id="title" placeholder="Title">
+  <input id="asset" placeholder="Asset Code">
+  <input id="assignedTo" placeholder="Technician Name">
 
-    <input id="title" placeholder="Issue Title">
-    <input id="asset" placeholder="Asset (e.g AHU-01)">
-    <input id="assignedTo" placeholder="Assign To">
+  <select id="priority">
+    <option>Low</option>
+    <option>Medium</option>
+    <option>High</option>
+  </select>
 
-    <select id="priority">
-      <option>Low</option>
-      <option>Medium</option>
-      <option>High</option>
-    </select>
+  <button onclick="createWO()">Create Work Order</button>
+</div>
 
-    <button onclick="createWO()">Create Work Order</button>
-  </div>
-
-  <!-- LIST -->
-  <div id="list"></div>
+<div id="list"></div>
 
 </div>
 
 <script type="module">
-import { db, auth } from "./firebase.js";
-import { collection, addDoc, getDocs, doc, updateDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { onAuthStateChanged } 
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
+import { collection, addDoc, getDocs, updateDoc, doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-// AUTH CHECK
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    loadWO();
-  }
+import { renderSidebar } from "./sidebar.js";
+
+let role = "";
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) window.location.href = "index.html";
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  role = snap.data().role;
+
+  renderSidebar(role);
+
+  loadWO();
 });
 
-
-// CREATE WORK ORDER
 window.createWO = async function () {
 
   await addDoc(collection(db, "workOrders"), {
@@ -91,67 +74,44 @@ window.createWO = async function () {
   loadWO();
 };
 
-
-// LOAD WORK ORDERS
 async function loadWO() {
 
   const snap = await getDocs(collection(db, "workOrders"));
 
-  list.innerHTML = "";
+  let html = "";
 
   snap.forEach(d => {
 
-    let data = d.data();
+    const w = d.data();
 
-    let priorityClass = data.priority.toLowerCase();
-
-    list.innerHTML += `
+    html += `
       <div class="card">
+        <b>${w.title}</b><br>
+        Asset: ${w.asset}<br>
+        Status: ${w.status}<br>
 
-        <h3>${data.title}</h3>
-
-        <p>Asset: ${data.asset}</p>
-        <p>Assigned: ${data.assignedTo}</p>
-
-        <p>
-          Priority: 
-          <span class="badge ${priorityClass}">
-            ${data.priority}
-          </span>
-        </p>
-
-        <p>
-          Status: 
-          <span class="${data.status === 'Open' ? 'open' : 'done'}">
-            ${data.status}
-          </span>
-        </p>
-
-        <button onclick="markDone('${d.id}')">
-          Mark Completed
-        </button>
-
+        <button onclick="closeWO('${d.id}')">Close</button>
       </div>
     `;
   });
+
+  document.getElementById("list").innerHTML = html;
 }
 
-
-// COMPLETE WORK ORDER
-window.markDone = async function(id) {
-
-  const ref = doc(db, "workOrders", id);
-
-  await updateDoc(ref, {
-    status: "Completed"
+window.closeWO = async function(id) {
+  await updateDoc(doc(db, "workOrders", id), {
+    status: "Closed"
   });
 
   loadWO();
 };
 
-</script>
+window.logout = async function () {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
 
-<script type="module" src="auth.js"></script>
+</script>
 
 </body>
 </html>
