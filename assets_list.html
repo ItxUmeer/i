@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assets List</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+th, td {
+  border:1px solid #e5e7eb;
+  padding:12px;
+  font-size:14px;
+  text-align:left;
+}
+
+th {
+  background:#2563eb;
+  color:white;
+}
+
+tr:hover {
+  background:#f8fafc;
+}
+
+/* STATUS BADGES */
+.badge {
+  padding:4px 8px;
+  border-radius:5px;
+  font-size:12px;
+}
+
+.active { background:#22c55e; color:white; }
+.inactive { background:#ef4444; color:white; }
+
+/* PPM BAR */
+.bar {
+  width:100%;
+  height:10px;
+  background:#e5e7eb;
+  border-radius:5px;
+  overflow:hidden;
+}
+
+.bar-fill {
+  height:10px;
+  background:#22c55e;
+  width:0%;
+}
+
+.low { background:#ef4444; }
+.mid { background:#f59e0b; }
+.high { background:#22c55e; }
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h3>CMMS</h3>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="assets_list.html">Assets List</a>
+  <a href="ppm.html">PPM</a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Assets List & PPM Status</h2>
+  <img src="logo-right.png">
+</div>
+
+<!-- TABLE -->
+<div class="section">
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Asset Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>PPM Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="assetTable"></tbody>
+
+  </table>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+/* ---------------- LOAD ---------------- */
+auth.onAuthStateChanged(async (user) => {
+
+  if (!user) {
+    location = "login.html";
+    return;
+  }
+
+  loadAssets();
+});
+
+/* ---------------- ASSETS ---------------- */
+async function loadAssets() {
+
+  const snap = await getDocs(collection(db, "assets"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const a = d.data();
+
+    // fake ppm status logic (you can replace later with real ppm collection)
+    let ppmPercent = Math.floor(Math.random() * 100);
+
+    let barClass = "high";
+    if (ppmPercent < 40) barClass = "low";
+    else if (ppmPercent < 70) barClass = "mid";
+
+    html += `
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.locationGroup}</td>
+        <td>
+          <span class="badge ${a.status === "Active" ? "active" : "inactive"}">
+            ${a.status}
+          </span>
+        </td>
+
+        <td>
+          <div class="bar">
+            <div class="bar-fill ${barClass}" style="width:${ppmPercent}%"></div>
+          </div>
+          <small>${ppmPercent}%</small>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("assetTable").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
