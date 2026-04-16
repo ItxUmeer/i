@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Facilities Supervisor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="sidebar"></div>
+
+<div class="main">
+
+  <h1>Facilities Supervisor Panel</h1>
+
+  <p>Assigned Work Orders</p>
+
+  <div id="list"></div>
+
+</div>
+
+<script type="module">
+import { db, auth } from "./firebase.js";
+import { collection, getDocs, updateDoc, doc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    loadTasks(user);
+  }
+});
+
+async function loadTasks(user) {
+
+  const snap = await getDocs(collection(db, "workOrders"));
+
+  list.innerHTML = "";
+
+  snap.forEach(d => {
+
+    let data = d.data();
+
+    // Supervisor filter (by email or UID)
+    if (data.assignedTo !== user.email &&
+        data.assignedTo !== user.uid) {
+      return;
+    }
+
+    list.innerHTML += `
+      <div class="card">
+        <h3>${data.title}</h3>
+        <p>Asset: ${data.asset}</p>
+        <p>Status: ${data.status}</p>
+
+        <button onclick="start('${d.id}')">Start</button>
+        <button onclick="complete('${d.id}')">Complete</button>
+      </div>
+    `;
+  });
+}
+
+window.start = async function(id) {
+  await updateDoc(doc(db,"workOrders",id), {
+    status: "In Progress"
+  });
+  location.reload();
+};
+
+window.complete = async function(id) {
+  await updateDoc(doc(db,"workOrders",id), {
+    status: "Completed"
+  });
+  location.reload();
+};
+
+</script>
+
+<script type="module" src="sidebar.js"></script>
+
+</body>
+</html>
