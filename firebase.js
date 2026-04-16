@@ -3,12 +3,12 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
+  authDomain: "mep-maintenance-system.firebaseapp.com",
+  projectId: "mep-maintenance-system",
+  storageBucket: "mep-maintenance-system.appspot.com",
+  messagingSenderId: "449309293495",
+  appId: "1:449309293495:web:061124ae9f1c990e388632"
 };
 
 const app = initializeApp(firebaseConfig);
