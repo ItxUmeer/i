@@ -1,205 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>CMMS Live Dashboard</title>
-
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-}
-
-.kpi {
-  background: #111827;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,255,255,0.05);
-}
-
-.kpi h3 {
-  margin: 0;
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-.kpi p {
-  font-size: 22px;
-  color: #00e5ff;
-  margin-top: 8px;
-}
-
-.role-box {
-  margin-bottom: 15px;
-  color: #fbbf24;
-}
-
-.chart-box {
-  margin-top: 20px;
-  background: #111827;
-  padding: 15px;
-  border-radius: 10px;
-}
-</style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>CMMS</h2>
   <div id="menu"></div>
-  <a href="#" onclick="logout()">Logout</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<h1>Live Dashboard</h1>
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Dashboard</h2>
+  <img src="logo-right.png">
+</div>
 
-<div class="role-box" id="roleBox">Loading...</div>
-
-<!-- KPI -->
 <div class="kpi-grid">
-
-  <div class="kpi">
-    <h3>Total Work Orders</h3>
-    <p id="woCount">0</p>
-  </div>
-
-  <div class="kpi">
-    <h3>Open Work Orders</h3>
-    <p id="openCount">0</p>
-  </div>
-
-  <div class="kpi">
-    <h3>Closed Work Orders</h3>
-    <p id="closedCount">0</p>
-  </div>
-
-  <div class="kpi">
-    <h3>Assets</h3>
-    <p id="assetCount">0</p>
-  </div>
-
+  <div class="kpi"><p id="wo">0</p>Work Orders</div>
+  <div class="kpi"><p id="asset">0</p>Assets</div>
 </div>
 
-<!-- CHART -->
-<div class="chart-box">
-  <canvas id="kpiChart"></canvas>
-</div>
+<canvas id="chart"></canvas>
 
 </div>
 
 <script type="module">
-
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-import { doc, getDoc, collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 import { renderSidebar } from "./sidebar.js";
 
 let chart;
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user=>{
+  renderSidebar("admin");
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+  const wo = await getDocs(collection(db,"workOrders"));
+  const asset = await getDocs(collection(db,"assets"));
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  const role = snap.data().role;
+  document.getElementById("wo").innerText = wo.size;
+  document.getElementById("asset").innerText = asset.size;
 
-  document.getElementById("roleBox").innerText = "Role: " + role;
-
-  renderSidebar(role);
-
-  initChart();
-  loadKPIs();
-
-  // 🔥 LIVE UPDATE every 5 sec
-  setInterval(loadKPIs, 5000);
-});
-
-
-// 📊 LOAD LIVE KPIs
-async function loadKPIs() {
-
-  const woSnap = await getDocs(collection(db, "workOrders"));
-  const assetSnap = await getDocs(collection(db, "assets"));
-
-  let total = 0;
-  let open = 0;
-  let closed = 0;
-
-  woSnap.forEach(d => {
-    total++;
-    const w = d.data();
-
-    if (w.status === "Closed") closed++;
-    else open++;
-  });
-
-  document.getElementById("woCount").innerText = total;
-  document.getElementById("openCount").innerText = open;
-  document.getElementById("closedCount").innerText = closed;
-  document.getElementById("assetCount").innerText = assetSnap.size;
-
-  updateChart(open, closed);
-}
-
-
-// 📊 INIT CHART
-function initChart() {
-
-  const ctx = document.getElementById("kpiChart");
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Open", "Closed"],
-      datasets: [{
-        label: "Work Orders",
-        data: [0, 0],
-        backgroundColor: ["#00e5ff", "#22c55e"]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { labels: { color: "white" } }
-      },
-      scales: {
-        x: { ticks: { color: "white" } },
-        y: { ticks: { color: "white" } }
-      }
+  chart = new Chart(document.getElementById("chart"),{
+    type:"bar",
+    data:{
+      labels:["Work Orders","Assets"],
+      datasets:[{data:[wo.size, asset.size], backgroundColor:["#0ea5e9","#ef4444"]}]
     }
   });
-}
-
-
-// 📊 UPDATE CHART LIVE
-function updateChart(open, closed) {
-  chart.data.datasets[0].data = [open, closed];
-  chart.update();
-}
-
-
-// LOGOUT
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-
+});
 </script>
 
 </body>
