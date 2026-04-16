@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Users</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h3>CMMS</h3>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="assets.html">Assets</a>
+  <a href="ppm.html">PPM</a>
+  <a href="#">Reports</a>
+  <a href="users.html">Users</a>
+
+  <hr>
+
+  <a href="#" id="logoutBtn">Logout</a>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>User Management</h2>
+  <img src="logo-right.png">
+</div>
+
+<!-- ADD USER -->
+<div class="section">
+  <h3>Add User</h3>
+
+  <input id="name" placeholder="Name">
+  <input id="email" placeholder="Email">
+
+  <select id="role">
+    <option value="admin">Admin</option>
+    <option value="assets_officer">Assets Officer</option>
+    <option value="facilities_supervisor">Facility Supervisor</option>
+  </select>
+
+  <button onclick="addUser()">Add User</button>
+</div>
+
+<!-- USER LIST -->
+<div class="section">
+  <h3>All Users</h3>
+  <div id="userList"></div>
+</div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+import { signOut } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+import {
+  collection, getDocs, doc, setDoc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+// LOGOUT
+logoutBtn.onclick = async ()=>{
+  await signOut(auth);
+  location="login.html";
+};
+
+// LOAD USERS
+async function loadUsers(){
+
+  const snap = await getDocs(collection(db,"users"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    const u = d.data();
+
+    html += `
+      <div style="
+        padding:10px;
+        border-bottom:1px solid #eee;
+        display:flex;
+        justify-content:space-between;
+      ">
+        <div>
+          <b>${u.name}</b><br>
+          <small>${u.email}</small>
+        </div>
+        <div>
+          <span style="color:#2563eb">${u.role}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  userList.innerHTML = html;
+}
+
+// ADD USER (IMPORTANT NOTE BELOW)
+window.addUser = async ()=>{
+
+  const uid = prompt("Enter USER UID from Firebase Auth");
+
+  if(!uid){
+    alert("UID required");
+    return;
+  }
+
+  await setDoc(doc(db,"users",uid),{
+    name: name.value,
+    email: email.value,
+    role: role.value
+  });
+
+  alert("User Added ✔");
+
+  loadUsers();
+};
+
+// INIT
+loadUsers();
+
+</script>
+
+</body>
+</html>
