@@ -95,3 +95,64 @@ body{
   display:none;
   width:220px;
 }
+/* KPI CARDS */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+}
+
+.kpi{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  text-align:center;
+  transition:0.3s;
+}
+
+.kpi:hover{
+  transform:translateY(-5px);
+}
+
+.kpi h2{
+  margin:0;
+  color:#2563eb;
+}
+
+/* SIDEBAR ICON STYLE */
+.sidebar a{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.sidebar a img{
+  width:18px;
+}
+
+/* NOTIFICATION */
+.notif{
+  position:relative;
+  cursor:pointer;
+}
+
+.notif span{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  background:red;
+  color:white;
+  border-radius:50%;
+  padding:2px 6px;
+  font-size:12px;
+}
+
+/* ANIMATION */
+.sidebar a{
+  transition:0.3s;
+}
+
+.sidebar a:hover{
+  transform:translateX(5px);
+}
