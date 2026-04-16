@@ -1,209 +1,263 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CMMS Dubai Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>CMMS Dashboard</title>
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b1220;
+  color: white;
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  background: #0f172a;
+  height: 100vh;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+}
+
+.sidebar h2 {
+  color: #00e5ff;
+  text-shadow: 0 0 10px #00e5ff;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px;
+  margin-top: 6px;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  background: #1e293b;
+  box-shadow: 0 0 10px #00e5ff;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
+/* KPI CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: linear-gradient(145deg, #111827, #0f172a);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.card p {
+  font-size: 22px;
+  margin: 8px 0 0;
+  color: #00e5ff;
+}
+
+/* PROGRESS BAR */
+.progress {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #00e5ff, #38bdf8);
+}
+
+/* CHART AREA */
+.chart-box {
+  margin-top: 25px;
+  background: #111827;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+}
+
+/* ROLE */
+.role-box {
+  margin-bottom: 15px;
+  color: #fbbf24;
+}
+</style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>CMMS DUBAI</h2>
-
-  <button class="active" onclick="location.href='dashboard.html'">📊 Dashboard</button>
-  <button onclick="location.href='assets.html'">🏢 Assets</button>
-  <button onclick="location.href='workorders.html'">🛠 Work Orders</button>
-  <button onclick="location.href='ppm.html'">📅 PPM</button>
-  <button onclick="location.href='technician.html'">👷 Technician</button>
-
-  <hr style="border:1px solid #1f2937">
-
-  <button onclick="logout()">🚪 Logout</button>
+  <h2>CMMS</h2>
+  <div id="menu"></div>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-  <h1>Facility Management Dashboard</h1>
+  <h1>Dashboard</h1>
+  <div class="role-box" id="roleBox"></div>
 
-  <!-- KPI GRID -->
-  <div class="kpi-grid">
+  <!-- KPI CARDS -->
+  <div class="cards">
 
-    <div class="kpi-card">
-      <div class="kpi-title">Total Assets</div>
-      <div class="kpi-value" id="assetCount">0</div>
+    <div class="card">
+      <h3>Work Orders</h3>
+      <p>24</p>
+      <div class="progress"><span style="width:70%"></span></div>
     </div>
 
-    <div class="kpi-card">
-      <div class="kpi-title">Work Orders</div>
-      <div class="kpi-value" id="woCount">0</div>
+    <div class="card">
+      <h3>PPM Completed</h3>
+      <p>12</p>
+      <div class="progress"><span style="width:45%"></span></div>
     </div>
 
-    <div class="kpi-card">
-      <div class="kpi-title">Open Tasks</div>
-      <div class="kpi-value" id="openCount">0</div>
+    <div class="card">
+      <h3>Assets</h3>
+      <p>158</p>
+      <div class="progress"><span style="width:85%"></span></div>
     </div>
 
-    <div class="kpi-card">
-      <div class="kpi-title">PPM Tasks</div>
-      <div class="kpi-value" id="ppmCount">0</div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-title">Overdue PPM</div>
-      <div class="kpi-value" id="overdueCount">0</div>
+    <div class="card">
+      <h3>Open Issues</h3>
+      <p>7</p>
+      <div class="progress"><span style="width:30%"></span></div>
     </div>
 
   </div>
 
-  <!-- CHART SECTION -->
-  <div class="kpi-grid">
-
-    <div class="card">
-      <h3 style="color:#38bdf8;">Work Orders Status</h3>
-      <canvas id="statusChart"></canvas>
-    </div>
-
-    <div class="card">
-      <h3 style="color:#38bdf8;">System Overview</h3>
-      <canvas id="overviewChart"></canvas>
-    </div>
-
+  <!-- CHART -->
+  <div class="chart-box">
+    <canvas id="workChart"></canvas>
   </div>
 
 </div>
 
-<!-- SCRIPT -->
 <script type="module">
-import { db, auth } from "./firebase.js";
-import { collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { onAuthStateChanged, signOut } 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { generatePPM } from "./ppm-generator.js";
+import { getFirestore, doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let statusChart, overviewChart;
+const firebaseConfig = {
+  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
+  authDomain: "mep-maintenance-system.firebaseapp.com",
+  projectId: "mep-maintenance-system",
+  storageBucket: "mep-maintenance-system.appspot.com",
+  messagingSenderId: "449309293495",
+  appId: "1:449309293495:web:061124ae9f1c990e388632"
+};
 
-// AUTH CHECK
-onAuthStateChanged(auth, (user) => {
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const menu = document.getElementById("menu");
+const roleBox = document.getElementById("roleBox");
+
+onAuthStateChanged(auth, async (user) => {
+
   if (!user) {
     window.location.href = "index.html";
-  } else {
-    generatePPM(); // AUTO PPM ENGINE
-    loadData();
+    return;
   }
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  const role = snap.exists() ? snap.data().role : "no-role";
+
+  roleBox.innerText = "Role: " + role;
+
+  menu.innerHTML = "";
+
+  if (role === "admin") {
+    menu.innerHTML += `<a href="#">Dashboard</a>`;
+    menu.innerHTML += `<a href="#">Users</a>`;
+    menu.innerHTML += `<a href="#">Work Orders</a>`;
+    menu.innerHTML += `<a href="#">Assets</a>`;
+    menu.innerHTML += `<a href="#">PPM</a>`;
+  }
+
+  else if (role === "facilities_supervisor") {
+    menu.innerHTML += `<a href="#">Approve Work Orders</a>`;
+    menu.innerHTML += `<a href="#">PPM Schedule</a>`;
+    menu.innerHTML += `<a href="#">Assets</a>`;
+  }
+
+  else if (role === "assets_officer") {
+    menu.innerHTML += `<a href="#">Assets</a>`;
+    menu.innerHTML += `<a href="#">Add Asset</a>`;
+  }
+
+  else if (role === "maintenance") {
+    menu.innerHTML += `<a href="#">My Work Orders</a>`;
+    menu.innerHTML += `<a href="#">Update Status</a>`;
+  }
+
+  // 📊 CHART (CANDLE / BAR STYLE)
+  const ctx = document.getElementById('workChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      datasets: [{
+        label: 'Work Orders',
+        data: [5, 8, 6, 10, 7],
+        backgroundColor: '#00e5ff'
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: 'white' } }
+      },
+      scales: {
+        x: { ticks: { color: 'white' } },
+        y: { ticks: { color: 'white' } }
+      }
+    }
+  });
+
 });
 
-// LOGOUT
-window.logout = function () {
-  signOut(auth);
+window.logout = async function () {
+  await signOut(auth);
   window.location.href = "index.html";
 };
 
-// LOAD DASHBOARD DATA
-async function loadData() {
-
-  const assetsSnap = await getDocs(collection(db, "assets"));
-  const woSnap = await getDocs(collection(db, "workOrders"));
-  const ppmSnap = await getDocs(collection(db, "ppm"));
-
-  let open = 0;
-  let completed = 0;
-  let overdue = 0;
-
-  const today = new Date();
-
-  woSnap.forEach(doc => {
-    let d = doc.data();
-    if (d.status === "Open") open++;
-    if (d.status === "Completed") completed++;
-  });
-
-  ppmSnap.forEach(doc => {
-    let d = doc.data();
-    if (d.nextDue && new Date(d.nextDue) < today) {
-      overdue++;
-    }
-  });
-
-  // KPI UPDATE
-  document.getElementById("assetCount").innerText = assetsSnap.size;
-  document.getElementById("woCount").innerText = woSnap.size;
-  document.getElementById("openCount").innerText = open;
-  document.getElementById("ppmCount").innerText = ppmSnap.size;
-  document.getElementById("overdueCount").innerText = overdue;
-
-  // DESTROY OLD CHARTS
-  if (statusChart) statusChart.destroy();
-  if (overviewChart) overviewChart.destroy();
-
-  // STATUS CHART
-  statusChart = new Chart(document.getElementById("statusChart"), {
-    type: "doughnut",
-    data: {
-      labels: ["Open", "Completed"],
-      datasets: [{
-        data: [open, completed],
-        backgroundColor: ["#f59e0b", "#22c55e"],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: {
-            color: "#e5e7eb"
-          }
-        }
-      }
-    }
-  });
-
-  // OVERVIEW CHART
-  overviewChart = new Chart(document.getElementById("overviewChart"), {
-    type: "bar",
-    data: {
-      labels: ["Assets", "Work Orders", "PPM", "Overdue"],
-      datasets: [{
-        label: "System Overview",
-        data: [assetsSnap.size, woSnap.size, ppmSnap.size, overdue],
-        backgroundColor: [
-          "#38bdf8",
-          "#6366f1",
-          "#f59e0b",
-          "#ef4444"
-        ],
-        borderRadius: 6
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: {
-            color: "#e5e7eb"
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#9ca3af" }
-        },
-        y: {
-          ticks: { color: "#9ca3af" }
-        }
-      }
-    }
-  });
-
-}
-
 </script>
-
-<script type="module" src="auth.js"></script>
 
 </body>
 </html>
