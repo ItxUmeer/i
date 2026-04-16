@@ -1,88 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PPM System</title>
-  <link rel="stylesheet" href="style.css">
+<title>PPM</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h2>PPM</h2>
-
-  <button onclick="location.href='dashboard.html'">Dashboard</button>
-  <button onclick="location.href='assets.html'">Assets</button>
-  <button onclick="location.href='workorders.html'">Work Orders</button>
+  <h2>CMMS</h2>
+  <div id="menu"></div>
 </div>
 
 <div class="main">
 
-  <h1>Preventive Maintenance (PPM)</h1>
+<h1>PPM Schedule</h1>
 
-  <input id="assetId" placeholder="Asset ID">
-  <input id="task" placeholder="Task (Filter Cleaning)">
-  <input id="nextDue" type="date">
-
-  <select id="frequency">
-    <option>Weekly</option>
-    <option>Monthly</option>
-    <option>Quarterly</option>
-    <option>Yearly</option>
-  </select>
-
-  <button onclick="addPPM()">Add PPM</button>
-
-  <div id="list"></div>
+<div id="list"></div>
 
 </div>
 
 <script type="module">
-import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-window.addPPM = async function () {
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { renderSidebar } from "./sidebar.js";
 
-  await addDoc(collection(db,"ppm"),{
-    assetId: assetId.value,
-    task: task.value,
-    nextDue: nextDue.value,
-    frequency: frequency.value,
-    status: "Pending"
-  });
+onAuthStateChanged(auth, async (user) => {
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  renderSidebar(snap.data().role);
 
   loadPPM();
-};
+});
 
 async function loadPPM() {
 
-  const snap = await getDocs(collection(db,"ppm"));
+  const snap = await getDocs(collection(db, "ppm"));
 
-  list.innerHTML = "";
+  let html = "";
 
-  snap.forEach(doc => {
+  snap.forEach(d => {
 
-    let d = doc.data();
+    const p = d.data();
 
-    list.innerHTML += `
+    html += `
       <div class="card">
-
-        <b>${d.assetId}</b><br>
-        Task: ${d.task}<br>
-        Due: ${d.nextDue}<br>
-        Frequency: ${d.frequency}<br>
-        Status: ${d.status}
-
+        <b>${p.asset}</b><br>
+        Next Due: ${p.nextDue}<br>
+        Frequency: ${p.frequency}
       </div>
     `;
   });
+
+  document.getElementById("list").innerHTML = html;
 }
 
-loadPPM();
-
 </script>
-
-<script type="module" src="auth.js"></script>
 
 </body>
 </html>
