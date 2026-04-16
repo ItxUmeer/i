@@ -1,31 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Assets</title>
+<meta charset="UTF-8">
+<title>Assets Management</title>
+
 <link rel="stylesheet" href="style.css">
+
+<style>
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab {
+  padding: 10px;
+  background: #1e293b;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.tab.active {
+  background: #00e5ff;
+  color: black;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+</style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>CMMS</h2>
   <div id="menu"></div>
   <a href="#" onclick="logout()">Logout</a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
-<h1>Assets Management</h1>
+<h1>Assets Hierarchy</h1>
 
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="filterAssets('HQ')">HQ (Buildings 1–5)</div>
+  <div class="tab" onclick="filterAssets('STAFF')">Staff Accommodation (A–E)</div>
+  <div class="tab" onclick="filterAssets('STATION')">Outside Stations</div>
+  <div class="tab" onclick="filterAssets('ALL')">All</div>
+</div>
+
+<!-- ADD ASSET -->
 <div class="card">
   <input id="name" placeholder="Asset Name">
-  <input id="location" placeholder="Location (HQ / Staff / Station)">
-  <input id="building" placeholder="Building (A, B, 1, 2...)">
+  <input id="building" placeholder="Building / Block">
+  <select id="location">
+    <option value="HQ">HQ</option>
+    <option value="STAFF">STAFF</option>
+    <option value="STATION">STATION</option>
+  </select>
+
   <input id="type" placeholder="Type (HVAC / MEP)">
   <button onclick="addAsset()">Add Asset</button>
 </div>
 
-<div id="list"></div>
+<!-- LIST -->
+<div id="list" class="asset-grid"></div>
 
 </div>
 
@@ -40,23 +86,15 @@ from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 import { renderSidebar } from "./sidebar.js";
 
-let role = "";
+let allAssets = [];
+let currentFilter = "HQ";
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) window.location.href = "index.html";
 
   const snap = await getDoc(doc(db, "users", user.uid));
-
-  role = snap.data().role;
-
-  // 🔐 ROLE CHECK
-  if (role !== "admin" && role !== "assets_officer") {
-    alert("No access");
-    window.location.href = "dashboard.html";
-  }
-
-  renderSidebar(role);
+  renderSidebar(snap.data().role);
 
   loadAssets();
 });
@@ -66,28 +104,56 @@ onAuthStateChanged(auth, async (user) => {
 window.addAsset = async function () {
 
   await addDoc(collection(db, "assets"), {
-    name: document.getElementById("name").value,
-    location: document.getElementById("location").value,
-    building: document.getElementById("building").value,
-    type: document.getElementById("type").value,
+    name: name.value,
+    building: building.value,
+    location: location.value,
+    type: type.value,
     status: "Active"
   });
 
-  alert("Asset Added ✔");
   loadAssets();
 };
 
 
-// 📄 LOAD ASSETS
+// 📥 LOAD ASSETS
 async function loadAssets() {
 
   const snap = await getDocs(collection(db, "assets"));
 
-  let html = "";
+  allAssets = [];
 
   snap.forEach(d => {
+    allAssets.push({ id: d.id, ...d.data() });
+  });
 
-    const a = d.data();
+  render();
+}
+
+
+// 🎯 FILTER
+window.filterAssets = function(type) {
+
+  currentFilter = type;
+
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+
+  render();
+};
+
+
+// 🖼 RENDER
+function render() {
+
+  let filtered = allAssets;
+
+  if (currentFilter !== "ALL") {
+    filtered = allAssets.filter(a => a.location === currentFilter);
+  }
+
+  let html = "";
+
+  filtered.forEach(a => {
 
     html += `
       <div class="card">
