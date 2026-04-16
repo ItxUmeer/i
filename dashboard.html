@@ -1,37 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>CMMS Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h2>CMMS</h2>
+  <h2>Dubai CMMS</h2>
   <button onclick="location.href='dashboard.html'">Dashboard</button>
   <button onclick="location.href='assets.html'">Assets</button>
   <button onclick="location.href='workorders.html'">Work Orders</button>
-  <button onclick="logout()">Logout</button>
 </div>
 
 <div class="main">
-  <h1>Dubai CMMS Dashboard</h1>
 
-  <div class="card">Assets: <span id="assetCount">0</span></div>
-  <div class="card">Work Orders: 0</div>
-  <div class="card">PPM: 0</div>
+  <h1>Facility Management Dashboard</h1>
+
+  <!-- KPI SECTION -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-title">Total Assets</div>
+      <div class="kpi-value" id="assetCount">0</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Active Work Orders</div>
+      <div class="kpi-value">12</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">PPM Due</div>
+      <div class="kpi-value">5</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Overdue Tasks</div>
+      <div class="kpi-value">2</div>
+    </div>
+
+  </div>
+
 </div>
-
-<script type="module">
-import { auth } from "./js/firebase.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-window.logout = function () {
-  signOut(auth);
-  location.href = "index.html";
-};
-</script>
 
 </body>
 </html>
