@@ -1,59 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Assets</title>
+<title>Assets Management</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-
-  <h3>CMMS</h3>
-
+  <h3>CMMS Admin</h3>
   <a href="dashboard.html">Dashboard</a>
-  <a href="workorders.html">Work Orders</a>
   <a href="assets.html">Assets</a>
   <a href="ppm.html">PPM</a>
-  <a href="users.html">Users</a>
-
-  <hr>
-
-  <a href="#" id="logoutBtn">Logout</a>
-
+  <a href="workorders.html">Work Orders</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- HEADER -->
 <div class="header-bar">
   <img src="logo-left.png">
-  <h2>Asset Management</h2>
+  <h2>Assets Management (Admin)</h2>
   <img src="logo-right.png">
 </div>
 
-<!-- ADD ASSET -->
-<div class="section" id="assetForm">
+<!-- CREATE ASSET -->
+<div class="section">
 
   <h3>Add Asset</h3>
 
-  <input id="name" placeholder="Asset Name (AHU-01)">
-  <input id="type" placeholder="Type (AHU)">
-  <input id="building" placeholder="Building (Building 1)">
-  <input id="locationGroup" placeholder="Location Group (HQ)">
+  <input id="name" placeholder="Asset Name">
+  <input id="type" placeholder="Type (AHU, FCU)">
+  <input id="building" placeholder="Building">
+  <input id="locationGroup" placeholder="Location Group">
 
   <select id="status">
     <option value="Active">Active</option>
     <option value="Inactive">Inactive</option>
   </select>
 
-  <br><br>
-
-  <input id="checklist" placeholder="Checklist (Filter, Motor, Belt)">
-
-  <br><br>
+  <input id="checklist" placeholder="Checklist (comma separated)">
 
   <button onclick="addAsset()">Add Asset</button>
 
@@ -61,8 +46,11 @@
 
 <!-- ASSET LIST -->
 <div class="section">
+
   <h3>Assets List</h3>
-  <div id="assetList">Loading...</div>
+
+  <div id="assetList"></div>
+
 </div>
 
 </div>
@@ -70,7 +58,6 @@
 <script type="module">
 
 import { auth, db } from "./firebase.js";
-
 import {
   collection,
   addDoc,
@@ -80,149 +67,52 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let currentRole = "";
-
-/* ---------------- LOGOUT ---------------- */
-document.getElementById("logoutBtn").onclick = async () => {
-  await auth.signOut();
-  location = "login.html";
-};
-
-/* ---------------- AUTH ---------------- */
+/* ---------------- LOAD ---------------- */
 auth.onAuthStateChanged(async (user) => {
 
-  if (!user) {
-    location = "login.html";
-    return;
-  }
+  if (!user) location = "login.html";
 
-  try {
-    const snap = await getDoc(doc(db, "users", user.uid));
-
-    if (snap.exists()) {
-      currentRole = snap.data().role;
-    }
-
-    // Hide form if not admin
-    if (currentRole !== "admin") {
-      document.getElementById("assetForm").style.display = "none";
-    }
-
-    loadAssets();
-
-  } catch (err) {
-    console.error("AUTH ERROR:", err);
-  }
+  loadAssets();
 });
 
-/* ---------------- LOAD ASSETS (SAFE + GUARANTEED) ---------------- */
+/* ---------------- ADD ASSET ---------------- */
+window.addAsset = async () => {
+
+  await addDoc(collection(db, "assets"), {
+    name: name.value,
+    type: type.value,
+    building: building.value,
+    locationGroup: locationGroup.value,
+    status: status.value,
+    checklist: checklist.value.split(",").map(i => i.trim())
+  });
+
+  alert("Asset Added ✔");
+  loadAssets();
+};
+
+/* ---------------- LOAD ASSETS ---------------- */
 async function loadAssets() {
 
-  const container = document.getElementById("assetList");
+  const snap = await getDocs(collection(db, "assets"));
 
-  try {
+  let html = "";
 
-    container.innerHTML = "Loading assets...";
+  snap.forEach(d => {
 
-    const snap = await getDocs(collection(db, "assets"));
+    const a = d.data();
 
-    if (snap.empty) {
-      container.innerHTML = "No assets found";
-      return;
-    }
+    html += `
+      <div class="card">
+        <b>${a.name}</b><br>
+        ${a.type} | ${a.building}<br>
+        ${a.status}
+      </div>
+    `;
+  });
 
-    let html = "";
-
-    snap.forEach((d) => {
-
-      const a = d.data();
-
-      html += `
-        <div class="card">
-          <b>${a.name || "-"}</b><br>
-          Type: ${a.type || "-"}<br>
-          Building: ${a.building || "-"}<br>
-          Location: ${a.locationGroup || "-"}<br>
-          Status: ${a.status || "-"}<br>
-
-          <small>
-            Checklist: ${a.checklist ? a.checklist.join(", ") : "None"}
-          </small>
-
-          ${currentRole === "admin" ? `
-            <br><button onclick="editAsset('${d.id}')">Edit</button>
-          ` : ""}
-        </div>
-      `;
-    });
-
-    container.innerHTML = html;
-
-  } catch (err) {
-    console.error("LOAD ERROR:", err);
-    container.innerHTML = "Error loading assets";
-  }
+  document.getElementById("assetList").innerHTML = html;
 }
-
-/* ---------------- ADD ASSET ---------------- */
-async function addAsset() {
-
-  try {
-
-    const checklistValue = document.getElementById("checklist").value;
-
-    const checklistArray = checklistValue
-      ? checklistValue.split(",").map(i => i.trim())
-      : [];
-
-    await addDoc(collection(db, "assets"), {
-      name: document.getElementById("name").value,
-      type: document.getElementById("type").value,
-      building: document.getElementById("building").value,
-      locationGroup: document.getElementById("locationGroup").value,
-      status: document.getElementById("status").value,
-      checklist: checklistArray
-    });
-
-    alert("Asset Added ✔");
-
-    loadAssets();
-
-    // clear fields
-    document.getElementById("name").value = "";
-    document.getElementById("type").value = "";
-    document.getElementById("building").value = "";
-    document.getElementById("locationGroup").value = "";
-    document.getElementById("checklist").value = "";
-
-  } catch (err) {
-    console.error("ADD ERROR:", err);
-    alert("Failed to add asset");
-  }
-}
-
-window.addAsset = addAsset;
-
-/* ---------------- EDIT ASSET ---------------- */
-async function editAsset(id) {
-
-  const newStatus = prompt("Enter Status (Active / Inactive)");
-
-  if (!newStatus) return;
-
-  try {
-    await updateDoc(doc(db, "assets", id), {
-      status: newStatus
-    });
-
-    loadAssets();
-
-  } catch (err) {
-    console.error("EDIT ERROR:", err);
-  }
-}
-
-window.editAsset = editAsset;
 
 </script>
 
