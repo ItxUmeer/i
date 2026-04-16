@@ -7,27 +7,26 @@
 
 <body>
 
-<div class="sidebar"><h2>CMMS</h2></div>
+<div class="sidebar">
+  <h2>CMMS</h2>
+  <a href="dashboard.html">Dashboard</a>
+</div>
 
 <div class="main">
 
 <div class="header-bar">
-  <img src="logo-left.png">
+  <img src="assets/logo-left.png">
   <h2>Assets</h2>
-  <img src="logo-right.png">
+  <img src="assets/logo-right.png">
 </div>
 
 <div class="section">
   <div class="form-grid">
-    <input id="name" placeholder="Asset Name">
+    <input id="name" placeholder="Asset">
     <input id="building" placeholder="Building">
-    <select id="location">
-      <option>HQ</option>
-      <option>STAFF</option>
-      <option>STATION</option>
-    </select>
   </div>
-  <button onclick="addAsset()">Add</button>
+
+  <button onclick="addAsset()">Add Asset</button>
 </div>
 
 <div id="list"></div>
@@ -36,10 +35,11 @@
 
 <script type="module">
 import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { collection, addDoc, getDocs }
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 async function load(){
-  const snap = await getDocs(collection(db,"assets"));
+  const snap=await getDocs(collection(db,"assets"));
 
   let html="";
   snap.forEach(d=>{
@@ -49,11 +49,10 @@ async function load(){
   list.innerHTML=html;
 }
 
-window.addAsset = async ()=>{
+window.addAsset=async()=>{
   await addDoc(collection(db,"assets"),{
     name:name.value,
-    building:building.value,
-    location:location.value
+    building:building.value
   });
   load();
 };
