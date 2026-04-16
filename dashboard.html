@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Dashboard</title>
+<title>CMMS Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
+
+/* GLOBAL LAYOUT FIX */
 body {
+  margin:0;
+  font-family:Arial;
   background:#f5f7fb;
 }
 
+/* SIDEBAR */
+.sidebar {
+  position:fixed;
+  left:0;
+  top:0;
+  width:220px;
+  height:100vh;
+  background:#0f172a;
+  color:white;
+  padding:20px;
+}
+
+.sidebar h3 {
+  color:white;
+  margin-bottom:20px;
+}
+
+.sidebar a {
+  display:block;
+  color:#cbd5e1;
+  padding:10px;
+  text-decoration:none;
+  border-radius:6px;
+}
+
+.sidebar a:hover {
+  background:#1e293b;
+  color:white;
+}
+
+/* MAIN AREA */
+.main {
+  margin-left:240px;
+  padding:20px;
+}
+
+/* HEADER */
+.header {
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* KPI GRID */
 .grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:15px;
-  margin:20px;
 }
 
 .card {
@@ -21,35 +70,61 @@ body {
   padding:20px;
   border-radius:10px;
   text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
 .card h2 {
   color:#2563eb;
-  font-size:30px;
+  font-size:28px;
 }
 
+/* NAV BUTTONS */
 .nav {
+  margin-top:20px;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:15px;
-  margin:20px;
 }
 
 .btn {
   background:#2563eb;
   color:white;
   padding:15px;
-  text-align:center;
   border-radius:10px;
+  text-align:center;
   cursor:pointer;
 }
+
+.btn:hover {
+  background:#1d4ed8;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h2 style="text-align:center;">CMMS Admin Dashboard</h2>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h3>CMMS Admin</h3>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="assets.html">Assets</a>
+  <a href="assets_list.html">Assets List</a>
+  <a href="ppm.html">PPM</a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="users.html">Users</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- HEADER -->
+<div class="header">
+  <h2>Admin Dashboard</h2>
+  <p>CMMS Control Panel</p>
+</div>
 
 <!-- KPI -->
 <div class="grid">
@@ -84,11 +159,14 @@ body {
 
 </div>
 
+</div>
+
 <script type="module">
 
 import { db } from "./firebase.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
+/* LOAD COUNTS */
 async function load() {
 
   const a = await getDocs(collection(db,"assets"));
