@@ -1,105 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Assets</title>
-  <link rel="stylesheet" href="style.css">
+<title>Assets</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h2>Assets</h2>
-
-  <button onclick="location.href='dashboard.html'">Dashboard</button>
-  <button onclick="location.href='workorders.html'">Work Orders</button>
+  <h2>CMMS</h2>
+  <div id="menu"></div>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
 <div class="main">
 
-  <h1>Asset Management</h1>
+<h1>Assets Management</h1>
 
-  <!-- LOCATION SYSTEM -->
-  <select id="locationGroup">
-    <option>Headquarters</option>
-    <option>Staff Accommodation</option>
-    <option>Outside Stations</option>
-  </select>
-
-  <input id="building" placeholder="Building (1-5 / A-E / Station)">
+<div class="card">
   <input id="name" placeholder="Asset Name">
-  <input id="type" placeholder="Type (AHU, Pump, Chiller)">
-
+  <input id="location" placeholder="Location (HQ / Staff / Station)">
+  <input id="building" placeholder="Building (A, B, 1, 2...)">
+  <input id="type" placeholder="Type (HVAC / MEP)">
   <button onclick="addAsset()">Add Asset</button>
+</div>
 
-  <hr>
-
-  <!-- FILTER -->
-  <select id="filter" onchange="loadAssets()">
-    <option>All</option>
-    <option>Headquarters</option>
-    <option>Staff Accommodation</option>
-    <option>Outside Stations</option>
-  </select>
-
-  <div id="list"></div>
+<div id="list"></div>
 
 </div>
 
 <script type="module">
-import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } 
+
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+import { collection, addDoc, getDocs, doc, getDoc } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { renderSidebar } from "./sidebar.js";
+
+let role = "";
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) window.location.href = "index.html";
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  role = snap.data().role;
+
+  // 🔐 ROLE CHECK
+  if (role !== "admin" && role !== "assets_officer") {
+    alert("No access");
+    window.location.href = "dashboard.html";
+  }
+
+  renderSidebar(role);
+
+  loadAssets();
+});
+
 
 // ➕ ADD ASSET
 window.addAsset = async function () {
 
-  await addDoc(collection(db,"assets"),{
-    name: name.value,
-    type: type.value,
-    locationGroup: locationGroup.value,
-    building: building.value,
+  await addDoc(collection(db, "assets"), {
+    name: document.getElementById("name").value,
+    location: document.getElementById("location").value,
+    building: document.getElementById("building").value,
+    type: document.getElementById("type").value,
     status: "Active"
   });
 
+  alert("Asset Added ✔");
   loadAssets();
 };
 
 
-// 📥 LOAD ASSETS WITH FILTER
-window.loadAssets = async function () {
+// 📄 LOAD ASSETS
+async function loadAssets() {
 
-  const snap = await getDocs(collection(db,"assets"));
+  const snap = await getDocs(collection(db, "assets"));
 
-  list.innerHTML = "";
+  let html = "";
 
-  let filterValue = document.getElementById("filter").value;
+  snap.forEach(d => {
 
-  snap.forEach(doc => {
+    const a = d.data();
 
-    let d = doc.data();
-
-    if (filterValue !== "All" && d.locationGroup !== filterValue) {
-      return;
-    }
-
-    list.innerHTML += `
+    html += `
       <div class="card">
-
-        <b>${d.name}</b><br>
-        Type: ${d.type}<br>
-        Location: ${d.locationGroup}<br>
-        Building: ${d.building}
-
+        <b>${a.name}</b><br>
+        Location: ${a.location}<br>
+        Building: ${a.building}<br>
+        Type: ${a.type}<br>
       </div>
     `;
   });
+
+  document.getElementById("list").innerHTML = html;
+}
+
+
+// LOGOUT
+window.logout = async function () {
+  await signOut(auth);
+  window.location.href = "index.html";
 };
 
-loadAssets();
-
 </script>
-
-<script type="module" src="auth.js"></script>
 
 </body>
 </html>
