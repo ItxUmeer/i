@@ -12,17 +12,14 @@
 
   <h3>CMMS</h3>
 
-  <a href="dashboard.html">
-    <img src="icon-dashboard.png" width="16"> Dashboard
-  </a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="assets.html">Assets</a>
+  <a href="ppm.html">PPM</a>
+  <a href="#">Reports</a>
+  <a href="#">Users</a>
+  <a href="#">Charts</a>
 
-  <a href="assets.html">
-    <img src="icon-assets.png" width="16"> Assets
-  </a>
-
-  <a href="workorders.html">
-    <img src="icon-workorder.png" width="16"> Work Orders
-  </a>
+  <hr>
 
   <a href="#" id="logoutBtn">Logout</a>
 
@@ -33,24 +30,26 @@
 
 <!-- HEADER -->
 <div class="header-bar">
+
   <img src="logo-left.png">
+
   <h2>CMMS Dashboard - DCAS</h2>
-  <img src="logo-right.png">
+
+  <div style="position:relative">
+    <img src="logo-right.png" onclick="toggleRole()" style="cursor:pointer">
+
+    <div id="roleBox" class="role-box">
+      <b>Your Access</b>
+      <p id="roleText">Loading...</p>
+    </div>
+  </div>
+
 </div>
 
 <!-- INTRO -->
 <div class="section">
-  <h3>Welcome to CMMS</h3>
-  <p>
-    Manage maintenance operations, assets, and preventive schedules
-    efficiently for Dubai Corporation for Ambulance Services.
-  </p>
-</div>
-
-<!-- ROLE -->
-<div class="section">
-  <h3>Your Access</h3>
-  <p id="roleText">Loading...</p>
+  <h3>Welcome</h3>
+  <p>This system manages CMMS operations for DCAS.</p>
 </div>
 
 </div>
@@ -70,8 +69,14 @@ logoutBtn.onclick = async ()=>{
   location="login.html";
 };
 
+// ROLE TOGGLE
+window.toggleRole = ()=>{
+  const box = document.getElementById("roleBox");
+  box.style.display = box.style.display==="block"?"none":"block";
+};
+
 // AUTH
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
   if(!user){
     location="login.html";
@@ -79,11 +84,11 @@ onAuthStateChanged(auth, async (user)=>{
   }
 
   const snap = await getDoc(doc(db,"users",user.uid));
-
   const role = snap.data().role;
 
   document.getElementById("roleText").innerText =
-    "Logged in as: " + role;
+    "You are logged in as: " + role;
+
 });
 
 </script>
