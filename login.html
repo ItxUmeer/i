@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="login-container">
+
+  <div class="login-box">
+
+    <div class="logo-bar">
+      <img src="assets/logo-left.png">
+      <img src="assets/logo-right.png">
+    </div>
+
+    <h2>CMMS Login</h2>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button id="loginBtn">Login</button>
+    <p id="msg"></p>
+
+  </div>
+
+</div>
+
+<script type="module">
+import { login } from "./auth.js";
+
+loginBtn.onclick = async () => {
+  try {
+    const role = await login(email.value, password.value);
+
+    if(role === "admin") location="dashboard.html";
+    else if(role === "assets_officer") location="assets.html";
+    else location="supervisor.html";
+
+  } catch(e){
+    msg.innerText = e.message;
+  }
+};
+</script>
+
+</body>
+</html>
