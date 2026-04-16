@@ -190,7 +190,17 @@ async function loadData() {
 }
 
 </script>
+import { generatePPM } from "./ppm-generator.js";
 
+// AUTO RUN EVERY TIME DASHBOARD OPENS
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    generatePPM(); // 🔥 AUTO CREATE PPM
+    loadData();
+  }
+});
 <script type="module" src="auth.js"></script>
 
 </body>
