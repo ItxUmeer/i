@@ -1,181 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dubai CMMS</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b1220;
-  color: white;
-}
-
-/* SIDEBAR */
-.sidebar {
-  width: 220px;
-  height: 100vh;
-  background: #0f172a;
-  position: fixed;
-  padding: 20px;
-}
-
-.sidebar h2 {
-  color: #38bdf8;
-}
-
-.sidebar button {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  background: #1e293b;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-/* MAIN */
-.main {
-  margin-left: 240px;
-  padding: 20px;
-}
-
-/* CARDS */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 12px;
-}
-
-/* LOGIN */
-.login {
-  width: 300px;
-  margin: 120px auto;
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-}
-
-button {
-  padding: 10px;
-  width: 100%;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-}
-
-/* MOBILE */
-@media(max-width:768px){
-  .sidebar{display:none;}
-  .main{margin-left:0;}
-}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="loginBox" class="login">
-  <h2>Dubai CMMS Login</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
-
-<!-- SIDEBAR -->
-<div id="app" style="display:none;">
-  <div class="sidebar">
-    <h2>CMMS</h2>
-    <button onclick="show('dashboard')">Dashboard</button>
-    <button onclick="show('assets')">Assets</button>
-    <button onclick="show('workorders')">Work Orders</button>
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <div class="main">
-
-    <!-- DASHBOARD -->
-    <div id="dashboard">
-      <h2>Dashboard</h2>
-      <div class="cards">
-        <div class="card">Assets <h3 id="assetCount">0</h3></div>
-        <div class="card">Work Orders <h3 id="woCount">0</h3></div>
-        <div class="card">PPM <h3>0</h3></div>
-      </div>
-    </div>
-
-    <!-- ASSETS -->
-    <div id="assets" style="display:none;">
-      <h2>Assets</h2>
-
-      <input id="assetName" placeholder="Asset Name">
-      <input id="assetType" placeholder="Type (AHU, Chiller)">
-      <button onclick="addAsset()">Add Asset</button>
-
-      <div id="assetList"></div>
-    </div>
-
-    <!-- WORK ORDERS -->
-    <div id="workorders" style="display:none;">
-      <h2>Work Orders</h2>
-      <p>Coming next step...</p>
-    </div>
-
-  </div>
-</div>
-
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// 🔥 Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { getFirestore, collection, addDoc, getDocs } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs 
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* 🔥 YOUR FIREBASE CONFIG */
+
+// 🔥 YOUR FIREBASE CONFIG (PASTED FROM YOU)
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_ID",
+  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
+  authDomain: "mep-maintenance-system.firebaseapp.com",
+  projectId: "mep-maintenance-system",
+  storageBucket: "mep-maintenance-system.firebasestorage.app",
+  messagingSenderId: "449309293495",
+  appId: "1:449309293495:web:061124ae9f1c990e388632"
 };
 
+
+// 🔥 INIT FIREBASE
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* LOGIN */
-window.login = function(){
+
+// ==========================
+// LOGIN FUNCTION
+// ==========================
+window.login = function () {
   let email = document.getElementById("email").value;
   let password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
-  .catch(e => alert(e.message));
-}
+    .catch(error => alert(error.message));
+};
 
-/* LOGOUT */
-window.logout = function(){
+
+// ==========================
+// LOGOUT
+// ==========================
+window.logout = function () {
   signOut(auth);
-}
+};
 
-/* AUTH */
-onAuthStateChanged(auth, user => {
-  if(user){
+
+// ==========================
+// AUTH STATE CHECK
+// ==========================
+onAuthStateChanged(auth, (user) => {
+  if (user) {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("app").style.display = "block";
 
@@ -186,32 +69,46 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-/* NAV */
-window.show = function(page){
-  document.querySelectorAll(".main > div").forEach(d => d.style.display="none");
-  document.getElementById(page).style.display="block";
-}
 
-/* ADD ASSET */
-window.addAsset = async function(){
+// ==========================
+// NAVIGATION
+// ==========================
+window.show = function (page) {
+  document.querySelectorAll(".main > div")
+    .forEach(div => div.style.display = "none");
+
+  document.getElementById(page).style.display = "block";
+};
+
+
+// ==========================
+// ADD ASSET
+// ==========================
+window.addAsset = async function () {
   let name = document.getElementById("assetName").value;
   let type = document.getElementById("assetType").value;
 
-  await addDoc(collection(db,"assets"),{
-    name, type, status:"active"
+  await addDoc(collection(db, "assets"), {
+    name: name,
+    type: type,
+    status: "active",
+    createdAt: new Date()
   });
 
   loadAssets();
-}
+};
 
-/* LOAD ASSETS */
-async function loadAssets(){
-  let snap = await getDocs(collection(db,"assets"));
+
+// ==========================
+// LOAD ASSETS
+// ==========================
+async function loadAssets() {
+  let snap = await getDocs(collection(db, "assets"));
 
   document.getElementById("assetList").innerHTML = "";
   document.getElementById("assetCount").innerText = snap.size;
 
-  snap.forEach(doc=>{
+  snap.forEach(doc => {
     let d = doc.data();
 
     document.getElementById("assetList").innerHTML += `
@@ -224,6 +121,3 @@ async function loadAssets(){
 }
 
 </script>
-
-</body>
-</html>
