@@ -1,180 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Assets Management</title>
-
+<title>Assets</title>
 <link rel="stylesheet" href="style.css">
-
-<style>
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.tab {
-  padding: 10px;
-  background: #1e293b;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-}
-
-.tab.active {
-  background: #00e5ff;
-  color: black;
-}
-
-.asset-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 10px;
-}
-</style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <h2>CMMS</h2>
-  <div id="menu"></div>
-  <a href="#" onclick="logout()">Logout</a>
-</div>
+<div class="sidebar"><h2>CMMS</h2></div>
 
-<!-- MAIN -->
 <div class="main">
 
-<h1>Assets Hierarchy</h1>
-
-<!-- TABS -->
-<div class="tabs">
-  <div class="tab active" onclick="filterAssets('HQ')">HQ (Buildings 1–5)</div>
-  <div class="tab" onclick="filterAssets('STAFF')">Staff Accommodation (A–E)</div>
-  <div class="tab" onclick="filterAssets('STATION')">Outside Stations</div>
-  <div class="tab" onclick="filterAssets('ALL')">All</div>
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Assets</h2>
+  <img src="logo-right.png">
 </div>
 
-<!-- ADD ASSET -->
-<div class="card">
-  <input id="name" placeholder="Asset Name">
-  <input id="building" placeholder="Building / Block">
-  <select id="location">
-    <option value="HQ">HQ</option>
-    <option value="STAFF">STAFF</option>
-    <option value="STATION">STATION</option>
-  </select>
-
-  <input id="type" placeholder="Type (HVAC / MEP)">
-  <button onclick="addAsset()">Add Asset</button>
+<div class="section">
+  <div class="form-grid">
+    <input id="name" placeholder="Asset Name">
+    <input id="building" placeholder="Building">
+    <select id="location">
+      <option>HQ</option>
+      <option>STAFF</option>
+      <option>STATION</option>
+    </select>
+  </div>
+  <button onclick="addAsset()">Add</button>
 </div>
 
-<!-- LIST -->
-<div id="list" class="asset-grid"></div>
+<div id="list"></div>
 
 </div>
 
 <script type="module">
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+async function load(){
+  const snap = await getDocs(collection(db,"assets"));
 
-import { collection, addDoc, getDocs, doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-import { renderSidebar } from "./sidebar.js";
-
-let allAssets = [];
-let currentFilter = "HQ";
-
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) window.location.href = "index.html";
-
-  const snap = await getDoc(doc(db, "users", user.uid));
-  renderSidebar(snap.data().role);
-
-  loadAssets();
-});
-
-
-// ➕ ADD ASSET
-window.addAsset = async function () {
-
-  await addDoc(collection(db, "assets"), {
-    name: name.value,
-    building: building.value,
-    location: location.value,
-    type: type.value,
-    status: "Active"
+  let html="";
+  snap.forEach(d=>{
+    html+=`<div class="card">${d.data().name}</div>`;
   });
 
-  loadAssets();
-};
-
-
-// 📥 LOAD ASSETS
-async function loadAssets() {
-
-  const snap = await getDocs(collection(db, "assets"));
-
-  allAssets = [];
-
-  snap.forEach(d => {
-    allAssets.push({ id: d.id, ...d.data() });
-  });
-
-  render();
+  list.innerHTML=html;
 }
 
-
-// 🎯 FILTER
-window.filterAssets = function(type) {
-
-  currentFilter = type;
-
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  event.target.classList.add("active");
-
-  render();
-};
-
-
-// 🖼 RENDER
-function render() {
-
-  let filtered = allAssets;
-
-  if (currentFilter !== "ALL") {
-    filtered = allAssets.filter(a => a.location === currentFilter);
-  }
-
-  let html = "";
-
-  filtered.forEach(a => {
-
-    html += `
-      <div class="card">
-        <b>${a.name}</b><br>
-        Location: ${a.location}<br>
-        Building: ${a.building}<br>
-        Type: ${a.type}<br>
-      </div>
-    `;
+window.addAsset = async ()=>{
+  await addDoc(collection(db,"assets"),{
+    name:name.value,
+    building:building.value,
+    location:location.value
   });
-
-  document.getElementById("list").innerHTML = html;
-}
-
-
-// LOGOUT
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "index.html";
+  load();
 };
 
+load();
 </script>
 
 </body>
