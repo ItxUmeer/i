@@ -6,38 +6,18 @@
 </head>
 <body>
 
-<h2>Dashboard</h2>
+<h1>📊 CMMS Dashboard</h1>
 
-<select id="buildingFilter"></select>
+<div class="card">Total Requests: <span id="total">0</span></div>
+<div class="card">Pending: <span id="pending">0</span></div>
+<div class="card">Completed: <span id="completed">0</span></div>
 
-<br><br>
+<br>
+<a href="request.html">➕ New Request</a> |
+<a href="technician.html">👨‍🔧 Technician Panel</a> |
+<a href="reports.html">📈 Reports</a>
 
-<a href="ppm.html">PPM Records</a><br>
-<a href="cm.html">CM Records</a><br>
-<button onclick="logout()">Logout</button>
-
-<script type="module">
-import { db, auth } from './firebase.js';
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const dropdown = document.getElementById("buildingFilter");
-
-async function loadBuildings() {
-  const querySnapshot = await getDocs(collection(db, "buildings"));
-  querySnapshot.forEach(doc => {
-    let opt = document.createElement("option");
-    opt.text = doc.data().name;
-    dropdown.add(opt);
-  });
-}
-
-window.logout = function() {
-  signOut(auth).then(() => window.location.href = "index.html");
-}
-
-loadBuildings();
-</script>
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
