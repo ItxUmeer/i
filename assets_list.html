@@ -5,130 +5,67 @@
 <link rel="stylesheet" href="style.css">
 
 <style>
-table {
-  width:100%;
-  border-collapse:collapse;
+body {
+  background:#f5f7fb;
+  font-family:Arial;
+}
+
+.section {
+  padding:20px;
+}
+
+.asset-row {
   background:white;
-}
-
-th, td {
-  border:1px solid #e5e7eb;
-  padding:12px;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
   font-size:14px;
-  text-align:left;
 }
 
-th {
-  background:#2563eb;
-  color:white;
+.asset-row span {
+  padding:6px 10px;
+  border-radius:6px;
+  background:#f1f5f9;
 }
 
-tr:hover {
-  background:#f8fafc;
-}
-
-/* STATUS BADGES */
 .badge {
-  padding:4px 8px;
-  border-radius:5px;
+  padding:5px 10px;
+  border-radius:6px;
+  color:white;
   font-size:12px;
 }
 
-.active { background:#22c55e; color:white; }
-.inactive { background:#ef4444; color:white; }
+.green { background:#22c55e; }
+.red { background:#ef4444; }
+.orange { background:#f59e0b; }
+.blue { background:#2563eb; }
 
-/* PPM BAR */
-.bar {
-  width:100%;
-  height:10px;
-  background:#e5e7eb;
-  border-radius:5px;
-  overflow:hidden;
+.title {
+  font-weight:bold;
+  color:#111827;
 }
-
-.bar-fill {
-  height:10px;
-  background:#22c55e;
-  width:0%;
-}
-
-.low { background:#ef4444; }
-.mid { background:#f59e0b; }
-.high { background:#22c55e; }
 </style>
 
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
+<h2 style="text-align:center;">Assets List View</h2>
 
-  <h3>CMMS</h3>
-
-  <a href="dashboard.html">Dashboard</a>
-  <a href="workorders.html">Work Orders</a>
-  <a href="assets_list.html">Assets List</a>
-  <a href="ppm.html">PPM</a>
-
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<!-- HEADER -->
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>Assets List & PPM Status</h2>
-  <img src="logo-right.png">
-</div>
-
-<!-- TABLE -->
-<div class="section">
-
-  <table>
-
-    <thead>
-      <tr>
-        <th>Asset Name</th>
-        <th>Type</th>
-        <th>Building</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>PPM Status</th>
-      </tr>
-    </thead>
-
-    <tbody id="assetTable"></tbody>
-
-  </table>
-
-</div>
-
-</div>
+<div class="section" id="list">Loading...</div>
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-/* ---------------- LOAD ---------------- */
-auth.onAuthStateChanged(async (user) => {
-
-  if (!user) {
-    location = "login.html";
-    return;
-  }
-
-  loadAssets();
-});
-
-/* ---------------- ASSETS ---------------- */
-async function loadAssets() {
+/* ---------------- LOAD ASSETS ---------------- */
+async function load() {
 
   const snap = await getDocs(collection(db, "assets"));
 
@@ -138,37 +75,50 @@ async function loadAssets() {
 
     const a = d.data();
 
-    // fake ppm status logic (you can replace later with real ppm collection)
-    let ppmPercent = Math.floor(Math.random() * 100);
+    // ---- PPM STATUS LOGIC (temporary smart display) ----
+    let ppmStatus = "Service Due";
+    let color = "orange";
 
-    let barClass = "high";
-    if (ppmPercent < 40) barClass = "low";
-    else if (ppmPercent < 70) barClass = "mid";
+    if (a.status === "Inactive") {
+      ppmStatus = "Not Active";
+      color = "red";
+    } else {
+      // simulate service state (you will later connect real ppm)
+      const rand = Math.random();
+
+      if (rand > 0.6) {
+        ppmStatus = "Serviced";
+        color = "green";
+      } else if (rand > 0.3) {
+        ppmStatus = "Due Soon";
+        color = "orange";
+      } else {
+        ppmStatus = "Overdue";
+        color = "red";
+      }
+    }
 
     html += `
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.type}</td>
-        <td>${a.building}</td>
-        <td>${a.locationGroup}</td>
-        <td>
-          <span class="badge ${a.status === "Active" ? "active" : "inactive"}">
-            ${a.status}
-          </span>
-        </td>
+      <div class="asset-row">
 
-        <td>
-          <div class="bar">
-            <div class="bar-fill ${barClass}" style="width:${ppmPercent}%"></div>
-          </div>
-          <small>${ppmPercent}%</small>
-        </td>
-      </tr>
+        <span class="title">${a.name || "-"}</span>
+        <span>${a.type || "-"}</span>
+        <span>${a.building || "-"}</span>
+        <span>${a.locationGroup || "-"}</span>
+        <span>Monthly</span>
+
+        <span class="badge ${color}">
+          ${ppmStatus}
+        </span>
+
+      </div>
     `;
   });
 
-  document.getElementById("assetTable").innerHTML = html;
+  document.getElementById("list").innerHTML = html;
 }
+
+load();
 
 </script>
 
