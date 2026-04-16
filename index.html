@@ -2,44 +2,53 @@
 <html>
 <head>
 <title>DCAS CMMS</title>
-<link rel="stylesheet" href="style.css">
 
 <style>
-body {
+body{
   margin:0;
   font-family:Segoe UI;
-  background:url("assets/bg.jpg") no-repeat center center fixed;
+  background:url("bg.jpg") no-repeat center center fixed;
   background-size:cover;
 }
 
-.overlay {
-  background:rgba(255,255,255,0.85);
+.overlay{
+  background:rgba(255,255,255,0.88);
   height:100vh;
 }
 
-.header {
+.header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   padding:20px;
+  align-items:center;
 }
 
-.header img {
+.header img{
   height:60px;
 }
 
-.center {
+.center{
   text-align:center;
   margin-top:120px;
 }
 
-.title {
+.title{
   font-size:40px;
-  font-weight:bold;
   color:#2563eb;
+  font-weight:bold;
 }
 
-.btn {
+.card{
+  background:white;
+  width:60%;
+  margin:auto;
+  margin-top:30px;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn{
   margin-top:20px;
   padding:12px 25px;
   background:#2563eb;
@@ -56,23 +65,18 @@ body {
 
 <div class="overlay">
 
-  <!-- HEADER -->
+  <!-- HEADER LOGOS (ROOT FIXED) -->
   <div class="header">
-    <img src="assets/logo-left.png">
-    <img src="assets/logo-right.png">
+    <img src="logo-left.png">
+    <img src="logo-right.png">
   </div>
 
-  <!-- CENTER -->
   <div class="center">
-    <div class="title">CMMS for DCAS</div>
+    <div class="title">CMMS - DCAS</div>
     <p>Dubai Corporation for Ambulance Services</p>
-
-    <button class="btn" onclick="location='login.html'">
-      Enter System
-    </button>
   </div>
 
-</div>
-
-</body>
-</html>
+  <div class="card">
+    <h3>System Introduction</h3>
+    <p>
+      This
