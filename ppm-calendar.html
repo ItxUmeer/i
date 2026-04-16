@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PPM Calendar</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.day {
+  background: #111827;
+  padding: 10px;
+  min-height: 80px;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+}
+
+.day:hover {
+  background: #1e293b;
+}
+
+.day-number {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #00e5ff;
+  border-radius: 50%;
+  margin-top: 5px;
+}
+
+.selected {
+  border: 2px solid #00e5ff;
+}
+
+.task-box {
+  margin-top: 20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>CMMS</h2>
+  <div id="menu"></div>
+</div>
+
+<div class="main">
+
+<h1>PPM Calendar</h1>
+
+<h3 id="monthLabel"></h3>
+
+<div class="calendar" id="calendar"></div>
+
+<div class="task-box">
+  <h3>Tasks</h3>
+  <div id="tasks"></div>
+</div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { renderSidebar } from "./sidebar.js";
+
+let ppmData = [];
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) window.location.href = "index.html";
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  renderSidebar(snap.data().role);
+
+  await loadPPM();
+  buildCalendar();
+});
+
+
+// 📥 LOAD PPM DATA
+async function loadPPM() {
+
+  const snap = await getDocs(collection(db, "ppm"));
+
+  ppmData = [];
+
+  snap.forEach(d => {
+    ppmData.push(d.data());
+  });
+}
+
+
+// 📅 BUILD CALENDAR
+function buildCalendar() {
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  document.getElementById("monthLabel").innerText =
+    today.toLocaleString("default", { month: "long" }) + " " + year;
+
+  let html = "";
+
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+    const hasTask = ppmData.some(p => p.nextDue === dateStr);
+
+    html += `
+      <div class="day" onclick="showTasks('${dateStr}', this)">
+        <div class="day-number">${d}</div>
+        ${hasTask ? `<div class="dot"></div>` : ""}
+      </div>
+    `;
+  }
+
+  document.getElementById("calendar").innerHTML = html;
+}
+
+
+// 📋 SHOW TASKS
+window.showTasks = function(date, el) {
+
+  document.querySelectorAll(".day").forEach(d => d.classList.remove("selected"));
+  el.classList.add("selected");
+
+  const tasks = ppmData.filter(p => p.nextDue === date);
+
+  let html = "";
+
+  if (tasks.length === 0) {
+    html = "No PPM tasks";
+  }
+
+  tasks.forEach(t => {
+    html += `
+      <div class="card">
+        <b>${t.asset}</b><br>
+        Type: ${t.type}<br>
+        Location: ${t.location}<br>
+        Status: ${t.status}
+      </div>
+    `;
+  });
+
+  document.getElementById("tasks").innerHTML = html;
+};
+
+</script>
+
+</body>
+</html>
