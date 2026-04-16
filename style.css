@@ -1,260 +1,82 @@
-/* =========================
-   CMMS DUBAI THEME v2
-========================= */
-
-:root {
-  --bg: #0b1220;
-  --panel: #111827;
-  --panel2: #1f2937;
-  --accent: #38bdf8;
-  --accent2: #6366f1;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --success: #22c55e;
-}
-
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
-}
-
 body {
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* =========================
-   SIDEBAR
-========================= */
-
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 260px;
-  height: 100vh;
-  background: linear-gradient(180deg, var(--panel), #0f172a);
-  padding: 20px;
-  border-right: 1px solid #1f2937;
-  overflow-y: auto;
-}
-
-.sidebar h2 {
-  color: var(--accent);
-  font-size: 20px;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-/* SIDEBAR BUTTONS */
-.sidebar button {
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  background: var(--panel2);
-  border: none;
-  color: var(--text);
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.3s;
-  text-align: left;
-  padding-left: 14px;
-}
-
-.sidebar button:hover {
-  background: var(--accent);
-  color: #000;
-  transform: translateX(5px);
-}
-
-/* ACTIVE BUTTON LOOK */
-.sidebar button.active {
-  background: var(--accent2);
+  margin: 0;
+  font-family: Arial;
+  background: #0b1220;
   color: white;
 }
 
-/* =========================
-   MAIN AREA
-========================= */
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  background: #0f172a;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+}
 
+.sidebar h2 {
+  color: #00e5ff;
+}
+
+.sidebar a {
+  display: block;
+  padding: 10px;
+  margin-top: 5px;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.sidebar a:hover {
+  background: #1e293b;
+  box-shadow: 0 0 10px #00e5ff;
+}
+
+/* MAIN CONTENT */
 .main {
   margin-left: 260px;
   padding: 20px;
 }
 
-/* =========================
-   HEADINGS
-========================= */
-
-h1 {
-  color: var(--accent);
-  margin-bottom: 15px;
-}
-
-h2, h3 {
-  color: var(--text);
-}
-
-/* =========================
-   KPI CARDS
-========================= */
-
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.kpi-card {
-  background: linear-gradient(145deg, var(--panel), var(--panel2));
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid #1f2937;
-  box-shadow: 0 0 10px rgba(56,189,248,0.05);
-  transition: 0.3s;
-}
-
-.kpi-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent);
-}
-
-.kpi-title {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.kpi-value {
-  font-size: 26px;
-  font-weight: bold;
-  color: var(--accent);
-  margin-top: 5px;
-}
-
-/* =========================
-   CARDS
-========================= */
-
+/* CARDS */
 .card {
-  background: var(--panel);
+  background: #111827;
   padding: 15px;
-  border-radius: 14px;
-  border: 1px solid #1f2937;
-  margin: 10px 0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(0,255,255,0.05);
 }
 
-/* =========================
-   INPUTS
-========================= */
+/* BUTTONS */
+button {
+  background: #00e5ff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
 
+/* INPUTS */
 input, select {
   width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  border-radius: 10px;
-  border: 1px solid #1f2937;
-  background: var(--panel);
-  color: var(--text);
-  outline: none;
-}
-
-input:focus, select:focus {
-  border-color: var(--accent);
-}
-
-/* =========================
-   BUTTONS
-========================= */
-
-button {
-  background: var(--accent);
-  color: black;
-  padding: 12px;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
   border: none;
-  border-radius: 10px;
+}
+
+/* TABS */
+.tab {
+  display: inline-block;
+  padding: 10px;
+  margin-right: 5px;
+  background: #1e293b;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+  border-radius: 6px;
 }
 
-button:hover {
-  opacity: 0.85;
-}
-
-/* =========================
-   TABLES
-========================= */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid #1f2937;
-  font-size: 14px;
-}
-
-th {
-  color: var(--accent);
-}
-
-/* =========================
-   PROGRESS BARS
-========================= */
-
-.progress-box {
-  background: var(--panel);
-  padding: 14px;
-  border-radius: 14px;
-  margin: 10px 0;
-  border: 1px solid #1f2937;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background: #1f2937;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  transition: 0.5s;
-}
-
-.green { background: var(--success); }
-.yellow { background: var(--warning); }
-.red { background: var(--danger); }
-
-/* =========================
-   MOBILE RESPONSIVE
-========================= */
-
-@media (max-width: 768px) {
-
-  .sidebar {
-    position: relative;
-    width: 100%;
-    height: auto;
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .kpi-grid {
-    grid-template-columns: 1fr;
-  }
+.tab.active {
+  background: #00e5ff;
+  color: black;
 }
