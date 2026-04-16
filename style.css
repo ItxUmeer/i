@@ -1,35 +1,28 @@
-:root{
-  --blue:#2563eb;
-  --red:#ef4444;
-  --bg:#f8fafc;
-}
-
 body{
   margin:0;
   font-family:Segoe UI;
-  background:var(--bg);
+  background:#f8fafc;
 }
 
 /* LOGIN */
 .login-container{
   height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
 }
 
 .login-box{
-  width:380px;
+  width:350px;
   background:white;
   padding:25px;
-  border-radius:12px;
+  border-radius:10px;
   text-align:center;
 }
 
 .logo-bar{
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
 
 .logo-bar img{
@@ -38,7 +31,7 @@ body{
 
 /* SIDEBAR */
 .sidebar{
-  width:240px;
+  width:230px;
   height:100vh;
   position:fixed;
   background:white;
@@ -51,21 +44,16 @@ body{
   padding:10px;
   margin:5px 0;
   text-decoration:none;
-  color:#111;
+  color:black;
 }
 
 .sidebar a:hover{
   background:#e0f2fe;
 }
 
-.sidebar img{
-  width:16px;
-  margin-right:8px;
-}
-
 /* MAIN */
 .main{
-  margin-left:260px;
+  margin-left:250px;
   padding:20px;
 }
 
@@ -74,7 +62,7 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:15px;
+  margin-bottom:20px;
 }
 
 .header-bar img{
@@ -89,50 +77,12 @@ body{
   margin-bottom:15px;
 }
 
-/* FORM */
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:10px;
-}
-
-input,select,textarea{
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:6px;
-}
-
 /* BUTTON */
 button{
-  background:var(--blue);
+  background:#2563eb;
   color:white;
-  padding:10px;
   border:none;
+  padding:10px;
   border-radius:6px;
   cursor:pointer;
-}
-
-/* CARDS */
-.card{
-  background:white;
-  padding:12px;
-  border-radius:10px;
-  margin-top:10px;
-}
-
-.status-open{border-left:5px solid var(--blue);}
-.status-progress{border-left:5px solid orange;}
-.status-closed{border-left:5px solid green;}
-
-/* KPI */
-.kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:10px;
-}
-
-.kpi{
-  background:white;
-  padding:10px;
-  border-radius:8px;
 }
