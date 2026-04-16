@@ -29,19 +29,18 @@
 <body>
 
 <div class="sidebar">
-  <h2>CMMS</h2>
+  <h2>DCAS CMMS</h2>
   <div id="menu"></div>
-  <a href="#" onclick="logout()">Logout</a>
+  <a href="#" id="logoutBtn">Logout</a>
 </div>
 
 <div class="main">
 
-<h1>Facility Supervisor Tasks</h1>
+<h1>Facility Supervisor Follow-Up</h1>
 
-<!-- TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('wo')">Work Orders</div>
-  <div class="tab" onclick="switchTab('ppm')">PPM Tasks</div>
+  <div class="tab active" data-tab="wo">Work Orders</div>
+  <div class="tab" data-tab="ppm">PPM Tasks</div>
 </div>
 
 <div id="content"></div>
@@ -62,6 +61,13 @@ import { renderSidebar } from "./sidebar.js";
 let userId = "";
 let currentTab = "wo";
 
+// ✅ FIX LOGOUT (WORKS ALWAYS)
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
+
+// 🔐 AUTH
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -75,41 +81,37 @@ onAuthStateChanged(auth, async (user) => {
   const role = snap.data().role;
 
   if (role !== "facilities_supervisor" && role !== "maintenance") {
-    alert("Access denied");
     window.location.href = "dashboard.html";
     return;
   }
 
   renderSidebar(role);
 
+  setupTabs();
   loadData();
 });
 
+// ✅ FIX TAB CLICK (NO EVENT BUG)
+function setupTabs() {
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
 
-// 🔄 SWITCH TAB
-window.switchTab = function(tab) {
+      currentTab = tab.dataset.tab;
+      loadData();
+    });
+  });
+}
 
-  currentTab = tab;
-
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  event.target.classList.add("active");
-
-  loadData();
-};
-
-
-// 📥 LOAD DATA (ONLY ASSIGNED)
+// 📥 LOAD DATA
 async function loadData() {
-
-  if (currentTab === "wo") {
-    loadWorkOrders();
-  } else {
-    loadPPM();
-  }
+  if (currentTab === "wo") loadWorkOrders();
+  else loadPPM();
 }
 
 
-// 🛠 LOAD ASSIGNED WORK ORDERS
+// 🛠 WORK ORDERS (FOLLOW-UP ONLY)
 async function loadWorkOrders() {
 
   const snap = await getDocs(collection(db, "workOrders"));
@@ -120,7 +122,6 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
-    // 🔥 ONLY SHOW ASSIGNED
     if (w.assignedTo !== userId) return;
 
     let cls = "status-open";
@@ -133,18 +134,34 @@ async function loadWorkOrders() {
         Asset: ${w.asset}<br>
         Status: ${w.status}<br>
 
-        <textarea id="c_${d.id}" placeholder="Add comment"></textarea>
+        <textarea id="c_${d.id}" placeholder="Update / Follow-up"></textarea>
 
-        ${buildButtons(d.id, w.status, "workOrders")}
+        ${woButtons(d.id, w.status)}
       </div>
     `;
   });
 
-  document.getElementById("content").innerHTML = html || "No assigned work orders";
+  document.getElementById("content").innerHTML =
+    html || "<p>No assigned work orders</p>";
 }
 
 
-// 🟣 LOAD ASSIGNED PPM
+// 🔘 WORK ORDER BUTTONS (NO APPROVE)
+function woButtons(id, status) {
+
+  if (status === "Open") {
+    return `<button onclick="updateStatus('${id}','In Progress','workOrders')">Start Work</button>`;
+  }
+
+  if (status === "In Progress") {
+    return `<button onclick="updateStatus('${id}','Closed','workOrders')">Close Work</button>`;
+  }
+
+  return "";
+}
+
+
+// 🟣 PPM FOLLOW-UP
 async function loadPPM() {
 
   const snap = await getDocs(collection(db, "ppm"));
@@ -167,30 +184,27 @@ async function loadPPM() {
         Due: ${p.nextDue}<br>
         Status: ${p.status}<br>
 
-        <textarea id="c_${d.id}" placeholder="Add comment"></textarea>
+        <textarea id="c_${d.id}" placeholder="PPM update"></textarea>
 
-        ${buildButtons(d.id, p.status, "ppm")}
+        ${ppmButtons(d.id, p.status)}
       </div>
     `;
   });
 
-  document.getElementById("content").innerHTML = html || "No assigned PPM tasks";
+  document.getElementById("content").innerHTML =
+    html || "<p>No assigned PPM tasks</p>";
 }
 
 
-// 🔘 BUTTON LOGIC
-function buildButtons(id, status, collectionName) {
+// 🔘 PPM BUTTONS
+function ppmButtons(id, status) {
 
-  if (status === "Open" || status === "Pending") {
-    return `<button onclick="updateStatus('${id}','Accepted','${collectionName}')">Accept</button>`;
-  }
-
-  if (status === "Accepted") {
-    return `<button onclick="updateStatus('${id}','In Progress','${collectionName}')">Start Work</button>`;
+  if (status === "Pending") {
+    return `<button onclick="updateStatus('${id}','In Progress','ppm')">Start PPM</button>`;
   }
 
   if (status === "In Progress") {
-    return `<button onclick="updateStatus('${id}','Closed','${collectionName}')">Close</button>`;
+    return `<button onclick="updateStatus('${id}','Completed','ppm')">Complete</button>`;
   }
 
   return "";
@@ -208,13 +222,6 @@ window.updateStatus = async function(id, status, col) {
   });
 
   loadData();
-};
-
-
-// 🔐 LOGOUT
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "index.html";
 };
 
 </script>
