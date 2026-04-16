@@ -6,10 +6,12 @@
 
 <style>
 
+/* GLOBAL */
 body {
   margin:0;
   font-family:Arial;
   background:#f5f7fb;
+  color:#111827;
 }
 
 /* SIDEBAR */
@@ -17,11 +19,12 @@ body {
   position:fixed;
   left:0;
   top:0;
-  width:220px;
+  width:230px;
   height:100vh;
-  background:#0b1220;
+  background:#0f172a;
   color:white;
   padding:15px;
+  border-right:3px solid #2563eb; /* separation FIX */
 }
 
 .sidebar a {
@@ -35,18 +38,24 @@ body {
   background:#1f2937;
 }
 
-/* MAIN */
+/* MAIN AREA (PROPER SEPARATION FIX) */
 .main {
-  margin-left:220px;
-  padding:20px;
+  margin-left:250px; /* stronger separation */
+  padding:25px;
 }
 
-/* FORM BOX */
+/* PAGE TITLE */
+h2 {
+  color:#111827;
+  margin-bottom:15px;
+}
+
+/* SECTION BOX */
 .section {
   background:white;
   padding:15px;
-  border-left:5px solid #2563eb;
-  border-radius:8px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
   margin-bottom:20px;
 }
 
@@ -55,8 +64,8 @@ input, select {
   width:100%;
   padding:10px;
   margin:6px 0;
-  border:1px solid #ccc;
-  border-radius:5px;
+  border:1px solid #d1d5db;
+  border-radius:6px;
 }
 
 /* BUTTON */
@@ -69,50 +78,47 @@ button {
   cursor:pointer;
 }
 
-/* FULL WIDTH LIST */
+/* LIST WRAPPER */
 .list {
   width:100%;
 }
 
-/* WORK ORDER ROW (DARK + HIGH CONTRAST) */
+/* WORK ORDER ROW (CLEAN LIGHT THEME) */
 .wo-row {
-  width:100%;
-  background:#111827;
-  color:white;
+  background:white;
+  border:1px solid #e5e7eb;
   margin-bottom:10px;
-  padding:15px;
+  padding:12px;
   border-radius:8px;
+
   display:flex;
   justify-content:space-between;
-  align-items:center;
   flex-wrap:wrap;
   gap:10px;
+
+  color:#111827; /* FIX: dark text */
 }
 
-/* COLUMN STYLE */
+/* TEXT BLOCKS */
 .wo-row span {
-  background:#1f2937;
+  background:#f9fafb;
   padding:6px 10px;
-  border-radius:5px;
+  border-radius:6px;
   font-size:13px;
-  color:#e5e7eb;
+  color:#111827; /* FIX: black text */
 }
 
-/* STATUS BADGES */
+/* STATUS COLORS */
 .badge {
-  padding:6px 12px;
+  padding:5px 10px;
   border-radius:6px;
   font-size:12px;
-  font-weight:bold;
+  color:white;
 }
 
 .pending { background:#dc2626; }
 .started { background:#f59e0b; }
 .completed { background:#16a34a; }
-
-h2 {
-  margin-bottom:15px;
-}
 
 </style>
 
@@ -134,14 +140,14 @@ h2 {
 <!-- MAIN -->
 <div class="main">
 
-<h2>Work Order Management</h2>
+<h2>Work Orders</h2>
 
-<!-- CREATE WORK ORDER -->
+<!-- CREATE SECTION -->
 <div class="section">
 
   <h3>Create Work Order</h3>
 
-  <input id="title" placeholder="Work Order Title">
+  <input id="title" placeholder="Title">
 
   <select id="assetId"></select>
 
@@ -149,17 +155,17 @@ h2 {
   <input id="subLocation" placeholder="Sub Location (Floor / Room)">
 
   <select id="assignedTo">
-    <option value="">Auto Assign / Select Supervisor</option>
+    <option value="">Auto Assign Supervisor</option>
   </select>
 
-  <button onclick="createWO()">Send Work Order</button>
+  <button onclick="createWO()">Create Work Order</button>
 
 </div>
 
-<!-- LIST -->
+<!-- LIST SECTION -->
 <div class="list">
 
-  <h3>Work Order List</h3>
+  <h3>All Work Orders</h3>
 
   <div id="list">Loading...</div>
 
@@ -174,12 +180,10 @@ import { auth, db } from "./firebase.js";
 import {
   collection,
   addDoc,
-  getDocs,
-  query,
-  where
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- LOAD ---------------- */
+/* ---------------- AUTH ---------------- */
 auth.onAuthStateChanged(async (user) => {
 
   if (!user) location = "login.html";
@@ -189,7 +193,7 @@ auth.onAuthStateChanged(async (user) => {
   loadWorkOrders();
 });
 
-/* ---------------- ASSETS ---------------- */
+/* ---------------- LOAD ASSETS ---------------- */
 async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
@@ -204,7 +208,7 @@ async function loadAssets() {
   document.getElementById("assetId").innerHTML = html;
 }
 
-/* ---------------- SUPERVISOR FIX (AUTO LOAD) ---------------- */
+/* ---------------- SUPERVISOR LOAD FIX ---------------- */
 async function loadSupervisors() {
 
   const snap = await getDocs(collection(db,"users"));
@@ -228,42 +232,38 @@ async function loadSupervisors() {
   document.getElementById("assignedTo").innerHTML = html;
 }
 
-/* ---------------- AUTO ASSIGN LOGIC ---------------- */
-function getAutoSupervisor() {
+/* ---------------- AUTO ASSIGN ---------------- */
+function getSupervisor() {
 
+  const val = document.getElementById("assignedTo").value;
+
+  if (val) return val;
+
+  // fallback auto assign first supervisor
   const select = document.getElementById("assignedTo");
 
-  // if user didn't select → auto assign first supervisor
-  if (!select.value) {
-    return select.options[1]?.value || "";
-  }
-
-  return select.value;
+  return select.options[1]?.value || "";
 }
 
-/* ---------------- CREATE WORK ORDER ---------------- */
+/* ---------------- CREATE ---------------- */
 window.createWO = async () => {
 
-  const assignedTo = getAutoSupervisor();
-
-  const data = {
-    title: document.getElementById("title").value,
-    assetId: document.getElementById("assetId").value,
-    location: document.getElementById("location").value,
-    subLocation: document.getElementById("subLocation").value,
-    assignedTo: assignedTo || null,
+  await addDoc(collection(db,"workOrders"), {
+    title: title.value,
+    assetId: assetId.value,
+    location: location.value,
+    subLocation: subLocation.value,
+    assignedTo: getSupervisor(),
     status: "Pending",
     createdAt: new Date()
-  };
+  });
 
-  await addDoc(collection(db,"workOrders"), data);
-
-  alert("Work Order Sent ✔ (Auto Assigned)");
+  alert("Work Order Created ✔");
 
   loadWorkOrders();
 };
 
-/* ---------------- WORK ORDER LIST (FULL WIDTH DARK UI) ---------------- */
+/* ---------------- LOAD WORK ORDERS (VISIBLE TO ALL USERS) ---------------- */
 async function loadWorkOrders() {
 
   const snap = await getDocs(collection(db,"workOrders"));
@@ -274,19 +274,19 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
-    let statusClass = "pending";
-    if (w.status === "Started") statusClass = "started";
-    if (w.status === "Completed") statusClass = "completed";
+    let color = "pending";
+    if (w.status === "Started") color = "started";
+    if (w.status === "Completed") color = "completed";
 
     html += `
       <div class="wo-row">
 
         <span><b>${w.title}</b></span>
-        <span>${w.assetId || "-"}</span>
-        <span>${w.location || "-"}</span>
-        <span>${w.subLocation || "-"}</span>
+        <span>${w.assetId}</span>
+        <span>${w.location}</span>
+        <span>${w.subLocation}</span>
 
-        <span class="badge ${statusClass}">
+        <span class="badge ${color}">
           ${w.status}
         </span>
 
