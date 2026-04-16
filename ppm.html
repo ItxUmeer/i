@@ -7,48 +7,42 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>CMMS</h3>
-
-  <a href="dashboard.html">Dashboard</a>
-  <a href="workorders.html">Work Orders</a>
   <a href="assets.html">Assets</a>
   <a href="ppm.html">PPM</a>
-  <a href="users.html">Users</a>
-
-  <hr>
-
-  <a href="#" id="logoutBtn">Logout</a>
+  <a href="workorders.html">Work Orders</a>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- HEADER -->
 <div class="header-bar">
   <img src="logo-left.png">
   <h2>PPM Management</h2>
   <img src="logo-right.png">
 </div>
 
-<!-- CREATE PPM (ADMIN ONLY) -->
-<div class="section" id="ppmForm">
-  <h3>Create PPM Task</h3>
+<!-- CREATE PPM -->
+<div class="section">
+
+  <h3>Create PPM</h3>
 
   <select id="assetSelect"></select>
 
-  <input id="task" placeholder="Task (Filter Cleaning)">
-  <input id="frequency" placeholder="Frequency (Monthly)">
+  <input id="task" placeholder="Task">
+  <input id="frequency" placeholder="Monthly / Weekly">
   <input id="nextDue" type="date">
 
   <button onclick="createPPM()">Create PPM</button>
+
 </div>
 
 <!-- PPM LIST -->
 <div class="section">
-  <h3>PPM Tasks</h3>
+
+  <h3>PPM List</h3>
   <div id="ppmList"></div>
+
 </div>
 
 </div>
@@ -56,54 +50,33 @@
 <script type="module">
 
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
 import {
-  collection, getDocs, addDoc, doc, getDoc, updateDoc
+  collection,
+  addDoc,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let currentRole = "";
-let assetsData = {};
+/* ---------------- LOAD ---------------- */
+auth.onAuthStateChanged(async (user) => {
 
-// LOGOUT
-logoutBtn.onclick = async ()=>{
-  await signOut(auth);
-  location="login.html";
-};
+  if (!user) location = "login.html";
 
-// AUTH
-onAuthStateChanged(auth, async (user)=>{
-
-  if(!user){
-    location="login.html";
-    return;
-  }
-
-  const snap = await getDoc(doc(db,"users",user.uid));
-  currentRole = snap.data().role;
-
-  if(currentRole !== "admin"){
-    ppmForm.style.display = "none";
-  }
-
-  await loadAssets();
+  loadAssets();
   loadPPM();
 });
 
-// LOAD ASSETS
-async function loadAssets(){
+/* ---------------- LOAD ASSETS FOR DROPDOWN ---------------- */
+async function loadAssets() {
 
-  const snap = await getDocs(collection(db,"assets"));
+  const snap = await getDocs(collection(db, "assets"));
 
   let html = `<option value="">Select Asset</option>`;
 
-  snap.forEach(d=>{
+  snap.forEach(d => {
+
     const a = d.data();
 
-    assetsData[d.id] = a;
-
-    html += `<option value="${d.id}">
+    html += `<option value="${a.name}">
       ${a.name} (${a.building})
     </option>`;
   });
@@ -111,34 +84,29 @@ async function loadAssets(){
   assetSelect.innerHTML = html;
 }
 
-// CREATE PPM
-window.createPPM = async ()=>{
+/* ---------------- CREATE PPM ---------------- */
+window.createPPM = async () => {
 
-  const asset = assetsData[assetSelect.value];
-
-  await addDoc(collection(db,"ppm"),{
-    assetId: asset.name,
-    location: asset.locationGroup + " - " + asset.building,
+  await addDoc(collection(db, "ppm"), {
+    assetId: assetSelect.value,
+    task: task.value,
     frequency: frequency.value,
     nextDue: nextDue.value,
-    status: "Pending",
-    task: task.value,
-    checklist: asset.checklist || []
+    status: "Pending"
   });
 
   alert("PPM Created ✔");
-
   loadPPM();
 };
 
-// LOAD PPM
-async function loadPPM(){
+/* ---------------- LOAD PPM ---------------- */
+async function loadPPM() {
 
-  const snap = await getDocs(collection(db,"ppm"));
+  const snap = await getDocs(collection(db, "ppm"));
 
   let html = "";
 
-  snap.forEach(d=>{
+  snap.forEach(d => {
 
     const p = d.data();
 
@@ -146,45 +114,14 @@ async function loadPPM(){
       <div class="card">
         <b>${p.assetId}</b><br>
         ${p.task}<br>
-        ${p.location}<br>
-        Status: ${p.status}<br>
-
-        ${
-          currentRole === "facilities_supervisor"
-          ? `<button onclick="openChecklist('${d.id}')">
-              Open Checklist
-            </button>`
-          : ""
-        }
+        ${p.frequency}<br>
+        ${p.status}
       </div>
     `;
   });
 
-  ppmList.innerHTML = html;
+  document.getElementById("ppmList").innerHTML = html;
 }
-
-// OPEN CHECKLIST (SUPERVISOR)
-window.openChecklist = async (id)=>{
-
-  const snap = await getDoc(doc(db,"ppm",id));
-  const p = snap.data();
-
-  let responses = {};
-
-  for(let item of p.checklist){
-    const res = prompt(item + " (OK / Not OK)");
-    responses[item] = res;
-  }
-
-  await updateDoc(doc(db,"ppm",id),{
-    status: "Completed",
-    responses: responses
-  });
-
-  alert("PPM Updated ✔");
-
-  loadPPM();
-};
 
 </script>
 
