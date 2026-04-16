@@ -1,89 +1,167 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>Admin Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>CMMS</h2>
   <div id="menu"></div>
+  <a href="#" id="logoutBtn">Logout</a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
+<!-- HEADER -->
 <div class="header-bar">
   <img src="logo-left.png">
-  <h2>Dashboard</h2>
+  <h2>Admin Dashboard</h2>
   <img src="logo-right.png">
 </div>
 
+<!-- KPI -->
 <div class="kpi-grid">
-  <div class="kpi"><p id="wo"></p>Total WO</div>
-  <div class="kpi"><p id="open"></p>Open</div>
-  <div class="kpi"><p id="closed"></p>Closed</div>
+  <div class="kpi"><b>Total WO</b><p id="totalWO">0</p></div>
+  <div class="kpi"><b>Open</b><p id="openWO">0</p></div>
+  <div class="kpi"><b>Closed</b><p id="closedWO">0</p></div>
 </div>
 
+<!-- CHART -->
 <div class="section">
   <canvas id="chart"></canvas>
 </div>
 
+<!-- CREATE WORK ORDER -->
 <div class="section">
   <h3>Create Work Order</h3>
+
   <div class="form-grid">
     <input id="title" placeholder="Title">
     <input id="asset" placeholder="Asset">
-    <input id="assign" placeholder="Assign UID">
+    <input id="assign" placeholder="Assign User UID">
   </div>
-  <button onclick="createWO()">Create</button>
+
+  <button id="createBtn">Create Work Order</button>
 </div>
 
 </div>
 
 <script type="module">
-import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-async function load(){
-  const snap = await getDocs(collection(db,"workOrders"));
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-  let open=0, closed=0;
+import { collection, getDocs, addDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-  snap.forEach(d=>{
-    if(d.data().status==="Closed") closed++;
+import { renderSidebar } from "./sidebar.js";
+
+let chart;
+
+// ✅ LOGOUT FIX
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
+
+// 🔐 AUTH CHECK
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  renderSidebar("admin");
+
+  await loadDashboard();
+});
+
+// 📊 LOAD DASHBOARD
+async function loadDashboard() {
+
+  const snap = await getDocs(collection(db, "workOrders"));
+
+  let open = 0;
+  let closed = 0;
+
+  snap.forEach(d => {
+    const w = d.data();
+
+    if (w.status === "Closed") closed++;
     else open++;
   });
 
-  wo.innerText=snap.size;
-  open.innerText=open;
-  closed.innerText=closed;
+  document.getElementById("totalWO").innerText = snap.size;
+  document.getElementById("openWO").innerText = open;
+  document.getElementById("closedWO").innerText = closed;
 
-  new Chart(chart,{
-    type:"bar",
-    data:{
-      labels:["Open","Closed"],
-      datasets:[{
-        data:[open,closed],
-        backgroundColor:["#2563eb","#ef4444"]
+  renderChart(open, closed);
+}
+
+// 📊 CHART
+function renderChart(open, closed) {
+
+  const ctx = document.getElementById("chart");
+
+  if (chart) chart.destroy(); // FIX duplicate chart bug
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Open", "Closed"],
+      datasets: [{
+        data: [open, closed],
+        backgroundColor: ["#2563eb", "#ef4444"],
+        borderRadius: 6
       }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }},
+        y: { grid: { color: "#eee" }}
+      }
     }
   });
 }
 
-window.createWO = async ()=>{
-  await addDoc(collection(db,"workOrders"),{
-    title:title.value,
-    asset:asset.value,
-    assignedTo:assign.value,
-    status:"Open"
-  });
-  load();
-};
+// ➕ CREATE WORK ORDER
+document.getElementById("createBtn").addEventListener("click", async () => {
 
-load();
+  const t = document.getElementById("title").value;
+  const a = document.getElementById("asset").value;
+  const u = document.getElementById("assign").value;
+
+  if (!t || !a || !u) {
+    alert("Fill all fields");
+    return;
+  }
+
+  await addDoc(collection(db, "workOrders"), {
+    title: t,
+    asset: a,
+    assignedTo: u,
+    status: "Open",
+    createdAt: new Date().toISOString()
+  });
+
+  alert("Work Order Created ✔");
+
+  document.getElementById("title").value = "";
+  document.getElementById("asset").value = "";
+  document.getElementById("assign").value = "";
+
+  loadDashboard();
+});
+
 </script>
 
 </body>
