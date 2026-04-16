@@ -46,7 +46,27 @@
     }
   </style>
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
+  const btn = document.getElementById("loginBtn");
+  const msg = document.getElementById("msg");
+
+  btn.addEventListener("click", () => {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      msg.innerText = "Please enter email & password";
+      return;
+    }
+
+    msg.innerText = "Login button works ✔ (Firebase not added yet)";
+  });
+
+});
+</script>
 <body>
 
 <div class="box">
