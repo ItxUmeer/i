@@ -22,39 +22,68 @@
 </div>
 
 <div class="kpi-grid">
-  <div class="kpi"><p id="wo">0</p>Work Orders</div>
-  <div class="kpi"><p id="asset">0</p>Assets</div>
+  <div class="kpi"><p id="wo"></p>Total WO</div>
+  <div class="kpi"><p id="open"></p>Open</div>
+  <div class="kpi"><p id="closed"></p>Closed</div>
 </div>
 
-<canvas id="chart"></canvas>
+<div class="section">
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="section">
+  <h3>Create Work Order</h3>
+  <div class="form-grid">
+    <input id="title" placeholder="Title">
+    <input id="asset" placeholder="Asset">
+    <input id="assign" placeholder="Assign UID">
+  </div>
+  <button onclick="createWO()">Create</button>
+</div>
 
 </div>
 
 <script type="module">
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-import { renderSidebar } from "./sidebar.js";
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let chart;
+async function load(){
+  const snap = await getDocs(collection(db,"workOrders"));
 
-onAuthStateChanged(auth, async user=>{
-  renderSidebar("admin");
+  let open=0, closed=0;
 
-  const wo = await getDocs(collection(db,"workOrders"));
-  const asset = await getDocs(collection(db,"assets"));
+  snap.forEach(d=>{
+    if(d.data().status==="Closed") closed++;
+    else open++;
+  });
 
-  document.getElementById("wo").innerText = wo.size;
-  document.getElementById("asset").innerText = asset.size;
+  wo.innerText=snap.size;
+  open.innerText=open;
+  closed.innerText=closed;
 
-  chart = new Chart(document.getElementById("chart"),{
+  new Chart(chart,{
     type:"bar",
     data:{
-      labels:["Work Orders","Assets"],
-      datasets:[{data:[wo.size, asset.size], backgroundColor:["#0ea5e9","#ef4444"]}]
+      labels:["Open","Closed"],
+      datasets:[{
+        data:[open,closed],
+        backgroundColor:["#2563eb","#ef4444"]
+      }]
     }
   });
-});
+}
+
+window.createWO = async ()=>{
+  await addDoc(collection(db,"workOrders"),{
+    title:title.value,
+    asset:asset.value,
+    assignedTo:assign.value,
+    status:"Open"
+  });
+  load();
+};
+
+load();
 </script>
 
 </body>
