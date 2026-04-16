@@ -16,5 +16,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Export services
-
 export const db = getFirestore(app);
