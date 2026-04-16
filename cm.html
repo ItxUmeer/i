@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CM</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>CM Records</h2>
+
+<input id="complaint" placeholder="Complaint">
+<input id="priority" placeholder="Priority">
+
+<button onclick="addCM()">Add CM</button>
+
+<ul id="cmList"></ul>
+
+<script type="module">
+import { db } from './firebase.js';
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+window.addCM = async function() {
+  await addDoc(collection(db, "cm"), {
+    complaint: complaint.value,
+    priority: priority.value
+  });
+  alert("Saved");
+  loadCM();
+}
+
+async function loadCM() {
+  const list = document.getElementById("cmList");
+  list.innerHTML = "";
+
+  const querySnapshot = await getDocs(collection(db, "cm"));
+  querySnapshot.forEach(doc => {
+    let li = document.createElement("li");
+    li.textContent = doc.data().complaint + " (" + doc.data().priority + ")";
+    list.appendChild(li);
+  });
+}
+
+loadCM();
+</script>
+
+</body>
+</html>
