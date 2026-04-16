@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>DCAS CMMS</title>
+<title>CMMS DCAS</title>
 
 <style>
 body{
@@ -19,12 +19,11 @@ body{
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   padding:20px;
 }
 
 .header img{
-  height:60px;
+  height:80px;
 }
 
 .center{
@@ -32,19 +31,12 @@ body{
   margin-top:100px;
 }
 
-.title{
-  font-size:38px;
-  color:#2563eb;
-  font-weight:bold;
-}
-
 .card{
   background:white;
   width:60%;
   margin:30px auto;
   padding:20px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  border-radius:10px;
 }
 
 .btn{
@@ -52,8 +44,6 @@ body{
   background:#2563eb;
   color:white;
   border:none;
-  border-radius:8px;
-  cursor:pointer;
 }
 </style>
 
@@ -63,36 +53,33 @@ body{
 
 <div class="overlay">
 
-  <div class="header">
-    <img src="logo-left.png">
-    <img src="logo-right.png">
-  </div>
+<div class="header">
+  <img src="logo-left.png">
+  <img src="logo-right.png">
+</div>
 
-  <div class="center">
-    <div class="title">CMMS - DCAS</div>
-    <p>Dubai Corporation for Ambulance Services</p>
-  </div>
+<div class="center">
+  <h1>CMMS - DCAS</h1>
+  <p>Dubai Corporation for Ambulance Services</p>
+</div>
 
-  <div class="card">
-    <h3>System Introduction</h3>
-    <p>
-      Centralized Maintenance Management System to handle Assets,
-      Preventive Maintenance (PPM), and Work Orders efficiently.
-    </p>
+<div class="card">
+  <h3>System Introduction</h3>
+  <p>Manage assets, work orders, and maintenance tasks efficiently.</p>
 
-    <h3>Your Role Access</h3>
-    <ul>
-      <li>Admin – Full control</li>
-      <li>Assets Officer – Asset & PPM management</li>
-      <li>Facility Supervisor – Task follow-up</li>
-    </ul>
+  <h3>Access Roles</h3>
+  <ul>
+    <li>Admin</li>
+    <li>Assets Officer</li>
+    <li>Facility Supervisor</li>
+  </ul>
 
-    <div style="text-align:center">
-      <button class="btn" onclick="location='login.html'">
-        Enter System
-      </button>
-    </div>
-  </div>
+  <center>
+    <button class="btn" onclick="location='login.html'">
+      Enter System
+    </button>
+  </center>
+</div>
 
 </div>
 
