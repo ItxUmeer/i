@@ -3,48 +3,128 @@
 <head>
 <title>Work Orders</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+
+body {
+  background:#f5f7fb;
+  font-family:Arial;
+}
+
+/* SIDEBAR FIX */
+.sidebar {
+  position:fixed;
+  left:0;
+  top:0;
+  width:220px;
+  height:100vh;
+  background:#0f172a;
+  color:white;
+  padding:15px;
+}
+
+.sidebar a {
+  display:block;
+  color:#cbd5e1;
+  padding:10px;
+  text-decoration:none;
+}
+
+/* MAIN */
+.main {
+  margin-left:240px;
+  padding:20px;
+}
+
+/* SECTION BOX */
+.section {
+  background:white;
+  padding:15px;
+  border:2px solid #2563eb;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+/* INPUTS */
+input, select {
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+}
+
+/* BUTTON */
+button {
+  background:#2563eb;
+  color:white;
+  padding:10px;
+  border:none;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+/* WORK ORDER ROW STYLE */
+.wo-row {
+  background:white;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+.wo-row span {
+  background:#f1f5f9;
+  padding:5px 10px;
+  border-radius:5px;
+}
+
+.badge {
+  padding:5px 10px;
+  border-radius:6px;
+  color:white;
+}
+
+.green { background:#22c55e; }
+.orange { background:#f59e0b; }
+.red { background:#ef4444; }
+
+</style>
+
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-
   <h3>CMMS</h3>
 
   <a href="dashboard.html">Dashboard</a>
-  <a href="workorders.html">Work Orders</a>
   <a href="assets.html">Assets</a>
+  <a href="assets_list.html">Assets List</a>
   <a href="ppm.html">PPM</a>
-  <a href="users.html">Users</a>
-
-  <hr>
-
-  <a href="#" id="logoutBtn">Logout</a>
-
+  <a href="workorders.html">Work Orders</a>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- HEADER -->
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>Work Order Management</h2>
-  <img src="logo-right.png">
-</div>
+<h2>Work Order Management</h2>
 
-<!-- CREATE WORK ORDER -->
-<div class="section" id="woForm">
+<!-- CREATE SECTION -->
+<div class="section">
 
   <h3>Create Work Order</h3>
 
-  <input id="title" placeholder="Title (AC Repair)">
-  <input id="description" placeholder="Description">
+  <input id="title" placeholder="Work Order Title">
 
-  <input id="assetId" placeholder="Asset ID (AHU-01)">
+  <select id="assetId"></select>
 
-  <!-- ASSIGNEE DROPDOWN -->
+  <input id="location" placeholder="Location (HQ / Building 1)">
+  <input id="subLocation" placeholder="Sub Location (Floor / Room)">
+
   <select id="assignedTo">
     <option value="">Select Supervisor</option>
   </select>
@@ -53,10 +133,13 @@
 
 </div>
 
-<!-- LIST -->
+<!-- LIST SECTION -->
 <div class="section">
-  <h3>Work Orders</h3>
-  <div id="woList">Loading...</div>
+
+  <h3>Work Order List</h3>
+
+  <div id="list">Loading...</div>
+
 </div>
 
 </div>
@@ -69,36 +152,40 @@ import {
   collection,
   addDoc,
   getDocs,
-  doc,
-  getDoc,
   query,
-  orderBy,
-  updateDoc,
-  serverTimestamp
+  where
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-/* ---------------- LOGOUT ---------------- */
-document.getElementById("logoutBtn").onclick = async () => {
-  await auth.signOut();
-  location = "login.html";
-};
 
 /* ---------------- AUTH ---------------- */
 auth.onAuthStateChanged(async (user) => {
 
-  if (!user) {
-    location = "login.html";
-    return;
-  }
+  if (!user) location = "login.html";
 
-  loadUsers();
+  loadAssets();
+  loadSupervisors();
   loadWorkOrders();
 });
 
-/* ---------------- LOAD USERS (SUPERVISORS ONLY) ---------------- */
-async function loadUsers() {
+/* ---------------- LOAD ASSETS ---------------- */
+async function loadAssets() {
 
-  const snap = await getDocs(collection(db, "users"));
+  const snap = await getDocs(collection(db,"assets"));
+
+  let html = `<option value="">Select Asset</option>`;
+
+  snap.forEach(d => {
+    const a = d.data();
+
+    html += `<option value="${a.name}">${a.name}</option>`;
+  });
+
+  document.getElementById("assetId").innerHTML = html;
+}
+
+/* ---------------- LOAD SUPERVISORS (FIXED AUTO ASSIGN) ---------------- */
+async function loadSupervisors() {
+
+  const snap = await getDocs(collection(db,"users"));
 
   let html = `<option value="">Select Supervisor</option>`;
 
@@ -108,11 +195,9 @@ async function loadUsers() {
 
     if (u.role === "facilities_supervisor") {
 
-      html += `
-        <option value="${d.id}">
-          ${u.name}
-        </option>
-      `;
+      html += `<option value="${d.id}">
+        ${u.name || d.id}
+      </option>`;
     }
   });
 
@@ -122,37 +207,30 @@ async function loadUsers() {
 /* ---------------- CREATE WORK ORDER ---------------- */
 window.createWO = async () => {
 
-  try {
+  const asset = document.getElementById("assetId").value;
+  const title = document.getElementById("title").value;
+  const location = document.getElementById("location").value;
+  const subLocation = document.getElementById("subLocation").value;
+  const assignedTo = document.getElementById("assignedTo").value;
 
-    await addDoc(collection(db, "workOrders"), {
-      title: document.getElementById("title").value,
-      description: document.getElementById("description").value,
-      assetId: document.getElementById("assetId").value,
-      assignedTo: document.getElementById("assignedTo").value,
-      status: "Pending",
-      createdAt: serverTimestamp(),
-      comments: []
-    });
+  await addDoc(collection(db,"workOrders"), {
+    title,
+    assetId: asset,
+    location,
+    subLocation,
+    assignedTo,
+    status: "Pending"
+  });
 
-    alert("Work Order Created ✔");
+  alert("Work Order Created ✔");
 
-    loadWorkOrders();
-
-  } catch (err) {
-    console.error(err);
-    alert("Error creating work order");
-  }
+  loadWorkOrders();
 };
 
-/* ---------------- LOAD WORK ORDERS ---------------- */
+/* ---------------- LOAD WORK ORDERS (SINGLE LINE STYLE) ---------------- */
 async function loadWorkOrders() {
 
-  const q = query(
-    collection(db, "workOrders"),
-    orderBy("createdAt", "desc")
-  );
-
-  const snap = await getDocs(q);
+  const snap = await getDocs(collection(db,"workOrders"));
 
   let html = "";
 
@@ -160,37 +238,30 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
+    let color = "orange";
+    if (w.status === "Completed") color = "green";
+    if (w.status === "Started") color = "orange";
+    if (w.status === "Pending") color = "red";
+
     html += `
-      <div class="card">
-        <b>${w.title}</b><br>
-        Asset: ${w.assetId}<br>
-        Status: ${w.status}<br>
+      <div class="wo-row">
 
-        <small>
-          ${w.description || ""}
-        </small>
+        <span><b>${w.title}</b></span>
+        <span>${w.assetId}</span>
+        <span>${w.location || "-"}</span>
+        <span>${w.subLocation || "-"}</span>
 
-        <br><br>
+        <span class="badge ${color}">
+          ${w.status}
+        </span>
 
-        <button onclick="setStatus('${d.id}','Started')">Start</button>
-        <button onclick="setStatus('${d.id}','Completed')">Close</button>
       </div>
     `;
   });
 
-  document.getElementById("woList").innerHTML =
+  document.getElementById("list").innerHTML =
     html || "No Work Orders";
 }
-
-/* ---------------- UPDATE STATUS ---------------- */
-window.setStatus = async (id, status) => {
-
-  await updateDoc(doc(db, "workOrders", id), {
-    status: status
-  });
-
-  loadWorkOrders();
-};
 
 </script>
 
