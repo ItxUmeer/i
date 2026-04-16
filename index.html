@@ -8,7 +8,6 @@
 <body>
 
 <div class="login-container">
-
   <div class="login-box">
 
     <div class="logo-bar">
@@ -25,22 +24,20 @@
     <p id="msg"></p>
 
   </div>
-
 </div>
 
 <script type="module">
 import { login } from "./auth.js";
 
-document.getElementById("loginBtn").onclick = async () => {
+loginBtn.onclick = async ()=>{
+  try{
+    const role = await login(email.value,password.value);
 
-  try {
-    const role = await login(email.value, password.value);
+    if(role==="admin") location="dashboard.html";
+    else if(role==="assets_officer") location="assets.html";
+    else location="supervisor.html";
 
-    if (role === "admin") location = "dashboard.html";
-    else if (role === "assets_officer") location = "assets.html";
-    else location = "supervisor.html";
-
-  } catch(e){
+  }catch(e){
     msg.innerText = e.message;
   }
 };
