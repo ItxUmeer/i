@@ -12,15 +12,15 @@ body{
 }
 
 .overlay{
-  background:rgba(255,255,255,0.88);
+  background:rgba(255,255,255,0.9);
   height:100vh;
 }
 
 .header{
   display:flex;
   justify-content:space-between;
-  padding:20px;
   align-items:center;
+  padding:20px;
 }
 
 .header img{
@@ -29,11 +29,11 @@ body{
 
 .center{
   text-align:center;
-  margin-top:120px;
+  margin-top:100px;
 }
 
 .title{
-  font-size:40px;
+  font-size:38px;
   color:#2563eb;
   font-weight:bold;
 }
@@ -41,15 +41,13 @@ body{
 .card{
   background:white;
   width:60%;
-  margin:auto;
-  margin-top:30px;
+  margin:30px auto;
   padding:20px;
   border-radius:12px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 .btn{
-  margin-top:20px;
   padding:12px 25px;
   background:#2563eb;
   color:white;
@@ -65,7 +63,6 @@ body{
 
 <div class="overlay">
 
-  <!-- HEADER LOGOS (ROOT FIXED) -->
   <div class="header">
     <img src="logo-left.png">
     <img src="logo-right.png">
@@ -79,4 +76,25 @@ body{
   <div class="card">
     <h3>System Introduction</h3>
     <p>
-      This
+      Centralized Maintenance Management System to handle Assets,
+      Preventive Maintenance (PPM), and Work Orders efficiently.
+    </p>
+
+    <h3>Your Role Access</h3>
+    <ul>
+      <li>Admin – Full control</li>
+      <li>Assets Officer – Asset & PPM management</li>
+      <li>Facility Supervisor – Task follow-up</li>
+    </ul>
+
+    <div style="text-align:center">
+      <button class="btn" onclick="location='login.html'">
+        Enter System
+      </button>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
