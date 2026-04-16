@@ -1,120 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Facility Supervisor Panel</title>
+<title>Supervisor Panel</title>
 <link rel="stylesheet" href="style.css">
-
-<style>
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.tab {
-  padding: 10px;
-  background: #e2e8f0;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.tab.active {
-  background: #0ea5e9;
-  color: white;
-}
-</style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>DCAS CMMS</h2>
-  <div id="menu"></div>
-  <a href="#" id="logoutBtn">Logout</a>
+  <h3>Supervisor</h3>
+
+  <a href="supervisor.html">My Tasks</a>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
-<h1>Facility Supervisor Follow-Up</h1>
-
-<div class="tabs">
-  <div class="tab active" data-tab="wo">Work Orders</div>
-  <div class="tab" data-tab="ppm">PPM Tasks</div>
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Facility Supervisor Dashboard</h2>
+  <img src="logo-right.png">
 </div>
 
-<div id="content"></div>
+<!-- WORK ORDERS -->
+<div class="section">
+  <h3>My Work Orders</h3>
+  <div id="workList">Loading...</div>
+</div>
+
+<!-- PPM -->
+<div class="section">
+  <h3>My PPM Tasks</h3>
+  <div id="ppmList">Loading...</div>
+</div>
 
 </div>
 
 <script type="module">
 
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { collection, getDocs, doc, getDoc, updateDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { renderSidebar } from "./sidebar.js";
+let uid = "";
 
-let userId = "";
-let currentTab = "wo";
-
-// ✅ FIX LOGOUT (WORKS ALWAYS)
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-});
-
-// 🔐 AUTH
-onAuthStateChanged(auth, async (user) => {
+/* ---------------- AUTH ---------------- */
+auth.onAuthStateChanged(async (user) => {
 
   if (!user) {
-    window.location.href = "index.html";
+    location = "login.html";
     return;
   }
 
-  userId = user.uid;
+  uid = user.uid;
 
-  const snap = await getDoc(doc(db, "users", user.uid));
-  const role = snap.data().role;
-
-  if (role !== "facilities_supervisor" && role !== "maintenance") {
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  renderSidebar(role);
-
-  setupTabs();
-  loadData();
+  loadWorkOrders();
+  loadPPM();
 });
 
-// ✅ FIX TAB CLICK (NO EVENT BUG)
-function setupTabs() {
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-
-      currentTab = tab.dataset.tab;
-      loadData();
-    });
-  });
-}
-
-// 📥 LOAD DATA
-async function loadData() {
-  if (currentTab === "wo") loadWorkOrders();
-  else loadPPM();
-}
-
-
-// 🛠 WORK ORDERS (FOLLOW-UP ONLY)
+/* ---------------- WORK ORDERS (ONLY ASSIGNED) ---------------- */
 async function loadWorkOrders() {
 
-  const snap = await getDocs(collection(db, "workOrders"));
+  const q = query(
+    collection(db, "workOrders"),
+    where("assignedTo", "==", uid)
+  );
+
+  const snap = await getDocs(q);
 
   let html = "";
 
@@ -122,49 +85,34 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
-    if (w.assignedTo !== userId) return;
-
-    let cls = "status-open";
-    if (w.status === "In Progress") cls = "status-progress";
-    if (w.status === "Closed") cls = "status-closed";
-
     html += `
-      <div class="card ${cls}">
+      <div class="card">
         <b>${w.title}</b><br>
-        Asset: ${w.asset}<br>
         Status: ${w.status}<br>
 
-        <textarea id="c_${d.id}" placeholder="Update / Follow-up"></textarea>
+        <button onclick="updateWO('${d.id}', 'Started')">Start</button>
+        <button onclick="updateWO('${d.id}', 'Completed')">Complete</button>
 
-        ${woButtons(d.id, w.status)}
+        <br><br>
+        <input id="c_${d.id}" placeholder="Add comment">
+        <button onclick="addComment('${d.id}')">Send</button>
       </div>
     `;
   });
 
-  document.getElementById("content").innerHTML =
-    html || "<p>No assigned work orders</p>";
+  document.getElementById("workList").innerHTML =
+    html || "No assigned work orders";
 }
 
-
-// 🔘 WORK ORDER BUTTONS (NO APPROVE)
-function woButtons(id, status) {
-
-  if (status === "Open") {
-    return `<button onclick="updateStatus('${id}','In Progress','workOrders')">Start Work</button>`;
-  }
-
-  if (status === "In Progress") {
-    return `<button onclick="updateStatus('${id}','Closed','workOrders')">Close Work</button>`;
-  }
-
-  return "";
-}
-
-
-// 🟣 PPM FOLLOW-UP
+/* ---------------- PPM (ONLY ASSIGNED) ---------------- */
 async function loadPPM() {
 
-  const snap = await getDocs(collection(db, "ppm"));
+  const q = query(
+    collection(db, "ppm"),
+    where("assignedTo", "==", uid)
+  );
+
+  const snap = await getDocs(q);
 
   let html = "";
 
@@ -172,56 +120,72 @@ async function loadPPM() {
 
     const p = d.data();
 
-    if (p.assignedTo !== userId) return;
-
-    let cls = "status-open";
-    if (p.status === "In Progress") cls = "status-progress";
-    if (p.status === "Completed") cls = "status-closed";
-
     html += `
-      <div class="card ${cls}">
-        <b>${p.asset}</b><br>
-        Due: ${p.nextDue}<br>
+      <div class="card">
+        <b>${p.assetId}</b><br>
+        Task: ${p.task || "-"}<br>
         Status: ${p.status}<br>
 
-        <textarea id="c_${d.id}" placeholder="PPM update"></textarea>
-
-        ${ppmButtons(d.id, p.status)}
+        <button onclick="completePPM('${d.id}')">
+          Complete
+        </button>
       </div>
     `;
   });
 
-  document.getElementById("content").innerHTML =
-    html || "<p>No assigned PPM tasks</p>";
+  document.getElementById("ppmList").innerHTML =
+    html || "No assigned PPM tasks";
 }
 
+/* ---------------- UPDATE WORK ORDER ---------------- */
+window.updateWO = async (id, status) => {
 
-// 🔘 PPM BUTTONS
-function ppmButtons(id, status) {
-
-  if (status === "Pending") {
-    return `<button onclick="updateStatus('${id}','In Progress','ppm')">Start PPM</button>`;
-  }
-
-  if (status === "In Progress") {
-    return `<button onclick="updateStatus('${id}','Completed','ppm')">Complete</button>`;
-  }
-
-  return "";
-}
-
-
-// 🔄 UPDATE STATUS
-window.updateStatus = async function(id, status, col) {
-
-  const comment = document.getElementById("c_" + id).value;
-
-  await updateDoc(doc(db, col, id), {
-    status: status,
-    comments: comment
+  await updateDoc(doc(db, "workOrders", id), {
+    status: status
   });
 
-  loadData();
+  loadWorkOrders();
+};
+
+/* ---------------- ADD COMMENT ---------------- */
+window.addComment = async (id) => {
+
+  const text = document.getElementById("c_" + id).value;
+
+  if (!text) return;
+
+  const ref = doc(db, "workOrders", id);
+  const snap = await getDoc(ref);
+
+  const data = snap.data();
+
+  const comments = data.comments || [];
+
+  comments.push({
+    text: text,
+    time: new Date().toISOString(),
+    user: uid
+  });
+
+  await updateDoc(ref, { comments });
+
+  loadWorkOrders();
+};
+
+/* ---------------- COMPLETE PPM ---------------- */
+window.completePPM = async (id) => {
+
+  await updateDoc(doc(db, "ppm", id), {
+    status: "Completed"
+  });
+
+  loadPPM();
+};
+
+/* ---------------- LOGOUT ---------------- */
+window.logout = async () => {
+  await auth.signOut();
+  location = "login.html";
 };
 
 </script>
