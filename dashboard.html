@@ -1,55 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CMMS Admin Dashboard</title>
+<title>Admin Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
-.dashboard-grid {
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:15px;
+body {
+  background:#f5f7fb;
 }
 
-.card-box {
+.grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin:20px;
+}
+
+.card {
   background:white;
   padding:20px;
   border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.08);
   text-align:center;
 }
 
-.card-box h2 {
-  margin:0;
-  font-size:28px;
+.card h2 {
   color:#2563eb;
+  font-size:30px;
 }
 
-.card-box p {
-  margin:5px 0;
-  color:#666;
-}
-
-.nav-grid {
+.nav {
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:15px;
-  margin-top:20px;
+  margin:20px;
 }
 
-.nav-btn {
+.btn {
   background:#2563eb;
   color:white;
   padding:15px;
   text-align:center;
   border-radius:10px;
   cursor:pointer;
-  transition:0.3s;
-}
-
-.nav-btn:hover {
-  background:#1d4ed8;
-  transform:scale(1.03);
 }
 </style>
 
@@ -57,108 +49,60 @@
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
+<h2 style="text-align:center;">CMMS Admin Dashboard</h2>
 
-  <h3>CMMS Admin</h3>
+<!-- KPI -->
+<div class="grid">
 
-  <a href="dashboard.html">Dashboard</a>
-  <a href="assets.html">Assets</a>
-  <a href="assets_list.html">Assets List</a>
-  <a href="ppm.html">PPM</a>
-  <a href="workorders.html">Work Orders</a>
-  <a href="users.html">Users</a>
-
-  <hr>
-
-  <a href="#" onclick="logout()">Logout</a>
-
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<!-- HEADER -->
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>CMMS Admin Dashboard</h2>
-  <img src="logo-right.png">
-</div>
-
-<!-- KPI CARDS -->
-<div class="dashboard-grid">
-
-  <div class="card-box">
-    <h2 id="assetCount">0</h2>
+  <div class="card">
+    <h2 id="a">0</h2>
     <p>Assets</p>
   </div>
 
-  <div class="card-box">
-    <h2 id="ppmCount">0</h2>
-    <p>PPM Tasks</p>
+  <div class="card">
+    <h2 id="p">0</h2>
+    <p>PPM</p>
   </div>
 
-  <div class="card-box">
-    <h2 id="woCount">0</h2>
+  <div class="card">
+    <h2 id="w">0</h2>
     <p>Work Orders</p>
   </div>
 
 </div>
 
-<!-- NAVIGATION -->
-<div class="nav-grid">
+<!-- NAV -->
+<div class="nav">
 
-  <div class="nav-btn" onclick="go('assets.html')">Assets Management</div>
-  <div class="nav-btn" onclick="go('assets_list.html')">Assets List</div>
-  <div class="nav-btn" onclick="go('ppm.html')">PPM System</div>
+  <div class="btn" onclick="go('assets.html')">Assets</div>
+  <div class="btn" onclick="go('assets_list.html')">Assets List</div>
+  <div class="btn" onclick="go('ppm.html')">PPM</div>
 
-  <div class="nav-btn" onclick="go('workorders.html')">Work Orders</div>
-  <div class="nav-btn" onclick="go('users.html')">User Management</div>
-  <div class="nav-btn" onclick="go('supervisor.html')">Supervisor Panel</div>
-
-</div>
+  <div class="btn" onclick="go('workorders.html')">Work Orders</div>
+  <div class="btn" onclick="go('users.html')">Users</div>
+  <div class="btn" onclick="go('supervisor.html')">Supervisor</div>
 
 </div>
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+async function load() {
 
-/* ---------------- AUTH ---------------- */
-auth.onAuthStateChanged(async (user) => {
+  const a = await getDocs(collection(db,"assets"));
+  const p = await getDocs(collection(db,"ppm"));
+  const w = await getDocs(collection(db,"workOrders"));
 
-  if (!user) location = "login.html";
-
-  loadCounts();
-});
-
-/* ---------------- LOAD KPI COUNTS ---------------- */
-async function loadCounts() {
-
-  const assets = await getDocs(collection(db, "assets"));
-  const ppm = await getDocs(collection(db, "ppm"));
-  const wo = await getDocs(collection(db, "workOrders"));
-
-  document.getElementById("assetCount").innerText = assets.size;
-  document.getElementById("ppmCount").innerText = ppm.size;
-  document.getElementById("woCount").innerText = wo.size;
+  document.getElementById("a").innerText = a.size;
+  document.getElementById("p").innerText = p.size;
+  document.getElementById("w").innerText = w.size;
 }
 
-/* ---------------- NAVIGATION ---------------- */
-window.go = (page) => {
-  location = page;
-};
+load();
 
-/* ---------------- LOGOUT ---------------- */
-window.logout = async () => {
-  await auth.signOut();
-  location = "login.html";
-};
+window.go = (p)=>location=p;
 
 </script>
 
