@@ -3,6 +3,7 @@
 <head>
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -12,8 +13,18 @@
 
   <h3>CMMS</h3>
 
-  <a href="workorders.html">Work Orders</a>
-  <a href="assets.html">Assets</a>
+  <a href="dashboard.html">
+    <img src="icon-dashboard.png"> Dashboard
+  </a>
+
+  <a href="workorders.html">
+    <img src="icon-workorder.png"> Work Orders
+  </a>
+
+  <a href="assets.html">
+    <img src="icon-assets.png"> Assets
+  </a>
+
   <a href="ppm.html">PPM</a>
   <a href="#">Reports</a>
   <a href="#">Users</a>
@@ -35,21 +46,64 @@
 
   <h2>CMMS Dashboard - DCAS</h2>
 
-  <div style="position:relative">
-    <img src="logo-right.png" onclick="toggleRole()" style="cursor:pointer">
+  <div style="display:flex;align-items:center;gap:20px">
 
-    <div id="roleBox" class="role-box">
-      <b>Your Access</b>
-      <p id="roleText">Loading...</p>
+    <!-- NOTIFICATION -->
+    <div class="notif" onclick="toggleNotif()">
+      🔔
+      <span id="notifCount">0</span>
     </div>
+
+    <!-- ROLE -->
+    <div style="position:relative">
+      <img src="logo-right.png" onclick="toggleRole()" style="cursor:pointer">
+
+      <div id="roleBox" class="role-box">
+        <b>Your Access</b>
+        <p id="roleText"></p>
+      </div>
+    </div>
+
   </div>
 
 </div>
 
-<!-- INTRO -->
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <h2 id="total">0</h2>
+    <p>Total Work Orders</p>
+  </div>
+
+  <div class="kpi">
+    <h2 id="open">0</h2>
+    <p>Open</p>
+  </div>
+
+  <div class="kpi">
+    <h2 id="closed">0</h2>
+    <p>Closed</p>
+  </div>
+</div>
+
+<!-- CHART -->
 <div class="section">
-  <h3>Welcome</h3>
-  <p>This system manages CMMS operations for DCAS.</p>
+  <canvas id="chart"></canvas>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div id="notifPanel" style="
+  position:fixed;
+  right:20px;
+  top:80px;
+  width:300px;
+  background:white;
+  border:1px solid #ddd;
+  padding:10px;
+  display:none;
+">
+  <h4>Notifications</h4>
+  <div id="notifList"></div>
 </div>
 
 </div>
@@ -60,8 +114,12 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import {
+  collection, getDocs,
+  query, where, onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+let chart;
 
 // LOGOUT
 logoutBtn.onclick = async ()=>{
@@ -69,10 +127,16 @@ logoutBtn.onclick = async ()=>{
   location="login.html";
 };
 
-// ROLE TOGGLE
+// TOGGLE ROLE
 window.toggleRole = ()=>{
-  const box = document.getElementById("roleBox");
-  box.style.display = box.style.display==="block"?"none":"block";
+  roleBox.style.display =
+    roleBox.style.display==="block"?"none":"block";
+};
+
+// TOGGLE NOTIF
+window.toggleNotif = ()=>{
+  notifPanel.style.display =
+    notifPanel.style.display==="block"?"none":"block";
 };
 
 // AUTH
@@ -83,13 +147,69 @@ onAuthStateChanged(auth, async(user)=>{
     return;
   }
 
-  const snap = await getDoc(doc(db,"users",user.uid));
-  const role = snap.data().role;
-
-  document.getElementById("roleText").innerText =
-    "You are logged in as: " + role;
+  loadDashboard();
+  loadNotifications(user.uid);
 
 });
+
+// LOAD KPI + CHART
+async function loadDashboard(){
+
+  const snap = await getDocs(collection(db,"workOrders"));
+
+  let open=0, closed=0;
+
+  snap.forEach(d=>{
+    if(d.data().status==="Closed") closed++;
+    else open++;
+  });
+
+  total.innerText = snap.size;
+  open.innerText = open;
+  closed.innerText = closed;
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(chart,{
+    type:"bar",
+    data:{
+      labels:["Open","Closed"],
+      datasets:[{
+        data:[open,closed],
+        backgroundColor:["#2563eb","#ef4444"]
+      }]
+    }
+  });
+}
+
+// NOTIFICATIONS
+function loadNotifications(uid){
+
+  const q = query(
+    collection(db,"notifications"),
+    where("to","==",uid)
+  );
+
+  onSnapshot(q,(snap)=>{
+
+    let count=0, html="";
+
+    snap.forEach(d=>{
+      const n=d.data();
+
+      if(!n.read) count++;
+
+      html += `<div style="padding:8px;border-bottom:1px solid #eee">
+        <b>${n.title}</b><br>
+        <small>${n.message}</small>
+      </div>`;
+    });
+
+    notifCount.innerText = count;
+    notifList.innerHTML = html;
+
+  });
+}
 
 </script>
 
