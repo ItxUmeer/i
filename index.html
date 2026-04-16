@@ -11,11 +11,12 @@ body{
   background-size:cover;
 }
 
+/* NO WHITE OVERLAY */
 .overlay{
-  background:rgba(255,255,255,0.9);
   height:100vh;
 }
 
+/* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
@@ -26,24 +27,34 @@ body{
   height:80px;
 }
 
+/* CENTER TITLE */
 .center{
   text-align:center;
-  margin-top:100px;
+  margin-top:80px;
+  background:rgba(255,255,255,0.85); /* readability */
+  display:inline-block;
+  padding:20px;
+  border-radius:12px;
 }
 
+/* MAIN CARD */
 .card{
-  background:white;
+  background:rgba(255,255,255,0.9);
   width:60%;
   margin:30px auto;
   padding:20px;
-  border-radius:10px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.2);
 }
 
+/* BUTTON */
 .btn{
   padding:12px 25px;
   background:#2563eb;
   color:white;
   border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 </style>
 
@@ -53,33 +64,44 @@ body{
 
 <div class="overlay">
 
-<div class="header">
-  <img src="logo-left.png">
-  <img src="logo-right.png">
-</div>
+  <!-- HEADER LOGOS -->
+  <div class="header">
+    <img src="logo-left.png">
+    <img src="logo-right.png">
+  </div>
 
-<div class="center">
-  <h1>CMMS - DCAS</h1>
-  <p>Dubai Corporation for Ambulance Services</p>
-</div>
+  <!-- TITLE -->
+  <div style="text-align:center">
+    <div class="center">
+      <h1>CMMS - DCAS</h1>
+      <p>Dubai Corporation for Ambulance Services</p>
+    </div>
+  </div>
 
-<div class="card">
-  <h3>System Introduction</h3>
-  <p>Manage assets, work orders, and maintenance tasks efficiently.</p>
+  <!-- CONTENT -->
+  <div class="card">
 
-  <h3>Access Roles</h3>
-  <ul>
-    <li>Admin</li>
-    <li>Assets Officer</li>
-    <li>Facility Supervisor</li>
-  </ul>
+    <h3>System Introduction</h3>
+    <p>
+      This Centralized Maintenance Management System (CMMS)
+      helps manage Assets, Work Orders, and Preventive Maintenance (PPM)
+      efficiently across all DCAS facilities.
+    </p>
 
-  <center>
-    <button class="btn" onclick="location='login.html'">
-      Enter System
-    </button>
-  </center>
-</div>
+    <h3>Your Access Roles</h3>
+    <ul>
+      <li><b>Admin</b> – Full system control</li>
+      <li><b>Assets Officer</b> – Asset & PPM management</li>
+      <li><b>Facility Supervisor</b> – Work order execution & follow-up</li>
+    </ul>
+
+    <div style="text-align:center">
+      <button class="btn" onclick="location='login.html'">
+        Enter System
+      </button>
+    </div>
+
+  </div>
 
 </div>
 
