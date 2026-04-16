@@ -7,18 +7,19 @@
 <style>
 
 body {
-  background:#f5f7fb;
+  margin:0;
   font-family:Arial;
+  background:#f5f7fb;
 }
 
-/* SIDEBAR FIX */
+/* SIDEBAR */
 .sidebar {
   position:fixed;
   left:0;
   top:0;
   width:220px;
   height:100vh;
-  background:#0f172a;
+  background:#0b1220;
   color:white;
   padding:15px;
 }
@@ -30,18 +31,22 @@ body {
   text-decoration:none;
 }
 
+.sidebar a:hover {
+  background:#1f2937;
+}
+
 /* MAIN */
 .main {
-  margin-left:240px;
+  margin-left:220px;
   padding:20px;
 }
 
-/* SECTION BOX */
+/* FORM BOX */
 .section {
   background:white;
   padding:15px;
-  border:2px solid #2563eb;
-  border-radius:10px;
+  border-left:5px solid #2563eb;
+  border-radius:8px;
   margin-bottom:20px;
 }
 
@@ -49,7 +54,9 @@ body {
 input, select {
   width:100%;
   padding:10px;
-  margin:5px 0;
+  margin:6px 0;
+  border:1px solid #ccc;
+  border-radius:5px;
 }
 
 /* BUTTON */
@@ -58,38 +65,54 @@ button {
   color:white;
   padding:10px;
   border:none;
-  cursor:pointer;
   border-radius:6px;
+  cursor:pointer;
 }
 
-/* WORK ORDER ROW STYLE */
+/* FULL WIDTH LIST */
+.list {
+  width:100%;
+}
+
+/* WORK ORDER ROW (DARK + HIGH CONTRAST) */
 .wo-row {
-  background:white;
+  width:100%;
+  background:#111827;
+  color:white;
   margin-bottom:10px;
-  padding:12px;
+  padding:15px;
   border-radius:8px;
   display:flex;
+  justify-content:space-between;
+  align-items:center;
   flex-wrap:wrap;
   gap:10px;
-  align-items:center;
-  box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
+/* COLUMN STYLE */
 .wo-row span {
-  background:#f1f5f9;
-  padding:5px 10px;
+  background:#1f2937;
+  padding:6px 10px;
   border-radius:5px;
+  font-size:13px;
+  color:#e5e7eb;
 }
 
+/* STATUS BADGES */
 .badge {
-  padding:5px 10px;
+  padding:6px 12px;
   border-radius:6px;
-  color:white;
+  font-size:12px;
+  font-weight:bold;
 }
 
-.green { background:#22c55e; }
-.orange { background:#f59e0b; }
-.red { background:#ef4444; }
+.pending { background:#dc2626; }
+.started { background:#f59e0b; }
+.completed { background:#16a34a; }
+
+h2 {
+  margin-bottom:15px;
+}
 
 </style>
 
@@ -113,7 +136,7 @@ button {
 
 <h2>Work Order Management</h2>
 
-<!-- CREATE SECTION -->
+<!-- CREATE WORK ORDER -->
 <div class="section">
 
   <h3>Create Work Order</h3>
@@ -122,19 +145,19 @@ button {
 
   <select id="assetId"></select>
 
-  <input id="location" placeholder="Location (HQ / Building 1)">
+  <input id="location" placeholder="Location (HQ / Building)">
   <input id="subLocation" placeholder="Sub Location (Floor / Room)">
 
   <select id="assignedTo">
-    <option value="">Select Supervisor</option>
+    <option value="">Auto Assign / Select Supervisor</option>
   </select>
 
-  <button onclick="createWO()">Create Work Order</button>
+  <button onclick="createWO()">Send Work Order</button>
 
 </div>
 
-<!-- LIST SECTION -->
-<div class="section">
+<!-- LIST -->
+<div class="list">
 
   <h3>Work Order List</h3>
 
@@ -156,7 +179,7 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- AUTH ---------------- */
+/* ---------------- LOAD ---------------- */
 auth.onAuthStateChanged(async (user) => {
 
   if (!user) location = "login.html";
@@ -166,7 +189,7 @@ auth.onAuthStateChanged(async (user) => {
   loadWorkOrders();
 });
 
-/* ---------------- LOAD ASSETS ---------------- */
+/* ---------------- ASSETS ---------------- */
 async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
@@ -175,19 +198,18 @@ async function loadAssets() {
 
   snap.forEach(d => {
     const a = d.data();
-
     html += `<option value="${a.name}">${a.name}</option>`;
   });
 
   document.getElementById("assetId").innerHTML = html;
 }
 
-/* ---------------- LOAD SUPERVISORS (FIXED AUTO ASSIGN) ---------------- */
+/* ---------------- SUPERVISOR FIX (AUTO LOAD) ---------------- */
 async function loadSupervisors() {
 
   const snap = await getDocs(collection(db,"users"));
 
-  let html = `<option value="">Select Supervisor</option>`;
+  let html = `<option value="">Auto Assign Supervisor</option>`;
 
   snap.forEach(d => {
 
@@ -195,39 +217,53 @@ async function loadSupervisors() {
 
     if (u.role === "facilities_supervisor") {
 
-      html += `<option value="${d.id}">
-        ${u.name || d.id}
-      </option>`;
+      html += `
+        <option value="${d.id}">
+          ${u.name || u.email || d.id}
+        </option>
+      `;
     }
   });
 
   document.getElementById("assignedTo").innerHTML = html;
 }
 
+/* ---------------- AUTO ASSIGN LOGIC ---------------- */
+function getAutoSupervisor() {
+
+  const select = document.getElementById("assignedTo");
+
+  // if user didn't select → auto assign first supervisor
+  if (!select.value) {
+    return select.options[1]?.value || "";
+  }
+
+  return select.value;
+}
+
 /* ---------------- CREATE WORK ORDER ---------------- */
 window.createWO = async () => {
 
-  const asset = document.getElementById("assetId").value;
-  const title = document.getElementById("title").value;
-  const location = document.getElementById("location").value;
-  const subLocation = document.getElementById("subLocation").value;
-  const assignedTo = document.getElementById("assignedTo").value;
+  const assignedTo = getAutoSupervisor();
 
-  await addDoc(collection(db,"workOrders"), {
-    title,
-    assetId: asset,
-    location,
-    subLocation,
-    assignedTo,
-    status: "Pending"
-  });
+  const data = {
+    title: document.getElementById("title").value,
+    assetId: document.getElementById("assetId").value,
+    location: document.getElementById("location").value,
+    subLocation: document.getElementById("subLocation").value,
+    assignedTo: assignedTo || null,
+    status: "Pending",
+    createdAt: new Date()
+  };
 
-  alert("Work Order Created ✔");
+  await addDoc(collection(db,"workOrders"), data);
+
+  alert("Work Order Sent ✔ (Auto Assigned)");
 
   loadWorkOrders();
 };
 
-/* ---------------- LOAD WORK ORDERS (SINGLE LINE STYLE) ---------------- */
+/* ---------------- WORK ORDER LIST (FULL WIDTH DARK UI) ---------------- */
 async function loadWorkOrders() {
 
   const snap = await getDocs(collection(db,"workOrders"));
@@ -238,20 +274,19 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
-    let color = "orange";
-    if (w.status === "Completed") color = "green";
-    if (w.status === "Started") color = "orange";
-    if (w.status === "Pending") color = "red";
+    let statusClass = "pending";
+    if (w.status === "Started") statusClass = "started";
+    if (w.status === "Completed") statusClass = "completed";
 
     html += `
       <div class="wo-row">
 
         <span><b>${w.title}</b></span>
-        <span>${w.assetId}</span>
+        <span>${w.assetId || "-"}</span>
         <span>${w.location || "-"}</span>
         <span>${w.subLocation || "-"}</span>
 
-        <span class="badge ${color}">
+        <span class="badge ${statusClass}">
           ${w.status}
         </span>
 
