@@ -1,86 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Facilities Supervisor</title>
-  <link rel="stylesheet" href="style.css">
+<title>Supervisor</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="sidebar"></div>
+<div class="sidebar">
+  <h2>CMMS</h2>
+  <div id="menu"></div>
+  <a href="#" onclick="logout()">Logout</a>
+</div>
 
 <div class="main">
 
-  <h1>Facilities Supervisor Panel</h1>
+<h1>Facilities Supervisor</h1>
 
-  <p>Assigned Work Orders</p>
-
-  <div id="list"></div>
+<div id="list"></div>
 
 </div>
 
 <script type="module">
-import { db, auth } from "./firebase.js";
-import { collection, getDocs, updateDoc, doc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-import { onAuthStateChanged } 
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    loadTasks(user);
+import { doc, getDoc, collection, getDocs, updateDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { renderSidebar } from "./sidebar.js";
+
+let role = "";
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) window.location.href = "index.html";
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  role = snap.data().role;
+
+  if (role !== "facilities_supervisor" && role !== "admin") {
+    alert("No access");
+    window.location.href = "dashboard.html";
   }
+
+  renderSidebar(role);
+
+  loadWO();
 });
 
-async function loadTasks(user) {
+async function loadWO() {
 
   const snap = await getDocs(collection(db, "workOrders"));
 
-  list.innerHTML = "";
+  let html = "";
 
   snap.forEach(d => {
 
-    let data = d.data();
+    const w = d.data();
 
-    // Supervisor filter (by email or UID)
-    if (data.assignedTo !== user.email &&
-        data.assignedTo !== user.uid) {
-      return;
-    }
-
-    list.innerHTML += `
+    html += `
       <div class="card">
-        <h3>${data.title}</h3>
-        <p>Asset: ${data.asset}</p>
-        <p>Status: ${data.status}</p>
+        <b>${w.title}</b><br>
+        Asset: ${w.asset}<br>
+        Status: ${w.status}<br>
+        Priority: ${w.priority}<br>
 
-        <button onclick="start('${d.id}')">Start</button>
-        <button onclick="complete('${d.id}')">Complete</button>
+        <button onclick="approve('${d.id}')">Approve</button>
       </div>
     `;
   });
+
+  document.getElementById("list").innerHTML = html;
 }
 
-window.start = async function(id) {
-  await updateDoc(doc(db,"workOrders",id), {
-    status: "In Progress"
+window.approve = async function(id) {
+  await updateDoc(doc(db, "workOrders", id), {
+    status: "Approved"
   });
-  location.reload();
+
+  loadWO();
 };
 
-window.complete = async function(id) {
-  await updateDoc(doc(db,"workOrders",id), {
-    status: "Completed"
-  });
-  location.reload();
+window.logout = async function () {
+  await signOut(auth);
+  window.location.href = "index.html";
 };
 
 </script>
-
-<script type="module" src="sidebar.js"></script>
 
 </body>
 </html>
