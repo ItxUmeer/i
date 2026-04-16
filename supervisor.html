@@ -14,20 +14,14 @@
 
 .tab {
   padding: 10px;
-  background: #1e293b;
+  background: #e2e8f0;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .tab.active {
-  background: #00e5ff;
-  color: black;
-}
-
-textarea {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
+  background: #0ea5e9;
+  color: white;
 }
 </style>
 </head>
@@ -42,7 +36,7 @@ textarea {
 
 <div class="main">
 
-<h1>Supervisor Panel</h1>
+<h1>Supervisor Tasks</h1>
 
 <!-- TABS -->
 <div class="tabs">
@@ -70,17 +64,20 @@ let currentTab = "wo";
 
 onAuthStateChanged(auth, async (user) => {
 
-  if (!user) window.location.href = "index.html";
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
   userId = user.uid;
 
   const snap = await getDoc(doc(db, "users", user.uid));
-
   const role = snap.data().role;
 
-  if (role !== "facilities_supervisor" && role !== "maintenance" && role !== "admin") {
-    alert("No access");
+  if (role !== "facilities_supervisor" && role !== "maintenance") {
+    alert("Access denied");
     window.location.href = "dashboard.html";
+    return;
   }
 
   renderSidebar(role);
@@ -101,15 +98,18 @@ window.switchTab = function(tab) {
 };
 
 
-// 📥 LOAD DATA
+// 📥 LOAD DATA (ONLY ASSIGNED)
 async function loadData() {
 
-  if (currentTab === "wo") loadWorkOrders();
-  else loadPPM();
+  if (currentTab === "wo") {
+    loadWorkOrders();
+  } else {
+    loadPPM();
+  }
 }
 
 
-// 🛠 LOAD WORK ORDERS (ASSIGNED ONLY)
+// 🛠 LOAD ASSIGNED WORK ORDERS
 async function loadWorkOrders() {
 
   const snap = await getDocs(collection(db, "workOrders"));
@@ -120,16 +120,31 @@ async function loadWorkOrders() {
 
     const w = d.data();
 
+    // 🔥 ONLY SHOW ASSIGNED
     if (w.assignedTo !== userId) return;
 
-    html += buildCard(d.id, w, "wo");
+    let cls = "status-open";
+    if (w.status === "In Progress") cls = "status-progress";
+    if (w.status === "Closed") cls = "status-closed";
+
+    html += `
+      <div class="card ${cls}">
+        <b>${w.title}</b><br>
+        Asset: ${w.asset}<br>
+        Status: ${w.status}<br>
+
+        <textarea id="c_${d.id}" placeholder="Add comment"></textarea>
+
+        ${buildButtons(d.id, w.status, "workOrders")}
+      </div>
+    `;
   });
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("content").innerHTML = html || "No assigned work orders";
 }
 
 
-// 🔧 LOAD PPM
+// 🟣 LOAD ASSIGNED PPM
 async function loadPPM() {
 
   const snap = await getDocs(collection(db, "ppm"));
@@ -142,39 +157,52 @@ async function loadPPM() {
 
     if (p.assignedTo !== userId) return;
 
-    html += buildCard(d.id, p, "ppm");
+    let cls = "status-open";
+    if (p.status === "In Progress") cls = "status-progress";
+    if (p.status === "Completed") cls = "status-closed";
+
+    html += `
+      <div class="card ${cls}">
+        <b>${p.asset}</b><br>
+        Due: ${p.nextDue}<br>
+        Status: ${p.status}<br>
+
+        <textarea id="c_${d.id}" placeholder="Add comment"></textarea>
+
+        ${buildButtons(d.id, p.status, "ppm")}
+      </div>
+    `;
   });
 
-  document.getElementById("content").innerHTML = html;
+  document.getElementById("content").innerHTML = html || "No assigned PPM tasks";
 }
 
 
-// 🧱 CARD BUILDER
-function buildCard(id, data, type) {
+// 🔘 BUTTON LOGIC
+function buildButtons(id, status, collectionName) {
 
-  return `
-    <div class="card">
-      <b>${data.title || data.asset}</b><br>
-      Status: ${data.status}<br>
+  if (status === "Open" || status === "Pending") {
+    return `<button onclick="updateStatus('${id}','Accepted','${collectionName}')">Accept</button>`;
+  }
 
-      <textarea id="c_${id}" placeholder="Add comment"></textarea>
+  if (status === "Accepted") {
+    return `<button onclick="updateStatus('${id}','In Progress','${collectionName}')">Start Work</button>`;
+  }
 
-      <button onclick="updateStatus('${id}','Accepted','${type}')">Accept</button>
-      <button onclick="updateStatus('${id}','In Progress','${type}')">Start</button>
-      <button onclick="updateStatus('${id}','Closed','${type}')">Close</button>
-    </div>
-  `;
+  if (status === "In Progress") {
+    return `<button onclick="updateStatus('${id}','Closed','${collectionName}')">Close</button>`;
+  }
+
+  return "";
 }
 
 
 // 🔄 UPDATE STATUS
-window.updateStatus = async function(id, status, type) {
+window.updateStatus = async function(id, status, col) {
 
   const comment = document.getElementById("c_" + id).value;
 
-  const ref = doc(db, type === "wo" ? "workOrders" : "ppm", id);
-
-  await updateDoc(ref, {
+  await updateDoc(doc(db, col, id), {
     status: status,
     comments: comment
   });
@@ -183,7 +211,7 @@ window.updateStatus = async function(id, status, type) {
 };
 
 
-// LOGOUT
+// 🔐 LOGOUT
 window.logout = async function () {
   await signOut(auth);
   window.location.href = "index.html";
