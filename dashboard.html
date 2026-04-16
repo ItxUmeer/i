@@ -1,9 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>CMMS Admin Dashboard</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.dashboard-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:15px;
+}
+
+.card-box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+.card-box h2 {
+  margin:0;
+  font-size:28px;
+  color:#2563eb;
+}
+
+.card-box p {
+  margin:5px 0;
+  color:#666;
+}
+
+.nav-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:15px;
+  margin-top:20px;
+}
+
+.nav-btn {
+  background:#2563eb;
+  color:white;
+  padding:15px;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.nav-btn:hover {
+  background:#1d4ed8;
+  transform:scale(1.03);
+}
+</style>
+
 </head>
 
 <body>
@@ -11,28 +60,18 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
 
-  <h3>CMMS</h3>
+  <h3>CMMS Admin</h3>
 
-  <a href="dashboard.html">
-    <img src="icon-dashboard.png"> Dashboard
-  </a>
-
-  <a href="workorders.html">
-    <img src="icon-workorder.png"> Work Orders
-  </a>
-
-  <a href="assets.html">
-    <img src="icon-assets.png"> Assets
-  </a>
-
+  <a href="dashboard.html">Dashboard</a>
+  <a href="assets.html">Assets</a>
+  <a href="assets_list.html">Assets List</a>
   <a href="ppm.html">PPM</a>
-  <a href="#">Reports</a>
-  <a href="#">Users</a>
-  <a href="#">Charts</a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="users.html">Users</a>
 
   <hr>
 
-  <a href="#" id="logoutBtn">Logout</a>
+  <a href="#" onclick="logout()">Logout</a>
 
 </div>
 
@@ -41,69 +80,42 @@
 
 <!-- HEADER -->
 <div class="header-bar">
-
   <img src="logo-left.png">
+  <h2>CMMS Admin Dashboard</h2>
+  <img src="logo-right.png">
+</div>
 
-  <h2>CMMS Dashboard - DCAS</h2>
+<!-- KPI CARDS -->
+<div class="dashboard-grid">
 
-  <div style="display:flex;align-items:center;gap:20px">
+  <div class="card-box">
+    <h2 id="assetCount">0</h2>
+    <p>Assets</p>
+  </div>
 
-    <!-- NOTIFICATION -->
-    <div class="notif" onclick="toggleNotif()">
-      🔔
-      <span id="notifCount">0</span>
-    </div>
+  <div class="card-box">
+    <h2 id="ppmCount">0</h2>
+    <p>PPM Tasks</p>
+  </div>
 
-    <!-- ROLE -->
-    <div style="position:relative">
-      <img src="logo-right.png" onclick="toggleRole()" style="cursor:pointer">
-
-      <div id="roleBox" class="role-box">
-        <b>Your Access</b>
-        <p id="roleText"></p>
-      </div>
-    </div>
-
+  <div class="card-box">
+    <h2 id="woCount">0</h2>
+    <p>Work Orders</p>
   </div>
 
 </div>
 
-<!-- KPI -->
-<div class="kpi-grid">
-  <div class="kpi">
-    <h2 id="total">0</h2>
-    <p>Total Work Orders</p>
-  </div>
+<!-- NAVIGATION -->
+<div class="nav-grid">
 
-  <div class="kpi">
-    <h2 id="open">0</h2>
-    <p>Open</p>
-  </div>
+  <div class="nav-btn" onclick="go('assets.html')">Assets Management</div>
+  <div class="nav-btn" onclick="go('assets_list.html')">Assets List</div>
+  <div class="nav-btn" onclick="go('ppm.html')">PPM System</div>
 
-  <div class="kpi">
-    <h2 id="closed">0</h2>
-    <p>Closed</p>
-  </div>
-</div>
+  <div class="nav-btn" onclick="go('workorders.html')">Work Orders</div>
+  <div class="nav-btn" onclick="go('users.html')">User Management</div>
+  <div class="nav-btn" onclick="go('supervisor.html')">Supervisor Panel</div>
 
-<!-- CHART -->
-<div class="section">
-  <canvas id="chart"></canvas>
-</div>
-
-<!-- NOTIFICATION PANEL -->
-<div id="notifPanel" style="
-  position:fixed;
-  right:20px;
-  top:80px;
-  width:300px;
-  background:white;
-  border:1px solid #ddd;
-  padding:10px;
-  display:none;
-">
-  <h4>Notifications</h4>
-  <div id="notifList"></div>
 </div>
 
 </div>
@@ -111,105 +123,42 @@
 <script type="module">
 
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
 import {
-  collection, getDocs,
-  query, where, onSnapshot
+  collection,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let chart;
+/* ---------------- AUTH ---------------- */
+auth.onAuthStateChanged(async (user) => {
 
-// LOGOUT
-logoutBtn.onclick = async ()=>{
-  await signOut(auth);
-  location="login.html";
-};
+  if (!user) location = "login.html";
 
-// TOGGLE ROLE
-window.toggleRole = ()=>{
-  roleBox.style.display =
-    roleBox.style.display==="block"?"none":"block";
-};
-
-// TOGGLE NOTIF
-window.toggleNotif = ()=>{
-  notifPanel.style.display =
-    notifPanel.style.display==="block"?"none":"block";
-};
-
-// AUTH
-onAuthStateChanged(auth, async(user)=>{
-
-  if(!user){
-    location="login.html";
-    return;
-  }
-
-  loadDashboard();
-  loadNotifications(user.uid);
-
+  loadCounts();
 });
 
-// LOAD KPI + CHART
-async function loadDashboard(){
+/* ---------------- LOAD KPI COUNTS ---------------- */
+async function loadCounts() {
 
-  const snap = await getDocs(collection(db,"workOrders"));
+  const assets = await getDocs(collection(db, "assets"));
+  const ppm = await getDocs(collection(db, "ppm"));
+  const wo = await getDocs(collection(db, "workOrders"));
 
-  let open=0, closed=0;
-
-  snap.forEach(d=>{
-    if(d.data().status==="Closed") closed++;
-    else open++;
-  });
-
-  total.innerText = snap.size;
-  open.innerText = open;
-  closed.innerText = closed;
-
-  if(chart) chart.destroy();
-
-  chart = new Chart(chart,{
-    type:"bar",
-    data:{
-      labels:["Open","Closed"],
-      datasets:[{
-        data:[open,closed],
-        backgroundColor:["#2563eb","#ef4444"]
-      }]
-    }
-  });
+  document.getElementById("assetCount").innerText = assets.size;
+  document.getElementById("ppmCount").innerText = ppm.size;
+  document.getElementById("woCount").innerText = wo.size;
 }
 
-// NOTIFICATIONS
-function loadNotifications(uid){
+/* ---------------- NAVIGATION ---------------- */
+window.go = (page) => {
+  location = page;
+};
 
-  const q = query(
-    collection(db,"notifications"),
-    where("to","==",uid)
-  );
-
-  onSnapshot(q,(snap)=>{
-
-    let count=0, html="";
-
-    snap.forEach(d=>{
-      const n=d.data();
-
-      if(!n.read) count++;
-
-      html += `<div style="padding:8px;border-bottom:1px solid #eee">
-        <b>${n.title}</b><br>
-        <small>${n.message}</small>
-      </div>`;
-    });
-
-    notifCount.innerText = count;
-    notifList.innerHTML = html;
-
-  });
-}
+/* ---------------- LOGOUT ---------------- */
+window.logout = async () => {
+  await auth.signOut();
+  location = "login.html";
+};
 
 </script>
 
