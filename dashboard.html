@@ -1,88 +1,92 @@
-body{
-  margin:0;
-  font-family:Segoe UI;
-  background:#f8fafc;
-}
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-/* LOGIN */
-.login-container{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+<body>
 
-.login-box{
-  width:350px;
-  background:white;
-  padding:25px;
-  border-radius:10px;
-  text-align:center;
-}
+<!-- SIDEBAR -->
+<div class="sidebar">
 
-.logo-bar{
-  display:flex;
-  justify-content:space-between;
-}
+  <h3>CMMS</h3>
 
-.logo-bar img{
-  height:45px;
-}
+  <a href="dashboard.html">
+    <img src="icon-dashboard.png" width="16"> Dashboard
+  </a>
 
-/* SIDEBAR */
-.sidebar{
-  width:230px;
-  height:100vh;
-  position:fixed;
-  background:white;
-  border-right:1px solid #ddd;
-  padding:15px;
-}
+  <a href="assets.html">
+    <img src="icon-assets.png" width="16"> Assets
+  </a>
 
-.sidebar a{
-  display:block;
-  padding:10px;
-  margin:5px 0;
-  text-decoration:none;
-  color:black;
-}
+  <a href="workorders.html">
+    <img src="icon-workorder.png" width="16"> Work Orders
+  </a>
 
-.sidebar a:hover{
-  background:#e0f2fe;
-}
+  <a href="#" id="logoutBtn">Logout</a>
 
-/* MAIN */
-.main{
-  margin-left:250px;
-  padding:20px;
-}
+</div>
 
-/* HEADER */
-.header-bar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
+<!-- MAIN -->
+<div class="main">
 
-.header-bar img{
-  height:45px;
-}
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>CMMS Dashboard - DCAS</h2>
+  <img src="logo-right.png">
+</div>
 
-/* SECTION */
-.section{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-}
+<!-- INTRO -->
+<div class="section">
+  <h3>Welcome to CMMS</h3>
+  <p>
+    Manage maintenance operations, assets, and preventive schedules
+    efficiently for Dubai Corporation for Ambulance Services.
+  </p>
+</div>
 
-/* BUTTON */
-button{
-  background:#2563eb;
-  color:white;
-  border:none;
-  padding:10px;
-  border-radius:6px;
-  cursor:pointer;
-}
+<!-- ROLE -->
+<div class="section">
+  <h3>Your Access</h3>
+  <p id="roleText">Loading...</p>
+</div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+import { doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+// LOGOUT
+logoutBtn.onclick = async ()=>{
+  await signOut(auth);
+  location="login.html";
+};
+
+// AUTH
+onAuthStateChanged(auth, async (user)=>{
+
+  if(!user){
+    location="login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db,"users",user.uid));
+
+  const role = snap.data().role;
+
+  document.getElementById("roleText").innerText =
+    "Logged in as: " + role;
+});
+
+</script>
+
+</body>
+</html>
