@@ -34,31 +34,36 @@
   <img src="logo-right.png">
 </div>
 
-<!-- ADD ASSET (ADMIN ONLY) -->
+<!-- ADD ASSET -->
 <div class="section" id="assetForm">
+
   <h3>Add Asset</h3>
 
   <div class="form-grid">
     <input id="name" placeholder="Asset Name (AHU-01)">
     <input id="type" placeholder="Type (AHU)">
-    <input id="building" placeholder="Building">
-    <input id="locationGroup" placeholder="Location Group">
-    
+    <input id="building" placeholder="Building (Building 1)">
+    <input id="locationGroup" placeholder="Location Group (HQ)">
+
     <select id="status">
       <option value="Active">Active</option>
       <option value="Inactive">Inactive</option>
     </select>
   </div>
 
-  <h4>Checklist (Optional - comma separated)</h4>
-  <input id="checklist" placeholder="Filter, Motor, Belt">
+  <br>
+
+  <input id="checklist" placeholder="Checklist (comma separated e.g. Filter, Motor, Belt)">
+
+  <br><br>
 
   <button onclick="addAsset()">Add Asset</button>
+
 </div>
 
 <!-- ASSET LIST -->
 <div class="section">
-  <h3>Assets</h3>
+  <h3>Assets List</h3>
   <div id="assetList"></div>
 </div>
 
@@ -67,107 +72,134 @@
 <script type="module">
 
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
 import {
-  collection, addDoc, getDocs, doc, updateDoc
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 let currentRole = "";
 
-// LOGOUT
-logoutBtn.onclick = async ()=>{
-  await signOut(auth);
-  location="login.html";
+/* ---------------- LOGOUT ---------------- */
+document.getElementById("logoutBtn").onclick = async () => {
+  await auth.signOut();
+  location = "login.html";
 };
 
-// AUTH CHECK
-onAuthStateChanged(auth, async (user)=>{
+/* ---------------- AUTH CHECK ---------------- */
+auth.onAuthStateChanged(async (user) => {
 
-  if(!user){
-    location="login.html";
+  if (!user) {
+    location = "login.html";
     return;
   }
 
-  const snap = await getDoc(doc(db,"users",user.uid));
-  currentRole = snap.data().role;
+  const snap = await getDoc(doc(db, "users", user.uid));
 
-  // Hide form if not admin
-  if(currentRole !== "admin"){
+  if (snap.exists()) {
+    currentRole = snap.data().role;
+  }
+
+  // only admin can see form
+  if (currentRole !== "admin") {
     document.getElementById("assetForm").style.display = "none";
   }
 
   loadAssets();
 });
 
-// LOAD ASSETS
-async function loadAssets(){
+/* ---------------- LOAD ASSETS ---------------- */
+async function loadAssets() {
 
-  const snap = await getDocs(collection(db,"assets"));
+  const snap = await getDocs(collection(db, "assets"));
 
   let html = "";
 
-  snap.forEach(d=>{
+  snap.forEach((d) => {
 
     const a = d.data();
 
     html += `
       <div class="card">
-        <b>${a.name}</b> (${a.type})<br>
-        ${a.locationGroup} - ${a.building}<br>
+        <b>${a.name}</b><br>
+        Type: ${a.type}<br>
+        Building: ${a.building}<br>
+        Location: ${a.locationGroup}<br>
         Status: ${a.status}<br>
 
         <small>
           Checklist: ${a.checklist ? a.checklist.join(", ") : "None"}
         </small>
 
-        ${
-          currentRole === "admin" 
-          ? `<br><button onclick="editAsset('${d.id}')">Edit</button>`
-          : ""
-        }
+        ${currentRole === "admin" ? `
+          <br><button onclick="editAsset('${d.id}')">Edit</button>
+        ` : ""}
       </div>
     `;
   });
 
-  assetList.innerHTML = html;
+  document.getElementById("assetList").innerHTML = html;
 }
 
-// ADD ASSET
-window.addAsset = async ()=>{
+/* ---------------- ADD ASSET (FIXED) ---------------- */
+async function addAsset() {
 
-  const checklistArray = checklist.value
-    ? checklist.value.split(",").map(i => i.trim())
-    : [];
+  console.log("ADD ASSET CLICKED");
 
-  await addDoc(collection(db,"assets"),{
-    name: name.value,
-    type: type.value,
-    building: building.value,
-    locationGroup: locationGroup.value,
-    status: status.value,
-    checklist: checklistArray
-  });
+  try {
 
-  alert("Asset Added ✔");
+    const checklistArray = document.getElementById("checklist").value
+      ? document.getElementById("checklist").value.split(",").map(i => i.trim())
+      : [];
 
-  loadAssets();
-};
+    await addDoc(collection(db, "assets"), {
+      name: document.getElementById("name").value,
+      type: document.getElementById("type").value,
+      building: document.getElementById("building").value,
+      locationGroup: document.getElementById("locationGroup").value,
+      status: document.getElementById("status").value,
+      checklist: checklistArray
+    });
 
-// EDIT ASSET (SIMPLE)
-window.editAsset = async (id)=>{
+    alert("Asset Added ✔");
 
-  const newStatus = prompt("Enter new status (Active/Inactive)");
+    loadAssets();
 
-  if(!newStatus) return;
+    // clear fields
+    document.getElementById("name").value = "";
+    document.getElementById("type").value = "";
+    document.getElementById("building").value = "";
+    document.getElementById("locationGroup").value = "";
+    document.getElementById("checklist").value = "";
 
-  await updateDoc(doc(db,"assets",id),{
+  } catch (err) {
+    console.error("ERROR:", err);
+    alert("Error adding asset");
+  }
+}
+
+/* ---------------- MAKE FUNCTION GLOBAL ---------------- */
+window.addAsset = addAsset;
+
+/* ---------------- EDIT ASSET ---------------- */
+async function editAsset(id) {
+
+  const newStatus = prompt("Enter status (Active / Inactive)");
+
+  if (!newStatus) return;
+
+  await updateDoc(doc(db, "assets", id), {
     status: newStatus
   });
 
   loadAssets();
-};
+}
+
+window.editAsset = editAsset;
 
 </script>
 
