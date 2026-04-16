@@ -2,22 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CMMS Dashboard</title>
+<title>CMMS Live Dashboard</title>
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* EXTRA SAFETY FIX (prevents "screen out" issue) */
-body {
-  overflow-x: hidden;
-}
-
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 15px;
 }
 
@@ -30,14 +24,14 @@ body {
 
 .kpi h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: #94a3b8;
 }
 
 .kpi p {
   font-size: 22px;
   color: #00e5ff;
-  margin: 8px 0 0;
+  margin-top: 8px;
 }
 
 .role-box {
@@ -45,7 +39,6 @@ body {
   color: #fbbf24;
 }
 
-/* CHART BOX */
 .chart-box {
   margin-top: 20px;
   background: #111827;
@@ -67,38 +60,39 @@ body {
 <!-- MAIN -->
 <div class="main">
 
-  <h1>Dashboard</h1>
-  <div class="role-box" id="roleBox">Loading role...</div>
+<h1>Live Dashboard</h1>
 
-  <!-- KPI -->
-  <div class="kpi-grid">
+<div class="role-box" id="roleBox">Loading...</div>
 
-    <div class="kpi">
-      <h3>Work Orders</h3>
-      <p id="woCount">0</p>
-    </div>
+<!-- KPI -->
+<div class="kpi-grid">
 
-    <div class="kpi">
-      <h3>Open PPM</h3>
-      <p id="ppmCount">0</p>
-    </div>
-
-    <div class="kpi">
-      <h3>Assets</h3>
-      <p id="assetCount">0</p>
-    </div>
-
-    <div class="kpi">
-      <h3>Closed Jobs</h3>
-      <p id="closedCount">0</p>
-    </div>
-
+  <div class="kpi">
+    <h3>Total Work Orders</h3>
+    <p id="woCount">0</p>
   </div>
 
-  <!-- CHART -->
-  <div class="chart-box">
-    <canvas id="kpiChart"></canvas>
+  <div class="kpi">
+    <h3>Open Work Orders</h3>
+    <p id="openCount">0</p>
   </div>
+
+  <div class="kpi">
+    <h3>Closed Work Orders</h3>
+    <p id="closedCount">0</p>
+  </div>
+
+  <div class="kpi">
+    <h3>Assets</h3>
+    <p id="assetCount">0</p>
+  </div>
+
+</div>
+
+<!-- CHART -->
+<div class="chart-box">
+  <canvas id="kpiChart"></canvas>
+</div>
 
 </div>
 
@@ -113,7 +107,7 @@ from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 import { renderSidebar } from "./sidebar.js";
 
-let role = "";
+let chart;
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -122,59 +116,65 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // USER ROLE
   const snap = await getDoc(doc(db, "users", user.uid));
-
-  role = snap.exists() ? snap.data().role : "no-role";
+  const role = snap.data().role;
 
   document.getElementById("roleBox").innerText = "Role: " + role;
 
   renderSidebar(role);
 
+  initChart();
   loadKPIs();
-  loadChart();
+
+  // 🔥 LIVE UPDATE every 5 sec
+  setInterval(loadKPIs, 5000);
 });
 
 
-// 🔵 KPI DATA FROM FIRESTORE
+// 📊 LOAD LIVE KPIs
 async function loadKPIs() {
 
   const woSnap = await getDocs(collection(db, "workOrders"));
   const assetSnap = await getDocs(collection(db, "assets"));
 
-  let totalWO = 0;
+  let total = 0;
+  let open = 0;
   let closed = 0;
 
   woSnap.forEach(d => {
-    totalWO++;
-    if (d.data().status === "Closed") closed++;
+    total++;
+    const w = d.data();
+
+    if (w.status === "Closed") closed++;
+    else open++;
   });
 
-  document.getElementById("woCount").innerText = totalWO;
+  document.getElementById("woCount").innerText = total;
+  document.getElementById("openCount").innerText = open;
   document.getElementById("closedCount").innerText = closed;
-
   document.getElementById("assetCount").innerText = assetSnap.size;
 
-  document.getElementById("ppmCount").innerText = 3; // placeholder for now
+  updateChart(open, closed);
 }
 
 
-// 📊 CHART (REAL KPI VISUAL)
-function loadChart() {
+// 📊 INIT CHART
+function initChart() {
 
   const ctx = document.getElementById("kpiChart");
 
-  new Chart(ctx, {
+  chart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Open", "Closed", "Assets", "PPM"],
+      labels: ["Open", "Closed"],
       datasets: [{
-        label: "CMMS Overview",
-        data: [5, 10, 20, 3],
-        backgroundColor: ["#00e5ff", "#22c55e", "#fbbf24", "#f97316"]
+        label: "Work Orders",
+        data: [0, 0],
+        backgroundColor: ["#00e5ff", "#22c55e"]
       }]
     },
     options: {
+      responsive: true,
       plugins: {
         legend: { labels: { color: "white" } }
       },
@@ -184,6 +184,13 @@ function loadChart() {
       }
     }
   });
+}
+
+
+// 📊 UPDATE CHART LIVE
+function updateChart(open, closed) {
+  chart.data.datasets[0].data = [open, closed];
+  chart.update();
 }
 
 
