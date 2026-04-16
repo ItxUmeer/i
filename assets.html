@@ -39,21 +39,19 @@
 
   <h3>Add Asset</h3>
 
-  <div class="form-grid">
-    <input id="name" placeholder="Asset Name (AHU-01)">
-    <input id="type" placeholder="Type (AHU)">
-    <input id="building" placeholder="Building (Building 1)">
-    <input id="locationGroup" placeholder="Location Group (HQ)">
+  <input id="name" placeholder="Asset Name (AHU-01)">
+  <input id="type" placeholder="Type (AHU)">
+  <input id="building" placeholder="Building (Building 1)">
+  <input id="locationGroup" placeholder="Location Group (HQ)">
 
-    <select id="status">
-      <option value="Active">Active</option>
-      <option value="Inactive">Inactive</option>
-    </select>
-  </div>
+  <select id="status">
+    <option value="Active">Active</option>
+    <option value="Inactive">Inactive</option>
+  </select>
 
-  <br>
+  <br><br>
 
-  <input id="checklist" placeholder="Checklist (comma separated e.g. Filter, Motor, Belt)">
+  <input id="checklist" placeholder="Checklist (Filter, Motor, Belt)">
 
   <br><br>
 
@@ -64,7 +62,7 @@
 <!-- ASSET LIST -->
 <div class="section">
   <h3>Assets List</h3>
-  <div id="assetList"></div>
+  <div id="assetList">Loading...</div>
 </div>
 
 </div>
@@ -90,7 +88,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   location = "login.html";
 };
 
-/* ---------------- AUTH CHECK ---------------- */
+/* ---------------- AUTH ---------------- */
 auth.onAuthStateChanged(async (user) => {
 
   if (!user) {
@@ -98,62 +96,83 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  const snap = await getDoc(doc(db, "users", user.uid));
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
 
-  if (snap.exists()) {
-    currentRole = snap.data().role;
+    if (snap.exists()) {
+      currentRole = snap.data().role;
+    }
+
+    // Hide form if not admin
+    if (currentRole !== "admin") {
+      document.getElementById("assetForm").style.display = "none";
+    }
+
+    loadAssets();
+
+  } catch (err) {
+    console.error("AUTH ERROR:", err);
   }
-
-  // only admin can see form
-  if (currentRole !== "admin") {
-    document.getElementById("assetForm").style.display = "none";
-  }
-
-  loadAssets();
 });
 
-/* ---------------- LOAD ASSETS ---------------- */
+/* ---------------- LOAD ASSETS (SAFE + GUARANTEED) ---------------- */
 async function loadAssets() {
 
-  const snap = await getDocs(collection(db, "assets"));
-
-  let html = "";
-
-  snap.forEach((d) => {
-
-    const a = d.data();
-
-    html += `
-      <div class="card">
-        <b>${a.name}</b><br>
-        Type: ${a.type}<br>
-        Building: ${a.building}<br>
-        Location: ${a.locationGroup}<br>
-        Status: ${a.status}<br>
-
-        <small>
-          Checklist: ${a.checklist ? a.checklist.join(", ") : "None"}
-        </small>
-
-        ${currentRole === "admin" ? `
-          <br><button onclick="editAsset('${d.id}')">Edit</button>
-        ` : ""}
-      </div>
-    `;
-  });
-
-  document.getElementById("assetList").innerHTML = html;
-}
-
-/* ---------------- ADD ASSET (FIXED) ---------------- */
-async function addAsset() {
-
-  console.log("ADD ASSET CLICKED");
+  const container = document.getElementById("assetList");
 
   try {
 
-    const checklistArray = document.getElementById("checklist").value
-      ? document.getElementById("checklist").value.split(",").map(i => i.trim())
+    container.innerHTML = "Loading assets...";
+
+    const snap = await getDocs(collection(db, "assets"));
+
+    if (snap.empty) {
+      container.innerHTML = "No assets found";
+      return;
+    }
+
+    let html = "";
+
+    snap.forEach((d) => {
+
+      const a = d.data();
+
+      html += `
+        <div class="card">
+          <b>${a.name || "-"}</b><br>
+          Type: ${a.type || "-"}<br>
+          Building: ${a.building || "-"}<br>
+          Location: ${a.locationGroup || "-"}<br>
+          Status: ${a.status || "-"}<br>
+
+          <small>
+            Checklist: ${a.checklist ? a.checklist.join(", ") : "None"}
+          </small>
+
+          ${currentRole === "admin" ? `
+            <br><button onclick="editAsset('${d.id}')">Edit</button>
+          ` : ""}
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+  } catch (err) {
+    console.error("LOAD ERROR:", err);
+    container.innerHTML = "Error loading assets";
+  }
+}
+
+/* ---------------- ADD ASSET ---------------- */
+async function addAsset() {
+
+  try {
+
+    const checklistValue = document.getElementById("checklist").value;
+
+    const checklistArray = checklistValue
+      ? checklistValue.split(",").map(i => i.trim())
       : [];
 
     await addDoc(collection(db, "assets"), {
@@ -177,26 +196,30 @@ async function addAsset() {
     document.getElementById("checklist").value = "";
 
   } catch (err) {
-    console.error("ERROR:", err);
-    alert("Error adding asset");
+    console.error("ADD ERROR:", err);
+    alert("Failed to add asset");
   }
 }
 
-/* ---------------- MAKE FUNCTION GLOBAL ---------------- */
 window.addAsset = addAsset;
 
 /* ---------------- EDIT ASSET ---------------- */
 async function editAsset(id) {
 
-  const newStatus = prompt("Enter status (Active / Inactive)");
+  const newStatus = prompt("Enter Status (Active / Inactive)");
 
   if (!newStatus) return;
 
-  await updateDoc(doc(db, "assets", id), {
-    status: newStatus
-  });
+  try {
+    await updateDoc(doc(db, "assets", id), {
+      status: newStatus
+    });
 
-  loadAssets();
+    loadAssets();
+
+  } catch (err) {
+    console.error("EDIT ERROR:", err);
+  }
 }
 
 window.editAsset = editAsset;
