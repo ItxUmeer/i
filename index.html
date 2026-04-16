@@ -75,8 +75,9 @@
   <div id="msg"></div>
 </div>
 
-<!-- FIREBASE SCRIPT -->
+<!-- FIREBASE + LOGIN SCRIPT -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -86,14 +87,14 @@ from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 console.log("CMMS LOGIN LOADED ✔");
 
-// 🔥 YOUR FIREBASE CONFIG (REPLACE THIS)
+// 🔥 YOUR FIREBASE CONFIG (UPDATED)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
+  authDomain: "mep-maintenance-system.firebaseapp.com",
+  projectId: "mep-maintenance-system",
+  storageBucket: "mep-maintenance-system.appspot.com",
+  messagingSenderId: "449309293495",
+  appId: "1:449309293495:web:061124ae9f1c990e388632"
 };
 
 // INIT FIREBASE
@@ -122,11 +123,11 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
     const uid = userCred.user.uid;
 
-    // GET ROLE FROM FIRESTORE
+    // GET USER ROLE FROM FIRESTORE
     const snap = await getDoc(doc(db, "users", uid));
 
     if (!snap.exists()) {
-      msg.innerText = "User profile not found in database";
+      msg.innerText = "User not found in database";
       return;
     }
 
