@@ -1,8 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Supervisor</title>
+<meta charset="UTF-8">
+<title>Supervisor Panel</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab {
+  padding: 10px;
+  background: #1e293b;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #00e5ff;
+  color: black;
+}
+
+textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+}
+</style>
 </head>
 
 <body>
@@ -15,9 +42,15 @@
 
 <div class="main">
 
-<h1>Facilities Supervisor</h1>
+<h1>Supervisor Panel</h1>
 
-<div id="list"></div>
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('wo')">Work Orders</div>
+  <div class="tab" onclick="switchTab('ppm')">PPM Tasks</div>
+</div>
+
+<div id="content"></div>
 
 </div>
 
@@ -27,32 +60,57 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { doc, getDoc, collection, getDocs, updateDoc } 
+import { collection, getDocs, doc, getDoc, updateDoc } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 import { renderSidebar } from "./sidebar.js";
 
-let role = "";
+let userId = "";
+let currentTab = "wo";
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) window.location.href = "index.html";
 
+  userId = user.uid;
+
   const snap = await getDoc(doc(db, "users", user.uid));
 
-  role = snap.data().role;
+  const role = snap.data().role;
 
-  if (role !== "facilities_supervisor" && role !== "admin") {
+  if (role !== "facilities_supervisor" && role !== "maintenance" && role !== "admin") {
     alert("No access");
     window.location.href = "dashboard.html";
   }
 
   renderSidebar(role);
 
-  loadWO();
+  loadData();
 });
 
-async function loadWO() {
+
+// 🔄 SWITCH TAB
+window.switchTab = function(tab) {
+
+  currentTab = tab;
+
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+
+  loadData();
+};
+
+
+// 📥 LOAD DATA
+async function loadData() {
+
+  if (currentTab === "wo") loadWorkOrders();
+  else loadPPM();
+}
+
+
+// 🛠 LOAD WORK ORDERS (ASSIGNED ONLY)
+async function loadWorkOrders() {
 
   const snap = await getDocs(collection(db, "workOrders"));
 
@@ -62,29 +120,70 @@ async function loadWO() {
 
     const w = d.data();
 
-    html += `
-      <div class="card">
-        <b>${w.title}</b><br>
-        Asset: ${w.asset}<br>
-        Status: ${w.status}<br>
-        Priority: ${w.priority}<br>
+    if (w.assignedTo !== userId) return;
 
-        <button onclick="approve('${d.id}')">Approve</button>
-      </div>
-    `;
+    html += buildCard(d.id, w, "wo");
   });
 
-  document.getElementById("list").innerHTML = html;
+  document.getElementById("content").innerHTML = html;
 }
 
-window.approve = async function(id) {
-  await updateDoc(doc(db, "workOrders", id), {
-    status: "Approved"
+
+// 🔧 LOAD PPM
+async function loadPPM() {
+
+  const snap = await getDocs(collection(db, "ppm"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const p = d.data();
+
+    if (p.assignedTo !== userId) return;
+
+    html += buildCard(d.id, p, "ppm");
   });
 
-  loadWO();
+  document.getElementById("content").innerHTML = html;
+}
+
+
+// 🧱 CARD BUILDER
+function buildCard(id, data, type) {
+
+  return `
+    <div class="card">
+      <b>${data.title || data.asset}</b><br>
+      Status: ${data.status}<br>
+
+      <textarea id="c_${id}" placeholder="Add comment"></textarea>
+
+      <button onclick="updateStatus('${id}','Accepted','${type}')">Accept</button>
+      <button onclick="updateStatus('${id}','In Progress','${type}')">Start</button>
+      <button onclick="updateStatus('${id}','Closed','${type}')">Close</button>
+    </div>
+  `;
+}
+
+
+// 🔄 UPDATE STATUS
+window.updateStatus = async function(id, status, type) {
+
+  const comment = document.getElementById("c_" + id).value;
+
+  const ref = doc(db, type === "wo" ? "workOrders" : "ppm", id);
+
+  await updateDoc(ref, {
+    status: status,
+    comments: comment
+  });
+
+  loadData();
 };
 
+
+// LOGOUT
 window.logout = async function () {
   await signOut(auth);
   window.location.href = "index.html";
