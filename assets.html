@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Assets</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -10,41 +10,48 @@
 <div class="sidebar">
   <h2>Assets</h2>
   <button onclick="location.href='dashboard.html'">Dashboard</button>
-  <button onclick="location.href='assets.html'">Assets</button>
   <button onclick="location.href='workorders.html'">Work Orders</button>
 </div>
 
 <div class="main">
-  <h1>Assets Register</h1>
+
+  <h1>Asset Register</h1>
 
   <input id="name" placeholder="Asset Name">
   <input id="type" placeholder="Type (AHU, Chiller)">
   <button onclick="addAsset()">Add Asset</button>
 
-  <div id="list"></div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody id="list"></tbody>
+  </table>
+
 </div>
 
 <script type="module">
-import { db } from "./js/firebase.js";
-import { collection, addDoc, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.addAsset = async function () {
-  await addDoc(collection(db, "assets"), {
+  await addDoc(collection(db,"assets"),{
     name: name.value,
     type: type.value
   });
-
   load();
 };
 
-async function load() {
-  let snap = await getDocs(collection(db, "assets"));
+async function load(){
+  let snap = await getDocs(collection(db,"assets"));
   list.innerHTML = "";
 
-  snap.forEach(doc => {
+  snap.forEach(doc=>{
     let d = doc.data();
-    list.innerHTML += `<div class="card">${d.name} - ${d.type}</div>`;
+    list.innerHTML += `<tr><td>${d.name}</td><td>${d.type}</td></tr>`;
   });
 }
 
