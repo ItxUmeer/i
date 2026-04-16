@@ -1,39 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CMMS Login</title>
+  <meta charset="UTF-8">
+  <title>CMMS Login - Dubai Facilities</title>
+
   <style>
     body {
+      margin: 0;
       font-family: Arial;
-      background: #0f172a;
-      color: white;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      color: white;
     }
 
     .box {
-      background: #1e293b;
+      background: #111827;
       padding: 30px;
-      border-radius: 10px;
-      width: 300px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #38bdf8;
     }
 
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 8px 0;
+      border: none;
+      border-radius: 6px;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
+      margin-top: 10px;
       background: #38bdf8;
       border: none;
-      cursor: pointer;
-      color: black;
+      border-radius: 6px;
       font-weight: bold;
+      cursor: pointer;
     }
 
     button:hover {
@@ -42,32 +55,28 @@
 
     #msg {
       margin-top: 10px;
-      font-size: 12px;
+      font-size: 13px;
+      text-align: center;
+      color: #fbbf24;
     }
   </style>
 </head>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
-  const btn = document.getElementById("loginBtn");
-  const msg = document.getElementById("msg");
+<body>
 
-  btn.addEventListener("click", () => {
+<div class="box">
+  <h2>CMMS LOGIN</h2>
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
 
-    if (!email || !password) {
-      msg.innerText = "Please enter email & password";
-      return;
-    }
+  <button id="loginBtn">Login</button>
 
-    msg.innerText = "Login button works ✔ (Firebase not added yet)";
-  });
+  <div id="msg"></div>
+</div>
 
-});
-</script>
-  <script type="module">
+<!-- FIREBASE SCRIPT -->
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -75,46 +84,57 @@ from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } 
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-console.log("🔥 Firebase loading...");
+console.log("CMMS LOGIN LOADED ✔");
 
+// 🔥 YOUR FIREBASE CONFIG (REPLACE THIS)
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_AUTH_DOMAIN",
   projectId: "YOUR_PROJECT_ID",
   storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
+  messagingSenderId: "YOUR_MESSAGING_ID",
   appId: "YOUR_APP_ID"
 };
 
+// INIT FIREBASE
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// LOGIN BUTTON
 document.getElementById("loginBtn").addEventListener("click", async () => {
 
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const msg = document.getElementById("msg");
+
+  if (!email || !password) {
+    msg.innerText = "Please enter email & password";
+    return;
+  }
 
   msg.innerText = "Logging in...";
 
   try {
 
+    // AUTH LOGIN
     const userCred = await signInWithEmailAndPassword(auth, email, password);
 
     const uid = userCred.user.uid;
 
-    const userSnap = await getDoc(doc(db, "users", uid));
+    // GET ROLE FROM FIRESTORE
+    const snap = await getDoc(doc(db, "users", uid));
 
-    if (!userSnap.exists()) {
-      msg.innerText = "User not found in Firestore";
+    if (!snap.exists()) {
+      msg.innerText = "User profile not found in database";
       return;
     }
 
-    const role = userSnap.data().role;
+    const role = snap.data().role;
 
     console.log("ROLE:", role);
 
+    // ROLE ROUTING
     if (role === "admin") {
       window.location.href = "dashboard.html";
     }
@@ -128,30 +148,19 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     else {
-      msg.innerText = "Invalid role";
+      msg.innerText = "Invalid role assigned";
     }
 
   }
 
   catch (error) {
-    console.error(error);
+    console.error("LOGIN ERROR:", error);
     msg.innerText = error.message;
   }
 
 });
+
 </script>
-<body>
-
-<div class="box">
-  <h2>CMMS LOGIN</h2>
-
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-
-  <button id="loginBtn">Login</button>
-
-  <div id="msg"></div>
-</div>
 
 </body>
 </html>
