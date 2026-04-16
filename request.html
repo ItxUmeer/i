@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Request</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🛠 Maintenance Request</h1>
+
+<input id="title" placeholder="Issue Title"><br>
+<input id="location" placeholder="Location"><br>
+<select id="priority">
+  <option>Low</option>
+  <option>Medium</option>
+  <option>High</option>
+</select><br>
+
+<button onclick="addRequest()">Submit</button>
+
+<script type="module">
+import { db } from './firebase.js';
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+window.addRequest = async function() {
+  await addDoc(collection(db, "requests"), {
+    title: title.value,
+    location: location.value,
+    priority: priority.value,
+    status: "Pending",
+    date: new Date().toLocaleString()
+  });
+
+  alert("Request Added");
+}
+</script>
+
+</body>
+</html>
