@@ -7,33 +7,191 @@
 
 <body>
 
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h3>CMMS</h3>
+
+  <a href="dashboard.html">Dashboard</a>
+  <a href="workorders.html">Work Orders</a>
+  <a href="assets.html">Assets</a>
+  <a href="ppm.html">PPM</a>
+  <a href="users.html">Users</a>
+
+  <hr>
+
+  <a href="#" id="logoutBtn">Logout</a>
+
+</div>
+
+<!-- MAIN -->
 <div class="main">
-<h2>Work Orders</h2>
-<div id="list"></div>
+
+<!-- HEADER -->
+<div class="header-bar">
+  <img src="logo-left.png">
+  <h2>Work Order Management</h2>
+  <img src="logo-right.png">
+</div>
+
+<!-- CREATE WORK ORDER -->
+<div class="section" id="woForm">
+
+  <h3>Create Work Order</h3>
+
+  <input id="title" placeholder="Title (AC Repair)">
+  <input id="description" placeholder="Description">
+
+  <input id="assetId" placeholder="Asset ID (AHU-01)">
+
+  <!-- ASSIGNEE DROPDOWN -->
+  <select id="assignedTo">
+    <option value="">Select Supervisor</option>
+  </select>
+
+  <button onclick="createWO()">Create Work Order</button>
+
+</div>
+
+<!-- LIST -->
+<div class="section">
+  <h3>Work Orders</h3>
+  <div id="woList">Loading...</div>
+</div>
+
 </div>
 
 <script type="module">
-import { db } from "./firebase.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-async function load(){
-  const snap = await getDocs(collection(db,"workOrders"));
+import { auth, db } from "./firebase.js";
 
-  let html="";
-  snap.forEach(d=>{
-    const w=d.data();
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  getDoc,
+  query,
+  orderBy,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-    let cls="status-open";
-    if(w.status==="In Progress") cls="status-progress";
-    if(w.status==="Closed") cls="status-closed";
+/* ---------------- LOGOUT ---------------- */
+document.getElementById("logoutBtn").onclick = async () => {
+  await auth.signOut();
+  location = "login.html";
+};
 
-    html+=`<div class="card ${cls}">${w.title}</div>`;
+/* ---------------- AUTH ---------------- */
+auth.onAuthStateChanged(async (user) => {
+
+  if (!user) {
+    location = "login.html";
+    return;
+  }
+
+  loadUsers();
+  loadWorkOrders();
+});
+
+/* ---------------- LOAD USERS (SUPERVISORS ONLY) ---------------- */
+async function loadUsers() {
+
+  const snap = await getDocs(collection(db, "users"));
+
+  let html = `<option value="">Select Supervisor</option>`;
+
+  snap.forEach(d => {
+
+    const u = d.data();
+
+    if (u.role === "facilities_supervisor") {
+
+      html += `
+        <option value="${d.id}">
+          ${u.name}
+        </option>
+      `;
+    }
   });
 
-  list.innerHTML=html;
+  document.getElementById("assignedTo").innerHTML = html;
 }
 
-load();
+/* ---------------- CREATE WORK ORDER ---------------- */
+window.createWO = async () => {
+
+  try {
+
+    await addDoc(collection(db, "workOrders"), {
+      title: document.getElementById("title").value,
+      description: document.getElementById("description").value,
+      assetId: document.getElementById("assetId").value,
+      assignedTo: document.getElementById("assignedTo").value,
+      status: "Pending",
+      createdAt: serverTimestamp(),
+      comments: []
+    });
+
+    alert("Work Order Created ✔");
+
+    loadWorkOrders();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error creating work order");
+  }
+};
+
+/* ---------------- LOAD WORK ORDERS ---------------- */
+async function loadWorkOrders() {
+
+  const q = query(
+    collection(db, "workOrders"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snap = await getDocs(q);
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    const w = d.data();
+
+    html += `
+      <div class="card">
+        <b>${w.title}</b><br>
+        Asset: ${w.assetId}<br>
+        Status: ${w.status}<br>
+
+        <small>
+          ${w.description || ""}
+        </small>
+
+        <br><br>
+
+        <button onclick="setStatus('${d.id}','Started')">Start</button>
+        <button onclick="setStatus('${d.id}','Completed')">Close</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("woList").innerHTML =
+    html || "No Work Orders";
+}
+
+/* ---------------- UPDATE STATUS ---------------- */
+window.setStatus = async (id, status) => {
+
+  await updateDoc(doc(db, "workOrders", id), {
+    status: status
+  });
+
+  loadWorkOrders();
+};
+
 </script>
 
 </body>
