@@ -1,86 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dubai CMMS Dashboard</title>
+  <title>CMMS Dubai Dashboard</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    .chart-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .chart-box {
-      background: #111827;
-      padding: 15px;
-      border-radius: 14px;
-      border: 1px solid #1f2937;
-    }
-
-    .btn {
-      margin-top: 10px;
-      background: #38bdf8;
-      color: black;
-      padding: 10px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .btn:hover {
-      opacity: 0.8;
-    }
-  </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>CMMS Dubai</h2>
+  <h2>CMMS DUBAI</h2>
 
-  <button onclick="location.href='dashboard.html'">Dashboard</button>
-  <button onclick="location.href='assets.html'">Assets</button>
-  <button onclick="location.href='workorders.html'">Work Orders</button>
-  <button onclick="location.href='ppm.html'">PPM</button>
-  <button onclick="location.href='technician.html'">Technician</button>
+  <button class="active" onclick="location.href='dashboard.html'">📊 Dashboard</button>
+  <button onclick="location.href='assets.html'">🏢 Assets</button>
+  <button onclick="location.href='workorders.html'">🛠 Work Orders</button>
+  <button onclick="location.href='ppm.html'">📅 PPM</button>
+  <button onclick="location.href='technician.html'">👷 Technician</button>
 
   <hr style="border:1px solid #1f2937">
 
-  <button onclick="logout()">Logout</button>
+  <button onclick="logout()">🚪 Logout</button>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-  <div class="header">
-    <h1 style="color:#38bdf8;">Facility Management Dashboard</h1>
+  <h1>Facility Management Dashboard</h1>
 
-    <button class="btn" onclick="runPPM()">Generate PPM Now</button>
-  </div>
-
-  <!-- KPI -->
-  <div class="grid">
+  <!-- KPI GRID -->
+  <div class="kpi-grid">
 
     <div class="kpi-card">
-      <div class="kpi-title">Assets</div>
+      <div class="kpi-title">Total Assets</div>
       <div class="kpi-value" id="assetCount">0</div>
     </div>
 
@@ -106,16 +58,16 @@
 
   </div>
 
-  <!-- CHARTS -->
-  <div class="chart-grid">
+  <!-- CHART SECTION -->
+  <div class="kpi-grid">
 
-    <div class="chart-box">
-      <h3>Work Orders Status</h3>
+    <div class="card">
+      <h3 style="color:#38bdf8;">Work Orders Status</h3>
       <canvas id="statusChart"></canvas>
     </div>
 
-    <div class="chart-box">
-      <h3>System Overview</h3>
+    <div class="card">
+      <h3 style="color:#38bdf8;">System Overview</h3>
       <canvas id="overviewChart"></canvas>
     </div>
 
@@ -123,6 +75,7 @@
 
 </div>
 
+<!-- SCRIPT -->
 <script type="module">
 import { db, auth } from "./firebase.js";
 import { collection, getDocs } 
@@ -140,7 +93,7 @@ onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
   } else {
-    generatePPM();   // 🔥 AUTO PPM GENERATION
+    generatePPM(); // AUTO PPM ENGINE
     loadData();
   }
 });
@@ -151,13 +104,7 @@ window.logout = function () {
   window.location.href = "index.html";
 };
 
-// MANUAL PPM GENERATOR
-window.runPPM = function () {
-  generatePPM();
-  alert("PPM Generated Successfully");
-};
-
-// LOAD DATA
+// LOAD DASHBOARD DATA
 async function loadData() {
 
   const assetsSnap = await getDocs(collection(db, "assets"));
@@ -183,30 +130,40 @@ async function loadData() {
     }
   });
 
-  // KPIs
+  // KPI UPDATE
   document.getElementById("assetCount").innerText = assetsSnap.size;
   document.getElementById("woCount").innerText = woSnap.size;
   document.getElementById("openCount").innerText = open;
   document.getElementById("ppmCount").innerText = ppmSnap.size;
   document.getElementById("overdueCount").innerText = overdue;
 
-  // CHART 1
+  // DESTROY OLD CHARTS
   if (statusChart) statusChart.destroy();
+  if (overviewChart) overviewChart.destroy();
 
+  // STATUS CHART
   statusChart = new Chart(document.getElementById("statusChart"), {
     type: "doughnut",
     data: {
       labels: ["Open", "Completed"],
       datasets: [{
         data: [open, completed],
-        backgroundColor: ["#f59e0b", "#22c55e"]
+        backgroundColor: ["#f59e0b", "#22c55e"],
+        borderWidth: 0
       }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: {
+            color: "#e5e7eb"
+          }
+        }
+      }
     }
   });
 
-  // CHART 2
-  if (overviewChart) overviewChart.destroy();
-
+  // OVERVIEW CHART
   overviewChart = new Chart(document.getElementById("overviewChart"), {
     type: "bar",
     data: {
@@ -214,8 +171,31 @@ async function loadData() {
       datasets: [{
         label: "System Overview",
         data: [assetsSnap.size, woSnap.size, ppmSnap.size, overdue],
-        backgroundColor: ["#38bdf8", "#6366f1", "#f59e0b", "#ef4444"]
+        backgroundColor: [
+          "#38bdf8",
+          "#6366f1",
+          "#f59e0b",
+          "#ef4444"
+        ],
+        borderRadius: 6
       }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: {
+            color: "#e5e7eb"
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#9ca3af" }
+        },
+        y: {
+          ticks: { color: "#9ca3af" }
+        }
+      }
     }
   });
 
