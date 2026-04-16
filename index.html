@@ -1,123 +1,22 @@
-<script type="module">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CMMS Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
 
-// 🔥 Firebase imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+<body>
 
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  getDocs 
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+<div class="login-box">
+  <h2>Dubai CMMS Login</h2>
 
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-// 🔥 YOUR FIREBASE CONFIG (PASTED FROM YOU)
-const firebaseConfig = {
-  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
-  authDomain: "mep-maintenance-system.firebaseapp.com",
-  projectId: "mep-maintenance-system",
-  storageBucket: "mep-maintenance-system.firebasestorage.app",
-  messagingSenderId: "449309293495",
-  appId: "1:449309293495:web:061124ae9f1c990e388632"
-};
+  <button onclick="login()">Login</button>
+</div>
 
+<script type="module" src="js/auth.js"></script>
 
-// 🔥 INIT FIREBASE
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-
-// ==========================
-// LOGIN FUNCTION
-// ==========================
-window.login = function () {
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .catch(error => alert(error.message));
-};
-
-
-// ==========================
-// LOGOUT
-// ==========================
-window.logout = function () {
-  signOut(auth);
-};
-
-
-// ==========================
-// AUTH STATE CHECK
-// ==========================
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    loadAssets();
-  } else {
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("app").style.display = "none";
-  }
-});
-
-
-// ==========================
-// NAVIGATION
-// ==========================
-window.show = function (page) {
-  document.querySelectorAll(".main > div")
-    .forEach(div => div.style.display = "none");
-
-  document.getElementById(page).style.display = "block";
-};
-
-
-// ==========================
-// ADD ASSET
-// ==========================
-window.addAsset = async function () {
-  let name = document.getElementById("assetName").value;
-  let type = document.getElementById("assetType").value;
-
-  await addDoc(collection(db, "assets"), {
-    name: name,
-    type: type,
-    status: "active",
-    createdAt: new Date()
-  });
-
-  loadAssets();
-};
-
-
-// ==========================
-// LOAD ASSETS
-// ==========================
-async function loadAssets() {
-  let snap = await getDocs(collection(db, "assets"));
-
-  document.getElementById("assetList").innerHTML = "";
-  document.getElementById("assetCount").innerText = snap.size;
-
-  snap.forEach(doc => {
-    let d = doc.data();
-
-    document.getElementById("assetList").innerHTML += `
-      <div class="card">
-        <b>${d.name}</b><br>
-        ${d.type}
-      </div>
-    `;
-  });
-}
-
-</script>
+</body>
+</html>
