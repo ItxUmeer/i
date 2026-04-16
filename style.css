@@ -4,6 +4,18 @@ body{
   background:#f8fafc;
 }
 
+/* HEADER */
+.header-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+}
+
+.header-bar img{
+  height:80px;
+}
+
 /* LOGIN */
 .login-container{
   height:100vh;
@@ -20,29 +32,35 @@ body{
   text-align:center;
 }
 
-.logo-bar{
-  display:flex;
-  justify-content:space-between;
+.login-box input{
+  width:100%;
+  margin:8px 0;
+  padding:10px;
 }
 
-.logo-bar img{
-  height:45px;
+.login-box button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#2563eb;
+  color:white;
+  border:none;
 }
 
 /* SIDEBAR */
 .sidebar{
-  width:230px;
+  width:240px;
   height:100vh;
   position:fixed;
   background:white;
-  border-right:1px solid #ddd;
+  border-right:2px solid #e5e7eb;
   padding:15px;
 }
 
 .sidebar a{
   display:block;
   padding:10px;
-  margin:5px 0;
+  margin:6px 0;
   text-decoration:none;
   color:black;
 }
@@ -53,20 +71,8 @@ body{
 
 /* MAIN */
 .main{
-  margin-left:250px;
+  margin-left:260px;
   padding:20px;
-}
-
-/* HEADER */
-.header-bar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.header-bar img{
-  height:45px;
 }
 
 /* SECTION */
@@ -77,12 +83,15 @@ body{
   margin-bottom:15px;
 }
 
-/* BUTTON */
-button{
-  background:#2563eb;
-  color:white;
-  border:none;
-  padding:10px;
-  border-radius:6px;
-  cursor:pointer;
+/* ROLE BOX */
+.role-box{
+  position:absolute;
+  right:0;
+  top:90px;
+  background:white;
+  border:1px solid #ddd;
+  padding:12px;
+  border-radius:8px;
+  display:none;
+  width:220px;
 }
