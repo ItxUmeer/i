@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>DCAS CMMS Dashboard</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- CHART JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -18,8 +21,9 @@
 
 <div class="main">
 
-  <h1>DCAS Facility Dashboard</h1>
+  <h1>DCAS Facility KPI Dashboard</h1>
 
+  <!-- KPI CARDS -->
   <div class="kpi-grid">
 
     <div class="kpi-card">
@@ -27,29 +31,97 @@
       <div class="kpi-value" id="assetCount">0</div>
     </div>
 
+    <div class="kpi-card">
+      <div class="kpi-title">Work Orders</div>
+      <div class="kpi-value" id="woCount">0</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Open Tasks</div>
+      <div class="kpi-value" id="openCount">0</div>
+    </div>
+
+  </div>
+
+  <br>
+
+  <!-- CHARTS -->
+  <div class="kpi-grid">
+
+    <div class="card">
+      <h3>Work Orders Status</h3>
+      <canvas id="statusChart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Assets vs Work Orders</h3>
+      <canvas id="assetChart"></canvas>
+    </div>
+
   </div>
 
 </div>
 
 <script type="module">
-import { auth, db } from "./firebase.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { db, auth } from "./firebase.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-// LOAD DATA
-async function loadAssets() {
-  const snap = await getDocs(collection(db, "assets"));
-  document.getElementById("assetCount").innerText = snap.size;
-}
+let statusChart, assetChart;
 
-// AUTH CHECK + DATA LOAD
+// AUTH CHECK
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
   } else {
-    loadAssets();
+    loadData();
   }
 });
+
+async function loadData() {
+
+  const assetsSnap = await getDocs(collection(db, "assets"));
+  const woSnap = await getDocs(collection(db, "workOrders"));
+
+  let open = 0, completed = 0;
+
+  woSnap.forEach(doc => {
+    let d = doc.data();
+    if (d.status === "Open") open++;
+    if (d.status === "Completed") completed++;
+  });
+
+  // KPIs
+  document.getElementById("assetCount").innerText = assetsSnap.size;
+  document.getElementById("woCount").innerText = woSnap.size;
+  document.getElementById("openCount").innerText = open;
+
+  // STATUS CHART
+  new Chart(document.getElementById("statusChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Open", "Completed"],
+      datasets: [{
+        data: [open, completed],
+        backgroundColor: ["#f59e0b", "#22c55e"]
+      }]
+    }
+  });
+
+  // ASSET VS WORK ORDER CHART
+  new Chart(document.getElementById("assetChart"), {
+    type: "bar",
+    data: {
+      labels: ["Assets", "Work Orders"],
+      datasets: [{
+        label: "Count",
+        data: [assetsSnap.size, woSnap.size],
+        backgroundColor: ["#38bdf8", "#6366f1"]
+      }]
+    }
+  });
+}
+
 </script>
 
 <script type="module" src="auth.js"></script>
