@@ -1,9 +1,13 @@
-/* GLOBAL */
+:root {
+  --blue: #2563eb;
+  --red: #ef4444;
+  --bg: #f8fafc;
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI";
-  background: #f4f8fb;
-  color: #1e293b;
+  background: var(--bg);
 }
 
 /* LOGIN */
@@ -20,7 +24,6 @@ body {
   padding: 30px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 .logo-bar {
@@ -28,9 +31,7 @@ body {
   justify-content: space-between;
 }
 
-.logo-bar img {
-  height: 50px;
-}
+.logo-bar img { height: 50px; }
 
 /* SIDEBAR */
 .sidebar {
@@ -47,13 +48,11 @@ body {
   padding: 10px;
   margin: 5px 0;
   text-decoration: none;
-  color: #1e293b;
+  color: black;
   border-radius: 6px;
 }
 
-.sidebar a:hover {
-  background: #e0f2fe;
-}
+.sidebar a:hover { background: #e0f2fe; }
 
 /* MAIN */
 .main {
@@ -68,40 +67,32 @@ body {
   align-items: center;
 }
 
-.header-bar img {
-  height: 45px;
-}
+.header-bar img { height: 45px; }
 
-/* CARDS */
-.card {
+/* SECTION */
+.section {
   background: white;
   padding: 15px;
   border-radius: 10px;
-  margin-bottom: 10px;
-  border-left: 5px solid #0ea5e9;
+  margin-bottom: 15px;
 }
 
-/* KPI */
-.kpi-grid {
+/* FORM */
+.form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
   gap: 10px;
 }
 
-.kpi {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
+input, select, textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
-
-/* STATUS */
-.status-open { border-left: 5px solid #0ea5e9; }
-.status-progress { border-left: 5px solid #f59e0b; }
-.status-closed { border-left: 5px solid #10b981; }
 
 /* BUTTON */
 button {
-  background: #0ea5e9;
+  background: var(--blue);
   color: white;
   border: none;
   padding: 10px;
@@ -109,17 +100,34 @@ button {
   cursor: pointer;
 }
 
-/* INPUT */
-input, select, textarea {
-  width: 100%;
+/* CARD */
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+/* STATUS */
+.status-open { border-left: 5px solid var(--blue); }
+.status-progress { border-left: 5px solid orange; }
+.status-closed { border-left: 5px solid green; }
+
+/* KPI */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  gap: 10px;
+}
+
+.kpi {
+  background: white;
   padding: 10px;
-  margin: 5px 0;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 /* MOBILE */
 @media(max-width:768px){
-  .sidebar { width:100%; height:auto; position:relative; }
+  .sidebar { width:100%; position:relative; height:auto; }
   .main { margin-left:0; }
 }
