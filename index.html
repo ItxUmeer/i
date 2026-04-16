@@ -1,25 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CMMS TEST</title>
+  <title>CMMS Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #38bdf8;
+      border: none;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    #msg {
+      margin-top: 10px;
+      font-size: 12px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>CMMS LOGIN TEST PAGE</h2>
+<div class="box">
+  <h2>CMMS LOGIN</h2>
 
-<input id="email" placeholder="email">
-<input id="password" placeholder="password">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-<button onclick="test()">CLICK TEST</button>
+  <button id="loginBtn">Login</button>
 
-<p id="msg"></p>
-
-<script>
-function test() {
-  document.getElementById("msg").innerText = "JS WORKS ✔";
-}
-</script>
+  <div id="msg"></div>
+</div>
 
 </body>
 </html>
