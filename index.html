@@ -1,81 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CMMS Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>CMMS LOGIN PAGE</h2>
+
+<input id="email" placeholder="email">
+<input id="password" placeholder="password">
+
+<button id="loginBtn">Login Test</button>
+
+<p id="msg"></p>
+
 <script>
-console.log("HTML IS RUNNING ✔");
-</script>
-<script type="module">
-import { auth, db } from "./firebase.js";
-import { signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+console.log("PAGE LOADED ✔");
 
-import { doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-console.log("LOGIN SCRIPT LOADED ✔");
-
-// Ensure DOM is ready before attaching event
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   const btn = document.getElementById("loginBtn");
-  const msg = document.getElementById("msg");
 
-  if (!btn) {
-    console.error("Login button not found ❌");
-    return;
-  }
+  console.log("BUTTON FOUND:", btn);
 
-  btn.addEventListener("click", async () => {
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    if (!email || !password) {
-      msg.innerText = "Please enter email & password";
-      return;
-    }
-
-    msg.innerText = "Logging in...";
-
-    try {
-
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-
-      const uid = userCred.user.uid;
-
-      const snap = await getDoc(doc(db, "users", uid));
-
-      if (!snap.exists()) {
-        msg.innerText = "User profile not found in Firestore";
-        return;
-      }
-
-      const role = snap.data().role;
-
-      console.log("ROLE DETECTED:", role);
-
-      // ROLE ROUTING
-      if (role === "admin") {
-        window.location.href = "dashboard.html";
-      }
-
-      else if (role === "assets_officer") {
-        window.location.href = "assets.html";
-      }
-
-      else if (role === "facilities_supervisor") {
-        window.location.href = "supervisor.html";
-      }
-
-      else {
-        msg.innerText = "Invalid role assigned";
-      }
-
-    }
-
-    catch (error) {
-      console.error("LOGIN ERROR:", error);
-      msg.innerText = error.message;
-    }
-
+  btn.addEventListener("click", () => {
+    document.getElementById("msg").innerText = "BUTTON WORKING ✔";
   });
 
 });
 </script>
+
+</body>
+</html>
