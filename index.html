@@ -1,166 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>CMMS Login - Dubai Facilities</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
-    }
-
-    .box {
-      background: #111827;
-      padding: 30px;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #38bdf8;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 6px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: #38bdf8;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0ea5e9;
-    }
-
-    #msg {
-      margin-top: 10px;
-      font-size: 13px;
-      text-align: center;
-      color: #fbbf24;
-    }
-  </style>
+<title>CMMS Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="box">
-  <h2>CMMS LOGIN</h2>
+<div class="login-container">
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+  <div class="login-box">
 
-  <button id="loginBtn">Login</button>
+    <div class="logo-bar">
+      <img src="logo-left.png">
+      <img src="logo-right.png">
+    </div>
 
-  <div id="msg"></div>
+    <h2>CMMS Login</h2>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button id="loginBtn">Login</button>
+    <p id="msg"></p>
+
+  </div>
+
 </div>
 
-<!-- FIREBASE + LOGIN SCRIPT -->
 <script type="module">
+import { login } from "./auth.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-import { getFirestore, doc, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-console.log("CMMS LOGIN LOADED ✔");
-
-// 🔥 YOUR FIREBASE CONFIG (UPDATED)
-const firebaseConfig = {
-  apiKey: "AIzaSyA3PK51x0QAqT_DJHasx0bn3Cww2Q5j0_A",
-  authDomain: "mep-maintenance-system.firebaseapp.com",
-  projectId: "mep-maintenance-system",
-  storageBucket: "mep-maintenance-system.appspot.com",
-  messagingSenderId: "449309293495",
-  appId: "1:449309293495:web:061124ae9f1c990e388632"
-};
-
-// INIT FIREBASE
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// LOGIN BUTTON
-document.getElementById("loginBtn").addEventListener("click", async () => {
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const msg = document.getElementById("msg");
-
-  if (!email || !password) {
-    msg.innerText = "Please enter email & password";
-    return;
-  }
-
-  msg.innerText = "Logging in...";
+document.getElementById("loginBtn").onclick = async () => {
 
   try {
+    const role = await login(email.value, password.value);
 
-    // AUTH LOGIN
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    if (role === "admin") location = "dashboard.html";
+    else if (role === "assets_officer") location = "assets.html";
+    else location = "supervisor.html";
 
-    const uid = userCred.user.uid;
-
-    // GET USER ROLE FROM FIRESTORE
-    const snap = await getDoc(doc(db, "users", uid));
-
-    if (!snap.exists()) {
-      msg.innerText = "User not found in database";
-      return;
-    }
-
-    const role = snap.data().role;
-
-    console.log("ROLE:", role);
-
-    // ROLE ROUTING
-    if (role === "admin") {
-      window.location.href = "dashboard.html";
-    }
-
-    else if (role === "assets_officer") {
-      window.location.href = "assets.html";
-    }
-
-    else if (role === "facilities_supervisor") {
-      window.location.href = "supervisor.html";
-    }
-
-    else {
-      msg.innerText = "Invalid role assigned";
-    }
-
+  } catch(e){
+    msg.innerText = e.message;
   }
-
-  catch (error) {
-    console.error("LOGIN ERROR:", error);
-    msg.innerText = error.message;
-  }
-
-});
-
+};
 </script>
 
 </body>
