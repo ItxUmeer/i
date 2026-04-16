@@ -9,54 +9,97 @@
 
 <div class="sidebar">
   <h2>Assets</h2>
+
   <button onclick="location.href='dashboard.html'">Dashboard</button>
   <button onclick="location.href='workorders.html'">Work Orders</button>
 </div>
 
 <div class="main">
 
-  <h1>Asset Register</h1>
+  <h1>Asset Management</h1>
 
+  <!-- LOCATION SYSTEM -->
+  <select id="locationGroup">
+    <option>Headquarters</option>
+    <option>Staff Accommodation</option>
+    <option>Outside Stations</option>
+  </select>
+
+  <input id="building" placeholder="Building (1-5 / A-E / Station)">
   <input id="name" placeholder="Asset Name">
-  <input id="type" placeholder="Type (AHU, Chiller)">
+  <input id="type" placeholder="Type (AHU, Pump, Chiller)">
+
   <button onclick="addAsset()">Add Asset</button>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Type</th>
-      </tr>
-    </thead>
-    <tbody id="list"></tbody>
-  </table>
+  <hr>
+
+  <!-- FILTER -->
+  <select id="filter" onchange="loadAssets()">
+    <option>All</option>
+    <option>Headquarters</option>
+    <option>Staff Accommodation</option>
+    <option>Outside Stations</option>
+  </select>
+
+  <div id="list"></div>
 
 </div>
 
 <script type="module">
 import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { collection, addDoc, getDocs } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
+// ➕ ADD ASSET
 window.addAsset = async function () {
+
   await addDoc(collection(db,"assets"),{
     name: name.value,
-    type: type.value
+    type: type.value,
+    locationGroup: locationGroup.value,
+    building: building.value,
+    status: "Active"
   });
-  load();
+
+  loadAssets();
 };
 
-async function load(){
-  let snap = await getDocs(collection(db,"assets"));
+
+// 📥 LOAD ASSETS WITH FILTER
+window.loadAssets = async function () {
+
+  const snap = await getDocs(collection(db,"assets"));
+
   list.innerHTML = "";
 
-  snap.forEach(doc=>{
-    let d = doc.data();
-    list.innerHTML += `<tr><td>${d.name}</td><td>${d.type}</td></tr>`;
-  });
-}
+  let filterValue = document.getElementById("filter").value;
 
-load();
+  snap.forEach(doc => {
+
+    let d = doc.data();
+
+    if (filterValue !== "All" && d.locationGroup !== filterValue) {
+      return;
+    }
+
+    list.innerHTML += `
+      <div class="card">
+
+        <b>${d.name}</b><br>
+        Type: ${d.type}<br>
+        Location: ${d.locationGroup}<br>
+        Building: ${d.building}
+
+      </div>
+    `;
+  });
+};
+
+loadAssets();
+
 </script>
+
+<script type="module" src="auth.js"></script>
 
 </body>
 </html>
