@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assets</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>Assets Management</h2>
+  <img src="logo-right.png" class="logo">
+</div>
+
+<div class="sidebar">
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
+</div>
+
+<div class="main">
+
+<div class="tab-buttons">
+  <button onclick="showTab('add')">Add Asset</button>
+  <button onclick="showTab('view')">View Assets</button>
+</div>
+
+<!-- ADD -->
+<div id="add" class="section">
+
+  <h3>Add Asset</h3>
+
+  <input id="name" placeholder="Asset Name">
+  <input id="type" placeholder="Type">
+  <input id="building" placeholder="Building">
+  <input id="locationGroup" placeholder="Location">
+
+  <button class="action-btn" onclick="addAsset()">Add Asset</button>
+
+</div>
+
+<!-- VIEW -->
+<div id="view" class="section" style="display:none">
+
+  <h3>Assets List</h3>
+
+  <button onclick="exportAssets()">Export</button>
+
+  <table border="1" width="100%" id="assetTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="list"></tbody>
+  </table>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+window.go = (p)=>location=p;
+
+window.showTab = (t)=>{
+  add.style.display="none";
+  view.style.display="none";
+  document.getElementById(t).style.display="block";
+};
+
+window.addAsset = async () => {
+
+  await addDoc(collection(db,"assets"), {
+    name:name.value,
+    type:type.value,
+    building:building.value,
+    locationGroup:locationGroup.value,
+    status:"Active"
+  });
+
+  alert("Added");
+  load();
+};
+
+async function load(){
+
+  const snap = await getDocs(collection(db,"assets"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    const a=d.data();
+
+    html+=`
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.locationGroup}</td>
+        <td>${a.status}</td>
+      </tr>
+    `;
+  });
+
+  list.innerHTML=html;
+}
+
+window.exportAssets = () => {
+  let table = document.getElementById("assetTable").outerHTML;
+  let a = document.createElement("a");
+  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
+  a.download = "assets.xls";
+  a.click();
+};
+
+load();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PPM</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>PPM Management</h2>
+  <img src="logo-right.png" class="logo">
+</div>
+
+<div class="sidebar">
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
+</div>
+
+<div class="main">
+
+<div class="tab-buttons">
+  <button onclick="showTab('add')">Add PPM</button>
+  <button onclick="showTab('list')">PPM List</button>
+</div>
+
+<!-- ADD -->
+<div id="add" class="section">
+
+  <select id="assetSelect"></select>
+
+  <input id="task" placeholder="Task">
+  <input id="frequency" placeholder="Frequency">
+  <input id="nextDue" type="date">
+
+  <button class="action-btn" onclick="createPPM()">Create</button>
+
+</div>
+
+<!-- LIST -->
+<div id="list" class="section" style="display:none">
+
+  <button onclick="exportPPM()">Export</button>
+
+  <table border="1" width="100%" id="ppmTable">
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Task</th>
+        <th>Frequency</th>
+        <th>Next Due</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="ppmList"></tbody>
+  </table>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+window.go = (p)=>location=p;
+
+window.showTab = (t)=>{
+  add.style.display="none";
+  list.style.display="none";
+  document.getElementById(t).style.display="block";
+};
+
+async function loadAssets(){
+
+  const snap = await getDocs(collection(db,"assets"));
+
+  let html = `<option>Select Asset</option>`;
+
+  snap.forEach(d=>{
+    const a=d.data();
+    html+=`<option value="${a.name}">${a.name}</option>`;
+  });
+
+  assetSelect.innerHTML=html;
+}
+
+window.createPPM = async () => {
+
+  await addDoc(collection(db,"ppm"), {
+    assetId:assetSelect.value,
+    task:task.value,
+    frequency:frequency.value,
+    nextDue:nextDue.value,
+    status:"Pending"
+  });
+
+  alert("Created");
+  loadPPM();
+};
+
+async function loadPPM(){
+
+  const snap = await getDocs(collection(db,"ppm"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    const p=d.data();
+
+    html+=`
+      <tr>
+        <td>${p.assetId}</td>
+        <td>${p.task}</td>
+        <td>${p.frequency}</td>
+        <td>${p.nextDue}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  });
+
+  ppmList.innerHTML=html;
+}
+
+window.exportPPM = () => {
+  let table = document.getElementById("ppmTable").outerHTML;
+  let a = document.createElement("a");
+  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
+  a.download = "ppm.xls";
+  a.click();
+};
+
+loadAssets();
+loadPPM();
+
+</script>
+
+</body>
+</html>
