@@ -1,96 +1,91 @@
-
-/* GLOBAL */
 body {
-  margin:0;
-  font-family:Arial;
-  background:#f5f7fb;
+  margin: 0;
+  font-family: Arial;
+  background: #f5f7fb;
 }
 
 /* HEADER */
 .header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:white;
-  padding:10px 20px;
-  border-bottom:2px solid #2563eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-bottom: 3px solid #2563eb;
 }
 
 .logo {
-  height:60px;
+  height: 60px;
 }
 
 /* SIDEBAR */
 .sidebar {
-  position:fixed;
-  left:0;
-  top:80px;
-  width:220px;
-  height:100%;
-  background:#0f172a;
-  padding:15px;
-  border-right:4px solid #2563eb;
+  width: 220px;
+  position: fixed;
+  top: 80px;
+  bottom: 0;
+  left: 0;
+  background: #1e3a8a;
+  padding-top: 20px;
+  border-right: 4px solid #dc2626;
 }
 
 .sidebar button {
-  width:100%;
-  margin-bottom:10px;
-  padding:12px;
-  background:#1e293b;
-  color:white;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+  display: block;
+  width: 90%;
+  margin: 10px auto;
+  padding: 12px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .sidebar button:hover {
-  background:#2563eb;
+  background: #e0e7ff;
 }
 
 /* MAIN */
 .main {
-  margin-left:240px;
-  padding:20px;
+  margin-left: 240px;
+  padding: 20px;
 }
 
 /* TABS */
-.tab-buttons {
-  margin-bottom:15px;
-}
-
 .tab-buttons button {
-  padding:10px 15px;
-  margin-right:10px;
-  border:none;
-  background:#2563eb;
-  color:white;
-  border-radius:6px;
-  cursor:pointer;
+  margin-right: 10px;
+  padding: 10px;
+  cursor: pointer;
 }
 
-/* SECTION */
-.section {
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #e5e7eb;
+/* TABLE */
+table {
+  border-collapse: collapse;
+  background: white;
+}
+
+th {
+  background: #2563eb;
+  color: white;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
 }
 
 /* INPUT */
 input, select {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border:1px solid #ccc;
-  border-radius:5px;
+  display: block;
+  margin: 10px 0;
+  padding: 10px;
+  width: 300px;
 }
 
-/* BUTTON */
 .action-btn {
-  background:#2563eb;
-  color:white;
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
 }
