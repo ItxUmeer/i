@@ -3,84 +3,48 @@
 <head>
 <title>Assets</title>
 <link rel="stylesheet" href="style.css">
-
-<style>
-@media print {
-  body { background:white; }
-  .sidebar, button { display:none; }
-  table { width:100%; }
-  @page { size: A4 landscape; }
-}
-</style>
-
 </head>
 
 <body>
 
 <div class="header">
-
-  <div class="header-left">
-    <img src="logo-left.png" class="logo">
-  </div>
-
-  <div class="header-center">
-    CMMS Data for DCAS Facility
-  </div>
-
+  <div class="header-left"><img src="logo-left.png" class="logo"></div>
+  <div class="header-center">Assets Management</div>
   <div class="header-right">
-
-    <div class="notif">
-      🔔 <span id="notifCount"></span>
-    </div>
-
+    🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
-
     <img src="logo-right.png" class="logo">
-
   </div>
-
 </div>
 
-<!-- NOTIFICATION BOX -->
-<div id="notifBox" style="display:none;position:absolute;right:10px;top:60px;background:white;width:300px;border:1px solid #ccc;z-index:999;"></div>
-
-<!-- SIDEBAR -->
 <div class="sidebar">
   <button onclick="go('assets.html')">Assets</button>
   <button onclick="go('ppm.html')">PPM</button>
   <button onclick="go('workorders.html')">Work Orders</button>
-  <button onclick="logout()">Logout</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <h2>Assets</h2>
 
-<div>
-  <input id="name" placeholder="Asset Name">
-  <input id="type" placeholder="Type">
-  <input id="building" placeholder="Building">
-  <input id="locationGroup" placeholder="Location">
+<input id="assetName" placeholder="Asset Name">
+<input id="assetType" placeholder="Type">
+<input id="assetBuilding" placeholder="Building">
+<input id="assetLocation" placeholder="Location">
 
-  <button onclick="addAsset()">Add Asset</button>
-  <button onclick="window.print()">PDF Report</button>
-</div>
-
-<br>
+<button onclick="addAsset()">Add Asset</button>
 
 <table>
 <thead>
 <tr>
-  <th>Name</th>
-  <th>Type</th>
-  <th>Building</th>
-  <th>Location</th>
-  <th>Status</th>
+<th>Name</th>
+<th>Type</th>
+<th>Building</th>
+<th>Location</th>
+<th>Status</th>
 </tr>
 </thead>
-
-<tbody id="list"></tbody>
+<tbody id="assetList"></tbody>
 </table>
 
 </div>
@@ -101,75 +65,41 @@ window.logout = ()=>location="login.html";
 window.addAsset = async () => {
 
   await addDoc(collection(db,"assets"), {
-    name:name.value,
-    type:type.value,
-    building:building.value,
-    locationGroup:locationGroup.value,
-    status:"Active"
+    name: document.getElementById("assetName").value,
+    type: document.getElementById("assetType").value,
+    building: document.getElementById("assetBuilding").value,
+    location: document.getElementById("assetLocation").value,
+    status: "Active"
   });
 
-  await addDoc(collection(db,"notifications"), {
-    title:"Asset Added",
-    message:name.value,
-    read:false,
-    createdAt:new Date()
-  });
-
-  load();
+  loadAssets();
 };
 
 /* LOAD */
-async function load(){
+async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html="";
+  let html = "";
 
   snap.forEach(d=>{
-    let a=d.data();
+    let a = d.data();
 
-    html+=`
+    html += `
       <tr>
         <td>${a.name}</td>
         <td>${a.type}</td>
         <td>${a.building}</td>
-        <td>${a.locationGroup}</td>
+        <td>${a.location}</td>
         <td>${a.status}</td>
       </tr>
     `;
   });
 
-  list.innerHTML=html;
+  assetList.innerHTML = html;
 }
 
-load();
-
-/* NOTIFICATION */
-window.toggleNotif = async () => {
-
-  let box = document.getElementById("notifBox");
-  box.style.display = box.style.display==="none"?"block":"none";
-
-  const snap = await getDocs(collection(db,"notifications"));
-
-  let html="";
-  let count=0;
-
-  snap.forEach(d=>{
-    let n=d.data();
-    if(!n.read) count++;
-
-    html+=`
-      <div style="padding:5px;border-bottom:1px solid #ddd">
-        <b>${n.title}</b><br>
-        ${n.message}
-      </div>
-    `;
-  });
-
-  box.innerHTML=html;
-  notifCount.innerText=count?`(${count})`:"";
-};
+loadAssets();
 
 </script>
 
