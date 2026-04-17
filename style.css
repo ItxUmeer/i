@@ -16,7 +16,8 @@ body {
 }
 
 /* =========================
-   HEADER FIX (MAIN ISSUE FIXED)
+  /* =========================
+   HEADER (FIXED + BIGGER + STABLE)
 ========================= */
 .header {
   position: fixed;
@@ -24,42 +25,69 @@ body {
   left: 0;
   right: 0;
 
-  height: 60px;
+  height: 90px;   /* 🔥 increased height (your request) */
 
   display: grid;
-  grid-template-columns: 200px 1fr 250px;
+  grid-template-columns: 220px 1fr 280px;
+
   align-items: center;
 
   background: #0b2c4d;
   color: white;
 
-  padding: 0 15px;
+  padding: 0 20px;
 
   z-index: 1000;
 }
 
-/* HEADER SECTIONS */
-.<div class="header">
+/* LEFT LOGO */
+.header-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 
-  <div class="header-left">
-    <img src="logo-left.png" class="logo">
-  </div>
+/* CENTER TITLE */
+.header-center {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
 
-  <div class="header-center">
-    CMMS Data for DCAS Facility
-  </div>
+/* RIGHT SIDE */
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+}
 
-  <div class="header-right">
+/* LOGO FIX */
+.logo {
+  height: 55px;   /* 🔥 bigger logo for better balance */
+}
 
-    <div class="notif">
-      🔔 <span id="notifCount"></span>
-    </div>
+/* NOTIFICATION */
+.notif {
+  cursor: pointer;
+  font-size: 18px;
+}
 
-    <button onclick="logout()">Logout</button>
+/* BUTTON IN HEADER */
+.header-right button {
+  background: #ffffff;
+  color: #0b2c4d;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 4px;
+}
 
-    <img src="logo-right.png" class="logo">
-
-  </div>
+.header-right button:hover {
+  background: #e6e6e6;
+}
 
 </div>
 }
