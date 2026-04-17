@@ -8,101 +8,97 @@
 <body>
 
 <div class="header">
-  <img src="logo-left.png" class="logo">
-  <h2>PPM Management</h2>
-  <img src="logo-right.png" class="logo">
+  <img src="logo-left.png">
+  <h3>PPM Management</h3>
+  <div>🔔 <span id="notifCount"></span></div>
+  <img src="logo-right.png">
 </div>
 
 <div class="sidebar">
   <button onclick="go('assets.html')">Assets</button>
   <button onclick="go('ppm.html')">PPM</button>
   <button onclick="go('workorders.html')">Work Orders</button>
+  <button onclick="logout()">Logout</button>
 </div>
 
 <div class="main">
 
-<div class="tab-buttons">
-  <button onclick="showTab('add')">Add PPM</button>
-  <button onclick="showTab('list')">PPM List</button>
-</div>
+<h2>PPM</h2>
 
-<!-- ADD -->
-<div id="add" class="section">
+<select id="assetSelect"></select>
+<input id="task" placeholder="Task">
+<input id="frequency" placeholder="Frequency">
+<input id="nextDue" type="date">
+<input id="comment" placeholder="Comment">
 
-  <select id="assetSelect"></select>
+<button onclick="createPPM()">Create PPM</button>
+<button onclick="window.print()">PDF Report</button>
 
-  <input id="task" placeholder="Task">
-  <input id="frequency" placeholder="Frequency">
-  <input id="nextDue" type="date">
+<table>
+<thead>
+<tr>
+  <th>Asset</th>
+  <th>Task</th>
+  <th>Frequency</th>
+  <th>Next Due</th>
+  <th>Comment</th>
+  <th>Status</th>
+</tr>
+</thead>
 
-  <button class="action-btn" onclick="createPPM()">Create</button>
-
-</div>
-
-<!-- LIST -->
-<div id="list" class="section" style="display:none">
-
-  <button onclick="exportPPM()">Export</button>
-
-  <table border="1" width="100%" id="ppmTable">
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Task</th>
-        <th>Frequency</th>
-        <th>Next Due</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody id="ppmList"></tbody>
-  </table>
-
-</div>
+<tbody id="ppmList"></tbody>
+</table>
 
 </div>
 
 <script type="module">
 
 import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import {
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
+window.logout = ()=>location="login.html";
 
-window.showTab = (t)=>{
-  add.style.display="none";
-  list.style.display="none";
-  document.getElementById(t).style.display="block";
-};
-
+/* LOAD ASSETS */
 async function loadAssets(){
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html = `<option>Select Asset</option>`;
+  let html="<option>Select Asset</option>";
 
   snap.forEach(d=>{
-    const a=d.data();
-    html+=`<option value="${a.name}">${a.name}</option>`;
+    html+=`<option>${d.data().name}</option>`;
   });
 
   assetSelect.innerHTML=html;
 }
 
+/* CREATE PPM */
 window.createPPM = async () => {
 
   await addDoc(collection(db,"ppm"), {
-    assetId:assetSelect.value,
+    asset:assetSelect.value,
     task:task.value,
     frequency:frequency.value,
     nextDue:nextDue.value,
+    comment:comment.value,
     status:"Pending"
   });
 
-  alert("Created");
+  await addDoc(collection(db,"notifications"), {
+    title:"PPM Created",
+    message:task.value,
+    read:false
+  });
+
   loadPPM();
 };
 
+/* LOAD */
 async function loadPPM(){
 
   const snap = await getDocs(collection(db,"ppm"));
@@ -110,14 +106,15 @@ async function loadPPM(){
   let html="";
 
   snap.forEach(d=>{
-    const p=d.data();
+    let p=d.data();
 
     html+=`
       <tr>
-        <td>${p.assetId}</td>
+        <td>${p.asset}</td>
         <td>${p.task}</td>
         <td>${p.frequency}</td>
         <td>${p.nextDue}</td>
+        <td>${p.comment || ""}</td>
         <td>${p.status}</td>
       </tr>
     `;
@@ -125,14 +122,6 @@ async function loadPPM(){
 
   ppmList.innerHTML=html;
 }
-
-window.exportPPM = () => {
-  let table = document.getElementById("ppmTable").outerHTML;
-  let a = document.createElement("a");
-  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
-  a.download = "ppm.xls";
-  a.click();
-};
 
 loadAssets();
 loadPPM();
