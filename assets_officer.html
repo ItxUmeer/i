@@ -1,252 +1,209 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Assets Officer Panel</title>
+<title>Assets Officer</title>
 <link rel="stylesheet" href="style.css">
-
-<style>
-table {
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-}
-
-th, td {
-  border:1px solid #ddd;
-  padding:10px;
-  font-size:14px;
-}
-
-th {
-  background:#2563eb;
-  color:white;
-}
-
-tr:hover {
-  background:#f1f5f9;
-}
-
-.btn {
-  padding:5px 10px;
-  border:none;
-  cursor:pointer;
-  border-radius:5px;
-}
-
-.blue { background:#2563eb; color:white; }
-.red { background:#ef4444; color:white; }
-.green { background:#22c55e; color:white; }
-</style>
-
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-
-  <h3>Assets Officer</h3>
-
-  <a href="assets_officer.html">Dashboard</a>
-  <a href="#" onclick="logout()">Logout</a>
-
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>Assets Officer Dashboard</h2>
+  <img src="logo-right.png" class="logo">
 </div>
 
-<!-- MAIN -->
+<div class="sidebar">
+  <button onclick="showTab('wo')">Work Orders</button>
+  <button onclick="showTab('create')">Create WO</button>
+  <button onclick="showTab('assets')">Assets</button>
+  <button onclick="showTab('ppm')">PPM</button>
+</div>
+
 <div class="main">
 
-<!-- HEADER -->
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>Assets Officer Control Panel</h2>
-  <img src="logo-right.png">
+<!-- WORK ORDERS -->
+<div id="wo" class="section">
+
+  <h3>Work Orders</h3>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="woList"></tbody>
+  </table>
+
 </div>
 
-<!-- ASSETS TABLE -->
-<div class="section">
-  <h3>Assets List</h3>
+<!-- CREATE WO -->
+<div id="create" class="section" style="display:none">
 
-  <table>
+  <h3>Create Work Order</h3>
+
+  <input id="title" placeholder="Title">
+  <select id="assetSelect"></select>
+  <input id="location" placeholder="Location">
+  <input id="subLocation" placeholder="Sub Location">
+
+  <button onclick="createWO()">Create</button>
+
+</div>
+
+<!-- ASSETS -->
+<div id="assets" class="section" style="display:none">
+
+  <h3>Assets</h3>
+
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Building</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Action</th>
       </tr>
     </thead>
 
-    <tbody id="assetTable"></tbody>
+    <tbody id="assetList"></tbody>
   </table>
+
 </div>
 
-<!-- PPM TABLE -->
-<div class="section">
-  <h3>PPM Status</h3>
+<!-- PPM -->
+<div id="ppm" class="section" style="display:none">
 
-  <table>
+  <h3>PPM</h3>
+
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Asset</th>
         <th>Task</th>
-        <th>Frequency</th>
-        <th>Due</th>
-        <th>Status</th>
+        <th>Next Due</th>
       </tr>
     </thead>
 
-    <tbody id="ppmTable"></tbody>
+    <tbody id="ppmList"></tbody>
   </table>
-</div>
 
-<!-- WORK ORDERS TABLE -->
-<div class="section">
-  <h3>Work Orders Monitor</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Asset</th>
-        <th>Assigned To</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody id="woTable"></tbody>
-  </table>
 </div>
 
 </div>
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
-
+import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- LOGOUT ---------------- */
-window.logout = async () => {
-  await auth.signOut();
-  location = "login.html";
+/* TAB */
+window.showTab = (t)=>{
+  wo.style.display="none";
+  create.style.display="none";
+  assets.style.display="none";
+  ppm.style.display="none";
+  document.getElementById(t).style.display="block";
 };
 
-/* ---------------- LOAD ALL ---------------- */
-auth.onAuthStateChanged(async (user) => {
+/* LOAD WORK ORDERS */
+async function loadWO(){
 
-  if (!user) {
-    location = "login.html";
-    return;
-  }
+  const snap = await getDocs(collection(db,"workOrders"));
 
-  loadAssets();
-  loadPPM();
-  loadWorkOrders();
-});
+  let html="";
 
-/* ---------------- ASSETS ---------------- */
-async function loadAssets() {
+  snap.forEach(d=>{
+    const w=d.data();
 
-  const snap = await getDocs(collection(db, "assets"));
-
-  let html = "";
-
-  snap.forEach(d => {
-
-    const a = d.data();
-
-    html += `
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.type}</td>
-        <td>${a.building}</td>
-        <td>${a.locationGroup}</td>
-        <td>${a.status}</td>
-        <td>
-          <button class="btn blue" onclick="createWO('${a.name}')">
-            Create WO
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("assetTable").innerHTML = html;
-}
-
-/* ---------------- PPM ---------------- */
-async function loadPPM() {
-
-  const snap = await getDocs(collection(db, "ppm"));
-
-  let html = "";
-
-  snap.forEach(d => {
-
-    const p = d.data();
-
-    html += `
-      <tr>
-        <td>${p.assetId}</td>
-        <td>${p.task}</td>
-        <td>${p.frequency}</td>
-        <td>${p.nextDue}</td>
-        <td>${p.status}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("ppmTable").innerHTML = html;
-}
-
-/* ---------------- WORK ORDERS ---------------- */
-async function loadWorkOrders() {
-
-  const snap = await getDocs(collection(db, "workOrders"));
-
-  let html = "";
-
-  snap.forEach(d => {
-
-    const w = d.data();
-
-    html += `
+    html+=`
       <tr>
         <td>${w.title}</td>
         <td>${w.assetId}</td>
-        <td>${w.assignedTo || "-"}</td>
+        <td>${w.location}</td>
         <td>${w.status}</td>
       </tr>
     `;
   });
 
-  document.getElementById("woTable").innerHTML = html;
+  woList.innerHTML=html;
 }
 
-/* ---------------- CREATE WORK ORDER ---------------- */
-window.createWO = async (assetName) => {
+/* LOAD ASSETS */
+async function loadAssets(){
 
-  const title = prompt("Enter Work Order Title");
+  const snap = await getDocs(collection(db,"assets"));
 
-  if (!title) return;
+  let html="";
+  let opt="";
 
-  await addDoc(collection(db, "workOrders"), {
-    title: title,
-    assetId: assetName,
-    status: "Pending",
-    assignedTo: ""
+  snap.forEach(d=>{
+    const a=d.data();
+
+    html+=`
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+      </tr>
+    `;
+
+    opt+=`<option value="${a.name}">${a.name}</option>`;
   });
 
-  alert("Work Order Created ✔");
+  assetList.innerHTML=html;
+  assetSelect.innerHTML=opt;
+}
 
-  loadWorkOrders();
+/* LOAD PPM */
+async function loadPPM(){
+
+  const snap = await getDocs(collection(db,"ppm"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    const p=d.data();
+
+    html+=`
+      <tr>
+        <td>${p.assetId}</td>
+        <td>${p.task}</td>
+        <td>${p.nextDue}</td>
+      </tr>
+    `;
+  });
+
+  ppmList.innerHTML=html;
+}
+
+/* CREATE WO */
+window.createWO = async () => {
+
+  await addDoc(collection(db,"workOrders"), {
+    title:title.value,
+    assetId:assetSelect.value,
+    location:location.value,
+    subLocation:subLocation.value,
+    status:"Pending"
+  });
+
+  alert("Created");
+  loadWO();
 };
+
+/* INIT */
+loadWO();
+loadAssets();
+loadPPM();
 
 </script>
 
