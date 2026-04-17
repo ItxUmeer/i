@@ -3,105 +3,133 @@
 <head>
 <title>Work Orders</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+@media print {
+  .sidebar, button { display:none; }
+  @page { size: A4 landscape; }
+}
+</style>
+
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-  <img src="logo-left.png" class="logo">
-  <h2>Work Orders</h2>
-  <img src="logo-right.png" class="logo">
+  <img src="logo-left.png">
+  <h3>CMMS Data for DCAS Facility - Work Orders</h3>
+
+  <div onclick="toggleNotif()" style="cursor:pointer;">
+    🔔 <span id="notifCount"></span>
+  </div>
+
+  <img src="logo-right.png">
 </div>
 
+<!-- NOTIFICATION BOX -->
+<div id="notifBox" style="display:none;position:absolute;right:10px;top:60px;background:white;width:320px;border:1px solid #ccc;z-index:999;"></div>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
   <button onclick="go('assets.html')">Assets</button>
   <button onclick="go('ppm.html')">PPM</button>
   <button onclick="go('workorders.html')">Work Orders</button>
+  <button onclick="logout()">Logout</button>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
-<div class="tab-buttons">
-  <button onclick="showTab('create')">Create</button>
-  <button onclick="showTab('list')">List</button>
-</div>
+<h2>Work Orders</h2>
 
 <!-- CREATE -->
-<div id="create" class="section">
-
+<div>
   <input id="title" placeholder="Title">
+
   <select id="assetSelect"></select>
+
   <input id="location" placeholder="Location">
   <input id="subLocation" placeholder="Sub Location">
 
-  <button class="action-btn" onclick="createWO()">Create</button>
+  <input id="comment" placeholder="Comment">
 
+  <button onclick="createWO()">Create</button>
+  <button onclick="window.print()">PDF Report</button>
 </div>
+
+<br>
 
 <!-- LIST -->
-<div id="list" class="section" style="display:none">
+<table>
+<thead>
+<tr>
+  <th>Title</th>
+  <th>Asset</th>
+  <th>Location</th>
+  <th>Sub Location</th>
+  <th>Comment</th>
+  <th>Status</th>
+  <th>Action</th>
+</tr>
+</thead>
 
-  <button onclick="exportWO()">Export</button>
-
-  <table border="1" width="100%" id="woTable">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Asset</th>
-        <th>Location</th>
-        <th>Sub Location</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody id="woList"></tbody>
-  </table>
-
-</div>
+<tbody id="woList"></tbody>
+</table>
 
 </div>
 
 <script type="module">
 
 import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
+window.logout = ()=>location="login.html";
 
-window.showTab = (t)=>{
-  create.style.display="none";
-  list.style.display="none";
-  document.getElementById(t).style.display="block";
-};
-
+/* LOAD ASSETS */
 async function loadAssets(){
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html = `<option>Select Asset</option>`;
+  let html="<option>Select Asset</option>";
 
   snap.forEach(d=>{
-    const a=d.data();
-    html+=`<option value="${a.name}">${a.name}</option>`;
+    html+=`<option>${d.data().name}</option>`;
   });
 
   assetSelect.innerHTML=html;
 }
 
+/* CREATE WORK ORDER */
 window.createWO = async () => {
 
   await addDoc(collection(db,"workOrders"), {
     title:title.value,
-    assetId:assetSelect.value,
+    asset:assetSelect.value,
     location:location.value,
     subLocation:subLocation.value,
-    status:"Pending"
+    comment:comment.value,
+    status:"Pending",
+    createdAt:new Date()
   });
 
-  alert("Created");
+  await addDoc(collection(db,"notifications"), {
+    title:"New Work Order",
+    message:title.value + " - " + assetSelect.value,
+    read:false
+  });
+
   loadWO();
 };
 
+/* LOAD WORK ORDERS */
 async function loadWO(){
 
   const snap = await getDocs(collection(db,"workOrders"));
@@ -109,15 +137,23 @@ async function loadWO(){
   let html="";
 
   snap.forEach(d=>{
-    const w=d.data();
+    let w=d.data();
 
     html+=`
       <tr>
         <td>${w.title}</td>
-        <td>${w.assetId}</td>
+        <td>${w.asset}</td>
         <td>${w.location}</td>
         <td>${w.subLocation}</td>
+        <td>${w.comment || ""}</td>
         <td>${w.status}</td>
+
+        <td>
+
+          <button onclick="startWO('${d.id}')">Start</button>
+          <button onclick="completeWO('${d.id}')">Complete</button>
+
+        </td>
       </tr>
     `;
   });
@@ -125,12 +161,63 @@ async function loadWO(){
   woList.innerHTML=html;
 }
 
-window.exportWO = () => {
-  let table = document.getElementById("woTable").outerHTML;
-  let a = document.createElement("a");
-  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
-  a.download = "workorders.xls";
-  a.click();
+/* START WORK ORDER */
+window.startWO = async (id) => {
+
+  await updateDoc(doc(db,"workOrders",id), {
+    status:"Started"
+  });
+
+  await addDoc(collection(db,"notifications"), {
+    title:"Work Order Started",
+    message:"A work order has been started",
+    read:false
+  });
+
+  loadWO();
+};
+
+/* COMPLETE WORK ORDER */
+window.completeWO = async (id) => {
+
+  await updateDoc(doc(db,"workOrders",id), {
+    status:"Completed"
+  });
+
+  await addDoc(collection(db,"notifications"), {
+    title:"Work Order Completed",
+    message:"A work order has been completed",
+    read:false
+  });
+
+  loadWO();
+};
+
+/* NOTIFICATIONS */
+window.toggleNotif = async () => {
+
+  let box = document.getElementById("notifBox");
+  box.style.display = box.style.display==="none"?"block":"none";
+
+  const snap = await getDocs(collection(db,"notifications"));
+
+  let html="";
+  let count=0;
+
+  snap.forEach(d=>{
+    let n=d.data();
+    if(!n.read) count++;
+
+    html+=`
+      <div style="padding:5px;border-bottom:1px solid #ddd">
+        <b>${n.title}</b><br>
+        ${n.message}
+      </div>
+    `;
+  });
+
+  box.innerHTML=html;
+  notifCount.innerText=count?`(${count})`:"";
 };
 
 loadAssets();
