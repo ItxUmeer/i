@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Supervisor Work Orders</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+
+  <div class="header-left">
+    <img src="logo-left.png" class="logo">
+  </div>
+
+  <div class="header-center">
+    SUPERVISOR DASHBOARD - WORK ORDERS
+  </div>
+
+  <div class="header-right">
+    🔔 <span id="notifCount"></span>
+    <button onclick="logout()">Logout</button>
+    <img src="logo-right.png" class="logo">
+  </div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
+  <button onclick="go('supervisor-workorders.html')">Supervisor Panel</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<h2>Supervisor Work Orders Control</h2>
+
+<!-- FILTERS (optional future use) -->
+<div>
+  <input id="searchBox" placeholder="Search Work Orders">
+</div>
+
+<br>
+
+<!-- TABLE -->
+<table>
+<thead>
+<tr>
+  <th>Title</th>
+  <th>Asset</th>
+  <th>Location</th>
+  <th>Sub Location</th>
+  <th>Comment</th>
+  <th>Status</th>
+  <th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="woList"></tbody>
+</table>
+
+</div>
+
+<script type="module">
+
+import { db } from "./firebase.js";
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+window.go = (p)=>location=p;
+window.logout = ()=>location="login.html";
+
+/* LOAD WORK ORDERS */
+async function loadWO() {
+
+  const snap = await getDocs(collection(db,"workOrders"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    let w = d.data();
+
+    html += `
+      <tr>
+        <td>${w.title}</td>
+        <td>${w.asset}</td>
+        <td>${w.location}</td>
+        <td>${w.subLocation}</td>
+        <td>${w.comment || ""}</td>
+        <td>${w.status}</td>
+
+        <td>
+
+          <button onclick="startWO('${d.id}')">Start</button>
+          <button onclick="completeWO('${d.id}')">Complete</button>
+
+        </td>
+      </tr>
+    `;
+  });
+
+  woList.innerHTML = html;
+}
+
+/* START WORK ORDER */
+window.startWO = async (id) => {
+
+  await updateDoc(doc(db,"workOrders",id), {
+    status: "Started"
+  });
+
+  await addDoc(collection(db,"notifications"), {
+    title: "Work Order Started",
+    message: "Supervisor started a work order",
+    read: false,
+    createdAt: new Date()
+  });
+
+  loadWO();
+};
+
+/* COMPLETE WORK ORDER */
+window.completeWO = async (id) => {
+
+  await updateDoc(doc(db,"workOrders",id), {
+    status: "Completed"
+  });
+
+  await addDoc(collection(db,"notifications"), {
+    title: "Work Order Completed",
+    message: "Supervisor completed a work order",
+    read: false,
+    createdAt: new Date()
+  });
+
+  loadWO();
+};
+
+/* SEARCH (optional but useful) */
+document.getElementById("searchBox").addEventListener("input", async (e) => {
+
+  const value = e.target.value.toLowerCase();
+
+  const snap = await getDocs(collection(db,"workOrders"));
+
+  let html = "";
+
+  snap.forEach(d => {
+
+    let w = d.data();
+
+    if (
+      w.title.toLowerCase().includes(value) ||
+      w.asset.toLowerCase().includes(value)
+    ) {
+      html += `
+        <tr>
+          <td>${w.title}</td>
+          <td>${w.asset}</td>
+          <td>${w.location}</td>
+          <td>${w.subLocation}</td>
+          <td>${w.comment || ""}</td>
+          <td>${w.status}</td>
+
+          <td>
+            <button onclick="startWO('${d.id}')">Start</button>
+            <button onclick="completeWO('${d.id}')">Complete</button>
+          </td>
+        </tr>
+      `;
+    }
+  });
+
+  woList.innerHTML = html;
+});
+
+loadWO();
+
+</script>
+
+</body>
+</html>
