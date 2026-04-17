@@ -7,187 +7,125 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <img src="logo-left.png" class="logo">
-  <h2>PPM Schedule</h2>
+  <img src="logo-left.png" style="height:60px">
+  <h2>PPM</h2>
 
-  <div onclick="toggleNotif()" style="cursor:pointer;">
-    🔔 <span id="notifCount" style="color:red;"></span>
+  <button onclick="goDashboard()">Dashboard</button>
+  <button onclick="logout()">Logout</button>
 
-    <div id="notifBox" style="
-      display:none;
-      position:absolute;
-      right:20px;
-      top:60px;
-      width:300px;
-      background:white;
-      border:1px solid #ccc;
-      max-height:300px;
-      overflow:auto;
-      padding:10px;
-    "></div>
-  </div>
+  <div onclick="toggleNotif()">🔔 <span id="notifCount"></span></div>
 
-  <img src="logo-right.png" class="logo">
+  <img src="logo-right.png" style="height:60px">
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <button onclick="showTab('create')">Create PPM</button>
-  <button onclick="showTab('list')">PPM List</button>
-</div>
+<div id="notifBox" style="display:none;position:absolute;right:10px;top:80px;background:white;border:1px solid #ccc;padding:10px;width:300px;"></div>
 
 <div class="main">
 
-<!-- CREATE -->
+<button onclick="showTab('create')">Create</button>
+<button onclick="showTab('list')">List</button>
+
 <div id="create">
 
-  <h3>Create PPM</h3>
+<select id="assetSelect"></select>
+<input id="task">
+<input id="nextDue">
 
-  <select id="assetSelect"></select>
-
-  <input id="task" placeholder="Task">
-  <input id="frequency" placeholder="Frequency">
-  <input id="nextDue" type="date">
-
-  <button onclick="createPPM()">Create</button>
+<button onclick="createPPM()">Save</button>
 
 </div>
 
-<!-- LIST -->
 <div id="list" style="display:none">
 
-  <h3>PPM List</h3>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Asset</th>
+<th>Task</th>
+<th>Status</th>
+<th>Comment</th>
+<th>Action</th>
+</tr>
+</thead>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Task</th>
-        <th>Next Due</th>
-        <th>Status</th>
-        <th>Comment</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-
-    <tbody id="ppmList"></tbody>
-  </table>
+<tbody id="ppmList"></tbody>
+</table>
 
 </div>
 
 </div>
 
 <script type="module">
-
 import { db } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* TAB */
-window.showTab=(t)=>{
-  create.style.display="none";
-  list.style.display="none";
-  document.getElementById(t).style.display="block";
-};
+/* CREATE */
+window.createPPM = async () => {
 
-/* LOAD ASSETS */
-async function loadAssets(){
-  const snap=await getDocs(collection(db,"assets"));
-  let html=`<option>Select Asset</option>`;
-  snap.forEach(d=>{
-    html+=`<option>${d.data().name}</option>`;
-  });
-  assetSelect.innerHTML=html;
-}
-
-/* CREATE PPM */
-window.createPPM = async ()=>{
-
-  await addDoc(collection(db,"ppm"),{
-    assetId:assetSelect.value,
-    task:task.value,
-    frequency:frequency.value,
-    nextDue:nextDue.value,
-    status:"Pending"
+  await addDoc(collection(db,"ppm"), {
+    assetId: assetSelect.value,
+    task: task.value,
+    nextDue: nextDue.value,
+    status: "Pending"
   });
 
-  await addDoc(collection(db,"notifications"),{
-    title:"New PPM",
-    message:task.value,
-    read:false,
-    createdAt:new Date()
-  });
+  await addNotification("PPM Created", task.value);
 
   loadPPM();
-  loadNotifications();
 };
 
-/* LOAD PPM */
+/* LOAD */
 async function loadPPM(){
 
-  const snap=await getDocs(collection(db,"ppm"));
+  const snap = await getDocs(collection(db,"ppm"));
 
   let html="";
 
   snap.forEach(d=>{
     let p=d.data();
 
-    html+=`
+    html += `
     <tr>
       <td>${p.assetId}</td>
       <td>${p.task}</td>
-      <td>${p.nextDue}</td>
       <td>${p.status}</td>
-
-      <td>
-        <input id="p-${d.id}" placeholder="comment">
-      </td>
-
-      <td>
-        <button onclick="completePPM('${d.id}')">Complete</button>
-      </td>
+      <td><input id="p-${d.id}"></td>
+      <td><button onclick="completePPM('${d.id}')">Done</button></td>
     </tr>`;
   });
 
-  ppmList.innerHTML=html;
+  ppmList.innerHTML = html;
 }
 
-/* COMPLETE PPM */
-window.completePPM = async(id)=>{
+/* COMPLETE */
+window.completePPM = async (id) => {
 
-  let comment=document.getElementById("p-"+id).value;
+  let c = document.getElementById("p-"+id)?.value || "";
 
-  await updateDoc(doc(db,"ppm",id),{
+  await updateDoc(doc(db,"ppm",id), {
     status:"Completed",
-    comment:comment
+    comment:c
   });
 
-  await addDoc(collection(db,"notifications"),{
-    title:"PPM Completed",
-    message:comment || "Done",
-    read:false,
-    createdAt:new Date()
-  });
+  await addNotification("PPM Done", c);
 
   loadPPM();
-  loadNotifications();
 };
 
 /* NOTIFICATIONS */
-window.toggleNotif=()=>{
-  notifBox.style.display = notifBox.style.display==="none"?"block":"none";
+window.toggleNotif = () => {
+  notifBox.style.display = notifBox.style.display === "none" ? "block" : "none";
 };
 
-async function loadNotifications(){
+async function addNotification(title,message){
+  await addDoc(collection(db,"notifications"),{
+    title,message,read:false
+  });
+}
 
-  const snap=await getDocs(collection(db,"notifications"));
+async function loadNotifications(){
+  const snap = await getDocs(collection(db,"notifications"));
 
   let html="";
   let count=0;
@@ -196,28 +134,15 @@ async function loadNotifications(){
     let n=d.data();
     if(!n.read) count++;
 
-    html+=`
-    <div style="border-bottom:1px solid #eee;">
-      <b>${n.title}</b><br>
-      ${n.message}
-      <button onclick="markRead('${d.id}')">✔</button>
-    </div>`;
+    html+=`<div><b>${n.title}</b><br>${n.message}</div>`;
   });
 
-  notifBox.innerHTML=html;
-  notifCount.innerText=count?`(${count})`:"";
+  notifBox.innerHTML = html;
+  notifCount.innerText = count ? `(${count})` : "";
 }
 
-window.markRead=async(id)=>{
-  await updateDoc(doc(db,"notifications",id),{read:true});
-  loadNotifications();
-};
-
-/* INIT */
-loadAssets();
 loadPPM();
 loadNotifications();
-
 </script>
 
 </body>
