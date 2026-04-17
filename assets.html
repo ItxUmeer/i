@@ -21,7 +21,6 @@
 
 <div class="main">
 
-<!-- TABS -->
 <div class="tab-buttons">
   <button onclick="showTab('add')">Add Asset</button>
   <button onclick="showTab('view')">View Assets</button>
@@ -33,9 +32,9 @@
   <h3>Add Asset</h3>
 
   <input id="name" placeholder="Asset Name">
-  <input id="type" placeholder="Type (AHU)">
+  <input id="type" placeholder="Type">
   <input id="building" placeholder="Building">
-  <input id="locationGroup" placeholder="Location (HQ)">
+  <input id="locationGroup" placeholder="Location">
 
   <button class="action-btn" onclick="addAsset()">Add Asset</button>
 
@@ -46,7 +45,20 @@
 
   <h3>Assets List</h3>
 
-  <div id="list"></div>
+  <button onclick="exportAssets()">Export</button>
+
+  <table border="1" width="100%" id="assetTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="list"></tbody>
+  </table>
 
 </div>
 
@@ -57,17 +69,14 @@
 import { db } from "./firebase.js";
 import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* NAV */
 window.go = (p)=>location=p;
 
-/* TAB */
 window.showTab = (t)=>{
   add.style.display="none";
   view.style.display="none";
   document.getElementById(t).style.display="block";
 };
 
-/* ADD */
 window.addAsset = async () => {
 
   await addDoc(collection(db,"assets"), {
@@ -78,10 +87,10 @@ window.addAsset = async () => {
     status:"Active"
   });
 
-  alert("Asset Added ✔");
+  alert("Added");
+  load();
 };
 
-/* LOAD */
 async function load(){
 
   const snap = await getDocs(collection(db,"assets"));
@@ -91,13 +100,27 @@ async function load(){
   snap.forEach(d=>{
     const a=d.data();
 
-    html+=`<div>
-      ${a.name} > ${a.type} > ${a.building} > ${a.locationGroup}
-    </div>`;
+    html+=`
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.locationGroup}</td>
+        <td>${a.status}</td>
+      </tr>
+    `;
   });
 
   list.innerHTML=html;
 }
+
+window.exportAssets = () => {
+  let table = document.getElementById("assetTable").outerHTML;
+  let a = document.createElement("a");
+  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
+  a.download = "assets.xls";
+  a.click();
+};
 
 load();
 
