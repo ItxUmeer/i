@@ -7,52 +7,55 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <img src="logo-left.png" class="logo">
-  <h2>Work Order Management</h2>
+  <h2>Work Orders</h2>
   <img src="logo-right.png" class="logo">
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <button onclick="go('assets.html')">Assets</button>
   <button onclick="go('ppm.html')">PPM</button>
   <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- TABS -->
 <div class="tab-buttons">
-  <button onclick="showTab('create')">Create Work Order</button>
-  <button onclick="showTab('list')">Work Order List</button>
+  <button onclick="showTab('create')">Create</button>
+  <button onclick="showTab('list')">List</button>
 </div>
 
 <!-- CREATE -->
 <div id="create" class="section">
 
-  <h3>Create Work Order</h3>
-
-  <input id="title" placeholder="Work Order Title">
-
-  <!-- ASSET SELECT -->
+  <input id="title" placeholder="Title">
   <select id="assetSelect"></select>
+  <input id="location" placeholder="Location">
+  <input id="subLocation" placeholder="Sub Location">
 
-  <input id="location" placeholder="Location (HQ / Building)">
-  <input id="subLocation" placeholder="Sub Location (Floor / Room)">
-
-  <button class="action-btn" onclick="createWO()">Create Work Order</button>
+  <button class="action-btn" onclick="createWO()">Create</button>
 
 </div>
 
 <!-- LIST -->
 <div id="list" class="section" style="display:none">
 
-  <h3>Work Order List</h3>
+  <button onclick="exportWO()">Export</button>
 
-  <div id="woList"></div>
+  <table border="1" width="100%" id="woTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Location</th>
+        <th>Sub Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="woList"></tbody>
+  </table>
 
 </div>
 
@@ -61,105 +64,75 @@
 <script type="module">
 
 import { db } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* NAV */
 window.go = (p)=>location=p;
 
-/* TAB SWITCH */
 window.showTab = (t)=>{
   create.style.display="none";
   list.style.display="none";
   document.getElementById(t).style.display="block";
 };
 
-/* LOAD ASSETS */
 async function loadAssets(){
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html = `<option value="">Select Asset</option>`;
+  let html = `<option>Select Asset</option>`;
 
   snap.forEach(d=>{
-    const a = d.data();
-
-    html += `
-      <option value="${a.name}">
-        ${a.name} (${a.building})
-      </option>
-    `;
+    const a=d.data();
+    html+=`<option value="${a.name}">${a.name}</option>`;
   });
 
-  document.getElementById("assetSelect").innerHTML = html;
+  assetSelect.innerHTML=html;
 }
 
-/* CREATE WORK ORDER */
 window.createWO = async () => {
 
-  if(!assetSelect.value){
-    alert("Select Asset");
-    return;
-  }
-
   await addDoc(collection(db,"workOrders"), {
-    title: title.value,
-    assetId: assetSelect.value,
-    location: location.value,
-    subLocation: subLocation.value,
-    status: "Pending",
-    createdAt: new Date()
+    title:title.value,
+    assetId:assetSelect.value,
+    location:location.value,
+    subLocation:subLocation.value,
+    status:"Pending"
   });
 
-  alert("Work Order Created ✔");
-
+  alert("Created");
   loadWO();
 };
 
-/* LOAD WORK ORDERS (GLOBAL FOR ALL USERS) */
 async function loadWO(){
 
   const snap = await getDocs(collection(db,"workOrders"));
 
-  let html = "";
+  let html="";
 
   snap.forEach(d=>{
+    const w=d.data();
 
-    const w = d.data();
-
-    let color = "#dc2626"; // pending red
-    if(w.status === "Started") color = "#f59e0b";
-    if(w.status === "Completed") color = "#16a34a";
-
-    html += `
-      <div style="
-        background:white;
-        padding:12px;
-        margin-bottom:10px;
-        border-radius:8px;
-        border-left:5px solid ${color};
-      ">
-
-        <b>${w.title}</b><br>
-
-        ${w.assetId} > ${w.location} > ${w.subLocation}<br>
-
-        <span style="color:${color}; font-weight:bold;">
-          ${w.status}
-        </span>
-
-      </div>
+    html+=`
+      <tr>
+        <td>${w.title}</td>
+        <td>${w.assetId}</td>
+        <td>${w.location}</td>
+        <td>${w.subLocation}</td>
+        <td>${w.status}</td>
+      </tr>
     `;
   });
 
-  document.getElementById("woList").innerHTML =
-    html || "No Work Orders";
+  woList.innerHTML=html;
 }
 
-/* INIT */
+window.exportWO = () => {
+  let table = document.getElementById("woTable").outerHTML;
+  let a = document.createElement("a");
+  a.href = "data:application/vnd.ms-excel," + encodeURIComponent(table);
+  a.download = "workorders.xls";
+  a.click();
+};
+
 loadAssets();
 loadWO();
 
