@@ -7,131 +7,84 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <img src="logo-left.png" class="logo">
+  <img src="logo-left.png" style="height:60px">
   <h2>Work Orders</h2>
 
-  <div onclick="toggleNotif()" style="cursor:pointer;">
-    🔔 <span id="notifCount" style="color:red;"></span>
+  <button onclick="goDashboard()">Dashboard</button>
+  <button onclick="logout()">Logout</button>
 
-    <div id="notifBox" style="
-      display:none;
-      position:absolute;
-      right:20px;
-      top:60px;
-      width:300px;
-      background:white;
-      border:1px solid #ccc;
-      max-height:300px;
-      overflow:auto;
-      padding:10px;
-    "></div>
-  </div>
+  <div onclick="toggleNotif()">🔔 <span id="notifCount"></span></div>
 
-  <img src="logo-right.png" class="logo">
+  <img src="logo-right.png" style="height:60px">
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <button onclick="showTab('create')">Create</button>
-  <button onclick="showTab('list')">Work Orders</button>
-</div>
+<div id="notifBox" style="display:none;position:absolute;right:10px;top:80px;background:white;border:1px solid #ccc;padding:10px;width:300px;max-height:300px;overflow:auto;"></div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- CREATE -->
+<button onclick="showTab('create')">Create</button>
+<button onclick="showTab('list')">List</button>
+
 <div id="create">
 
-  <h3>Create Work Order</h3>
+<input id="title">
+<select id="assetSelect"></select>
+<input id="location">
+<input id="comment">
 
-  <input id="title" placeholder="Title">
-
-  <select id="assetSelect"></select>
-
-  <input id="location" placeholder="Location">
-  <input id="subLocation" placeholder="Sub Location">
-
-  <button onclick="createWO()">Create Work Order</button>
+<button onclick="createWO()">Create</button>
 
 </div>
 
-<!-- LIST -->
 <div id="list" style="display:none">
 
-  <h3>Work Order List</h3>
+<button onclick="downloadPDF('woReport')">PDF</button>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Asset</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Comment</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+<div id="woReport">
 
-    <tbody id="woList"></tbody>
-  </table>
+<h2 style="text-align:center">CMMS Data for DCAS Facility</h2>
+
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Title</th>
+<th>Asset</th>
+<th>Status</th>
+<th>Comment</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="woList"></tbody>
+</table>
+
+</div>
 
 </div>
 
 </div>
 
 <script type="module">
-
 import { db } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* TAB */
-window.showTab=(t)=>{
-  create.style.display="none";
-  list.style.display="none";
-  document.getElementById(t).style.display="block";
-};
+/* CREATE */
+window.createWO = async () => {
 
-/* LOAD ASSETS */
-async function loadAssets(){
-  const snap = await getDocs(collection(db,"assets"));
-  let html = `<option>Select Asset</option>`;
-  snap.forEach(d=>{
-    html += `<option>${d.data().name}</option>`;
-  });
-  assetSelect.innerHTML = html;
-}
-
-/* CREATE WO + NOTIFICATION */
-window.createWO = async ()=>{
-
-  await addDoc(collection(db,"workOrders"),{
-    title:title.value,
-    assetId:assetSelect.value,
-    location:location.value,
-    subLocation:subLocation.value,
-    status:"Pending"
+  await addDoc(collection(db,"workOrders"), {
+    title: title.value,
+    assetId: assetSelect.value,
+    location: location.value,
+    status: "Pending"
   });
 
-  await addDoc(collection(db,"notifications"),{
-    title:"New Work Order",
-    message:title.value + " created",
-    read:false,
-    createdAt:new Date()
-  });
+  await addNotification("Work Order Created", title.value);
 
   loadWO();
-  loadNotifications();
 };
 
-/* LOAD WO */
+/* LOAD */
 async function loadWO(){
 
   const snap = await getDocs(collection(db,"workOrders"));
@@ -141,17 +94,12 @@ async function loadWO(){
   snap.forEach(d=>{
     let w=d.data();
 
-    html+=`
+    html += `
     <tr>
       <td>${w.title}</td>
       <td>${w.assetId}</td>
-      <td>${w.location || "-"}</td>
       <td>${w.status}</td>
-
-      <td>
-        <input id="c-${d.id}" placeholder="comment">
-      </td>
-
+      <td><input id="c-${d.id}"></td>
       <td>
         <button onclick="startWO('${d.id}')">Start</button>
         <button onclick="completeWO('${d.id}')">Complete</button>
@@ -159,58 +107,48 @@ async function loadWO(){
     </tr>`;
   });
 
-  woList.innerHTML=html;
+  woList.innerHTML = html;
 }
 
-/* START */
-window.startWO = async(id)=>{
+/* SUPERVISOR ACTIONS */
+window.startWO = async (id) => {
+  let c = document.getElementById("c-"+id)?.value || "";
 
-  let comment=document.getElementById("c-"+id).value;
-
-  await updateDoc(doc(db,"workOrders",id),{
+  await updateDoc(doc(db,"workOrders",id), {
     status:"Started",
-    comment:comment
+    comment:c
   });
 
-  await addDoc(collection(db,"notifications"),{
-    title:"Work Started",
-    message:comment || "No comment",
-    read:false,
-    createdAt:new Date()
-  });
+  await addNotification("Started", c);
 
   loadWO();
-  loadNotifications();
 };
 
-/* COMPLETE */
-window.completeWO = async(id)=>{
+window.completeWO = async (id) => {
+  let c = document.getElementById("c-"+id)?.value || "";
 
-  let comment=document.getElementById("c-"+id).value;
-
-  await updateDoc(doc(db,"workOrders",id),{
+  await updateDoc(doc(db,"workOrders",id), {
     status:"Completed",
-    comment:comment
+    comment:c
   });
 
-  await addDoc(collection(db,"notifications"),{
-    title:"Work Completed",
-    message:comment || "Completed",
-    read:false,
-    createdAt:new Date()
-  });
+  await addNotification("Completed", c);
 
   loadWO();
-  loadNotifications();
 };
 
 /* NOTIFICATIONS */
-window.toggleNotif=()=>{
-  notifBox.style.display = notifBox.style.display==="none"?"block":"none";
+window.toggleNotif = () => {
+  notifBox.style.display = notifBox.style.display === "none" ? "block" : "none";
 };
 
-async function loadNotifications(){
+async function addNotification(title,message){
+  await addDoc(collection(db,"notifications"),{
+    title,message,read:false
+  });
+}
 
+async function loadNotifications(){
   const snap = await getDocs(collection(db,"notifications"));
 
   let html="";
@@ -219,30 +157,15 @@ async function loadNotifications(){
   snap.forEach(d=>{
     let n=d.data();
     if(!n.read) count++;
-
-    html+=`
-      <div style="border-bottom:1px solid #eee;">
-        <b>${n.title}</b><br>
-        ${n.message}
-        <button onclick="markRead('${d.id}')">✔</button>
-      </div>
-    `;
+    html+=`<div><b>${n.title}</b><br>${n.message}</div>`;
   });
 
-  notifBox.innerHTML=html;
-  notifCount.innerText=count?`(${count})`:"";
+  notifBox.innerHTML = html;
+  notifCount.innerText = count ? `(${count})` : "";
 }
 
-window.markRead=async(id)=>{
-  await updateDoc(doc(db,"notifications",id),{read:true});
-  loadNotifications();
-};
-
-/* INIT */
-loadAssets();
 loadWO();
 loadNotifications();
-
 </script>
 
 </body>
