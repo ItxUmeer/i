@@ -1,91 +1,228 @@
-body {
+/* =========================
+   RESET
+========================= */
+* {
   margin: 0;
-  font-family: Arial;
-  background: #f5f7fb;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-/* HEADER */
+/* =========================
+   BODY
+========================= */
+body {
+  background: #f4f6f9;
+}
+
+/* =========================
+   HEADER FIX (MAIN ISSUE FIXED)
+========================= */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 10px 20px;
-  border-bottom: 3px solid #2563eb;
-}
-
-.logo {
-  height: 60px;
-}
-
-/* SIDEBAR */
-.sidebar {
-  width: 220px;
   position: fixed;
-  top: 80px;
-  bottom: 0;
+  top: 0;
   left: 0;
-  background: #1e3a8a;
-  padding-top: 20px;
-  border-right: 4px solid #dc2626;
+  right: 0;
+
+  height: 60px;
+
+  display: grid;
+  grid-template-columns: 200px 1fr 250px;
+  align-items: center;
+
+  background: #0b2c4d;
+  color: white;
+
+  padding: 0 15px;
+
+  z-index: 1000;
 }
 
-.sidebar button {
-  display: block;
-  width: 90%;
-  margin: 10px auto;
-  padding: 12px;
-  background: white;
-  border: none;
-  cursor: pointer;
+/* HEADER SECTIONS */
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* CENTER TITLE */
+.header-center {
+  justify-content: center;
   font-weight: bold;
+  font-size: 16px;
+}
+
+/* RIGHT SIDE */
+.header-right {
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+/* LOGO */
+.logo {
+  height: 40px;
+}
+
+/* =========================
+   SIDEBAR FIX
+========================= */
+.sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+
+  width: 220px;
+  height: calc(100vh - 60px);
+
+  background: #111827;
+
+  padding-top: 20px;
+}
+
+/* SIDEBAR BUTTONS */
+.sidebar button {
+  width: 100%;
+  padding: 12px;
+
+  background: none;
+  border: none;
+
+  color: white;
+  text-align: left;
+
+  cursor: pointer;
 }
 
 .sidebar button:hover {
-  background: #e0e7ff;
+  background: #1f2937;
 }
 
-/* MAIN */
+/* =========================
+   MAIN CONTENT FIX
+========================= */
 .main {
-  margin-left: 240px;
+  margin-left: 220px;
+  margin-top: 60px;
+
   padding: 20px;
 }
 
-/* TABS */
-.tab-buttons button {
-  margin-right: 10px;
-  padding: 10px;
-  cursor: pointer;
-}
-
-/* TABLE */
+/* =========================
+   TABLE FIX (YOUR BIG ISSUE)
+========================= */
 table {
+  width: 100%;
   border-collapse: collapse;
+
   background: white;
 }
 
-th {
-  background: #2563eb;
-  color: white;
-}
-
 th, td {
+  border: 1px solid #ddd;
   padding: 10px;
+
   text-align: left;
 }
 
-/* INPUT */
-input, select {
-  display: block;
-  margin: 10px 0;
-  padding: 10px;
-  width: 300px;
+th {
+  background: #0b2c4d;
+  color: white;
 }
 
-.action-btn {
-  background: #2563eb;
-  color: white;
+/* =========================
+   BUTTONS
+========================= */
+button {
+  padding: 8px 12px;
   border: none;
-  padding: 10px 20px;
+
+  background: #0b2c4d;
+  color: white;
+
   cursor: pointer;
+  margin: 2px;
+}
+
+button:hover {
+  background: #09314f;
+}
+
+/* =========================
+   INPUTS
+========================= */
+input, select {
+  padding: 8px;
+  margin: 5px;
+  border: 1px solid #ccc;
+}
+
+/* =========================
+   NOTIFICATION BOX
+========================= */
+#notifBox {
+  position: absolute;
+  right: 10px;
+  top: 60px;
+
+  background: white;
+  width: 320px;
+  max-height: 300px;
+
+  overflow: auto;
+  border: 1px solid #ccc;
+
+  z-index: 999;
+}
+
+/* =========================
+   LOGIN PAGE FIX (REQUESTED)
+========================= */
+.login-container {
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #0b2c4d;
+}
+
+.login-box {
+  background: white;
+  padding: 30px;
+
+  width: 320px;
+
+  text-align: center;
+
+  border-radius: 8px;
+}
+
+.login-box input {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.login-box button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* =========================
+   PRINT (PDF EXPORT FIX)
+========================= */
+@media print {
+  .sidebar,
+  button {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  @page {
+    size: A4 landscape;
+  }
 }
