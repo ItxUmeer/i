@@ -1,55 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Assets Management</title>
+<title>Assets</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>Assets Management</h2>
+  <img src="logo-right.png" class="logo">
+</div>
+
 <div class="sidebar">
-  <h3>CMMS Admin</h3>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="assets.html">Assets</a>
-  <a href="ppm.html">PPM</a>
-  <a href="workorders.html">Work Orders</a>
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
 <div class="main">
 
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>Assets Management (Admin)</h2>
-  <img src="logo-right.png">
+<!-- TABS -->
+<div class="tab-buttons">
+  <button onclick="showTab('add')">Add Asset</button>
+  <button onclick="showTab('view')">View Assets</button>
 </div>
 
-<!-- CREATE ASSET -->
-<div class="section">
+<!-- ADD -->
+<div id="add" class="section">
 
   <h3>Add Asset</h3>
 
   <input id="name" placeholder="Asset Name">
-  <input id="type" placeholder="Type (AHU, FCU)">
+  <input id="type" placeholder="Type (AHU)">
   <input id="building" placeholder="Building">
-  <input id="locationGroup" placeholder="Location Group">
+  <input id="locationGroup" placeholder="Location (HQ)">
 
-  <select id="status">
-    <option value="Active">Active</option>
-    <option value="Inactive">Inactive</option>
-  </select>
-
-  <input id="checklist" placeholder="Checklist (comma separated)">
-
-  <button onclick="addAsset()">Add Asset</button>
+  <button class="action-btn" onclick="addAsset()">Add Asset</button>
 
 </div>
 
-<!-- ASSET LIST -->
-<div class="section">
+<!-- VIEW -->
+<div id="view" class="section" style="display:none">
 
   <h3>Assets List</h3>
 
-  <div id="assetList"></div>
+  <div id="list"></div>
 
 </div>
 
@@ -57,62 +54,52 @@
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  getDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- LOAD ---------------- */
-auth.onAuthStateChanged(async (user) => {
+/* NAV */
+window.go = (p)=>location=p;
 
-  if (!user) location = "login.html";
+/* TAB */
+window.showTab = (t)=>{
+  add.style.display="none";
+  view.style.display="none";
+  document.getElementById(t).style.display="block";
+};
 
-  loadAssets();
-});
-
-/* ---------------- ADD ASSET ---------------- */
+/* ADD */
 window.addAsset = async () => {
 
-  await addDoc(collection(db, "assets"), {
-    name: name.value,
-    type: type.value,
-    building: building.value,
-    locationGroup: locationGroup.value,
-    status: status.value,
-    checklist: checklist.value.split(",").map(i => i.trim())
+  await addDoc(collection(db,"assets"), {
+    name:name.value,
+    type:type.value,
+    building:building.value,
+    locationGroup:locationGroup.value,
+    status:"Active"
   });
 
   alert("Asset Added ✔");
-  loadAssets();
 };
 
-/* ---------------- LOAD ASSETS ---------------- */
-async function loadAssets() {
+/* LOAD */
+async function load(){
 
-  const snap = await getDocs(collection(db, "assets"));
+  const snap = await getDocs(collection(db,"assets"));
 
-  let html = "";
+  let html="";
 
-  snap.forEach(d => {
+  snap.forEach(d=>{
+    const a=d.data();
 
-    const a = d.data();
-
-    html += `
-      <div class="card">
-        <b>${a.name}</b><br>
-        ${a.type} | ${a.building}<br>
-        ${a.status}
-      </div>
-    `;
+    html+=`<div>
+      ${a.name} > ${a.type} > ${a.building} > ${a.locationGroup}
+    </div>`;
   });
 
-  document.getElementById("assetList").innerHTML = html;
+  list.innerHTML=html;
 }
+
+load();
 
 </script>
 
