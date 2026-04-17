@@ -1,5 +1,6 @@
 /* =========================
-   CLEAN CMMS LAYOUT (NO BLUE THEME)
+   CMMS CLEAN PROFESSIONAL UI
+   (WHITE + LIGHT GREY THEME)
 ========================= */
 
 * {
@@ -10,12 +11,12 @@
 }
 
 body {
-  background: #f5f5f5;
+  background: #f4f6f8;
   color: #222;
 }
 
 /* =========================
-   HEADER (CLEAN GREY THEME)
+   HEADER (CLEAN WHITE + STRONG SHADOW)
 ========================= */
 .header {
   position: fixed;
@@ -23,21 +24,25 @@ body {
   left: 0;
   right: 0;
 
-  height: 80px;
+  height: 85px;
 
   display: grid;
-  grid-template-columns: 200px 1fr 250px;
+  grid-template-columns: 220px 1fr 260px;
 
   align-items: center;
 
-  background: #2f2f2f;
-  color: white;
+  background: #ffffff;
 
-  padding: 0 15px;
+  border-bottom: 2px solid #e6e6e6;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 
   z-index: 1000;
+
+  padding: 0 15px;
 }
 
+/* HEADER SECTIONS */
 .header-left,
 .header-center,
 .header-right {
@@ -45,102 +50,125 @@ body {
   align-items: center;
 }
 
+/* CENTER TITLE */
 .header-center {
   justify-content: center;
   font-weight: bold;
   font-size: 16px;
+  color: #333;
 }
 
+/* RIGHT SIDE */
 .header-right {
   justify-content: flex-end;
   gap: 12px;
 }
 
+/* LOGO */
 .logo {
   height: 45px;
 }
 
 /* =========================
-   SIDEBAR (FIXED RESTORED)
+   SIDEBAR (LIGHT + CLEAN - FIXED ISSUE)
 ========================= */
 .sidebar {
   position: fixed;
-  top: 80px;
+  top: 85px;
   left: 0;
 
-  width: 220px;
-  height: calc(100vh - 80px);
+  width: 230px;
+  height: calc(100vh - 85px);
 
-  background: #1f1f1f;
+  background: #ffffff;
+
+  border-right: 2px solid #e6e6e6;
+
+  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
 
   padding-top: 15px;
 }
 
+/* SIDEBAR BUTTONS */
 .sidebar button {
   width: 100%;
   padding: 12px;
 
-  background: none;
+  background: transparent;
+
   border: none;
 
-  color: white;
+  color: #333;
+
   text-align: left;
 
   cursor: pointer;
+
+  border-left: 3px solid transparent;
+
+  transition: 0.2s;
 }
 
 .sidebar button:hover {
-  background: #333;
+  background: #f1f3f5;
+  border-left: 3px solid #999;
 }
 
 /* =========================
-   MAIN CONTENT (FIX ALIGNMENT)
+   MAIN CONTENT (PROPER ALIGNMENT)
 ========================= */
 .main {
-  margin-left: 220px;
-  margin-top: 80px;
+  margin-left: 230px;
+  margin-top: 85px;
 
   padding: 20px;
 }
 
 /* =========================
-   TABLE FIX (CRITICAL)
+   TABLE (CLEAN BUSINESS STYLE)
 ========================= */
 table {
   width: 100%;
   border-collapse: collapse;
 
   background: white;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid #e6e6e6;
   padding: 10px;
 
   text-align: left;
 }
 
 th {
-  background: #e6e6e6;
+  background: #f2f2f2;
   font-weight: bold;
 }
 
 /* =========================
-   BUTTONS (NEUTRAL STYLE)
+   BUTTONS (CLEAN UI)
 ========================= */
 button {
   padding: 8px 12px;
-  border: 1px solid #ccc;
 
-  background: #fff;
+  border: 1px solid #ddd;
+
+  background: #ffffff;
+
   color: #222;
 
   cursor: pointer;
+
   margin: 2px;
+
+  transition: 0.2s;
 }
 
 button:hover {
-  background: #f0f0f0;
+  background: #f5f5f5;
 }
 
 /* =========================
@@ -150,16 +178,18 @@ input, select {
   padding: 8px;
   margin: 5px;
 
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
+
+  background: white;
 }
 
 /* =========================
-   NOTIFICATIONS
+   NOTIFICATION BOX
 ========================= */
 #notifBox {
   position: absolute;
   right: 10px;
-  top: 80px;
+  top: 85px;
 
   background: white;
   width: 320px;
@@ -167,13 +197,15 @@ input, select {
 
   overflow: auto;
 
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 
   z-index: 999;
 }
 
 /* =========================
-   LOGIN PAGE CENTER FIX
+   LOGIN PAGE (CENTER FIXED)
 ========================= */
 .login-container {
   height: 100vh;
@@ -182,11 +214,12 @@ input, select {
   justify-content: center;
   align-items: center;
 
-  background: #eaeaea;
+  background: #f4f6f8;
 }
 
 .login-box {
   background: white;
+
   padding: 30px;
 
   width: 320px;
@@ -194,15 +227,13 @@ input, select {
   text-align: center;
 
   border: 1px solid #ddd;
+
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .login-box input {
   width: 100%;
   margin: 10px 0;
-}
-
-.login-box button {
-  width: 100%;
 }
 
 /* =========================
