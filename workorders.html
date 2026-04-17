@@ -15,16 +15,28 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <img src="logo-left.png">
-  <h3>CMMS Data for DCAS Facility - Work Orders</h3>
 
-  <div onclick="toggleNotif()" style="cursor:pointer;">
-    🔔 <span id="notifCount"></span>
+  <div class="header-left">
+    <img src="logo-left.png" class="logo">
   </div>
 
-  <img src="logo-right.png">
+  <div class="header-center">
+    CMMS Data for DCAS Facility
+  </div>
+
+  <div class="header-right">
+
+    <div class="notif">
+      🔔 <span id="notifCount"></span>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+
+    <img src="logo-right.png" class="logo">
+
+  </div>
+
 </div>
 
 <!-- NOTIFICATION BOX -->
