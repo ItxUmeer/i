@@ -3,96 +3,246 @@
 <head>
 <title>Work Orders</title>
 <link rel="stylesheet" href="style.css">
-<script src="html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-<img src="logo-left.png" class="logo">
-<h2>Work Orders</h2>
-<img src="logo-right.png" class="logo">
+  <img src="logo-left.png" class="logo">
+  <h2>Work Orders</h2>
+
+  <div onclick="toggleNotif()" style="cursor:pointer;">
+    🔔 <span id="notifCount" style="color:red;"></span>
+
+    <div id="notifBox" style="
+      display:none;
+      position:absolute;
+      right:20px;
+      top:60px;
+      width:300px;
+      background:white;
+      border:1px solid #ccc;
+      max-height:300px;
+      overflow:auto;
+      padding:10px;
+    "></div>
+  </div>
+
+  <img src="logo-right.png" class="logo">
 </div>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-<button onclick="showTab('create')">Create</button>
-<button onclick="showTab('list')">List</button>
+  <button onclick="showTab('create')">Create</button>
+  <button onclick="showTab('list')">Work Orders</button>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
+<!-- CREATE -->
 <div id="create">
-<input id="title" placeholder="Title">
-<select id="assetSelect"></select>
-<input id="location">
-<input id="subLocation">
-<button onclick="createWO()">Create</button>
+
+  <h3>Create Work Order</h3>
+
+  <input id="title" placeholder="Title">
+
+  <select id="assetSelect"></select>
+
+  <input id="location" placeholder="Location">
+  <input id="subLocation" placeholder="Sub Location">
+
+  <button onclick="createWO()">Create Work Order</button>
+
 </div>
 
+<!-- LIST -->
 <div id="list" style="display:none">
 
-<button onclick="downloadPDF('woReport')">PDF</button>
+  <h3>Work Order List</h3>
 
-<div id="woReport">
-<h2 style="text-align:center;">CMMS Data for DCAS Facility</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Comment</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-<table border="1" width="100%">
-<thead>
-<tr>
-<th>Title</th><th>Asset</th><th>Status</th>
-</tr>
-</thead>
-
-<tbody id="woList"></tbody>
-</table>
-</div>
+    <tbody id="woList"></tbody>
+  </table>
 
 </div>
 
 </div>
 
 <script type="module">
+
 import { db } from "./firebase.js";
-import { collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
+/* TAB */
+window.showTab=(t)=>{
+  create.style.display="none";
+  list.style.display="none";
+  document.getElementById(t).style.display="block";
+};
+
+/* LOAD ASSETS */
 async function loadAssets(){
-let snap=await getDocs(collection(db,"assets"));
-let html="";
-snap.forEach(d=>{
-html+=`<option>${d.data().name}</option>`;
-});
-assetSelect.innerHTML=html;
+  const snap = await getDocs(collection(db,"assets"));
+  let html = `<option>Select Asset</option>`;
+  snap.forEach(d=>{
+    html += `<option>${d.data().name}</option>`;
+  });
+  assetSelect.innerHTML = html;
 }
 
-window.createWO=async()=>{
-await addDoc(collection(db,"workOrders"),{
-title:title.value,
-assetId:assetSelect.value,
-status:"Pending"
-});
-loadWO();
+/* CREATE WO + NOTIFICATION */
+window.createWO = async ()=>{
+
+  await addDoc(collection(db,"workOrders"),{
+    title:title.value,
+    assetId:assetSelect.value,
+    location:location.value,
+    subLocation:subLocation.value,
+    status:"Pending"
+  });
+
+  await addDoc(collection(db,"notifications"),{
+    title:"New Work Order",
+    message:title.value + " created",
+    read:false,
+    createdAt:new Date()
+  });
+
+  loadWO();
+  loadNotifications();
 };
 
+/* LOAD WO */
 async function loadWO(){
-let snap=await getDocs(collection(db,"workOrders"));
-let html="";
-snap.forEach(d=>{
-let w=d.data();
-html+=`<tr>
-<td>${w.title}</td>
-<td>${w.assetId}</td>
-<td>${w.status}</td>
-</tr>`;
-});
-woList.innerHTML=html;
+
+  const snap = await getDocs(collection(db,"workOrders"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    let w=d.data();
+
+    html+=`
+    <tr>
+      <td>${w.title}</td>
+      <td>${w.assetId}</td>
+      <td>${w.location || "-"}</td>
+      <td>${w.status}</td>
+
+      <td>
+        <input id="c-${d.id}" placeholder="comment">
+      </td>
+
+      <td>
+        <button onclick="startWO('${d.id}')">Start</button>
+        <button onclick="completeWO('${d.id}')">Complete</button>
+      </td>
+    </tr>`;
+  });
+
+  woList.innerHTML=html;
 }
 
-window.downloadPDF=(id)=>{
-html2pdf().from(document.getElementById(id)).save();
+/* START */
+window.startWO = async(id)=>{
+
+  let comment=document.getElementById("c-"+id).value;
+
+  await updateDoc(doc(db,"workOrders",id),{
+    status:"Started",
+    comment:comment
+  });
+
+  await addDoc(collection(db,"notifications"),{
+    title:"Work Started",
+    message:comment || "No comment",
+    read:false,
+    createdAt:new Date()
+  });
+
+  loadWO();
+  loadNotifications();
 };
 
+/* COMPLETE */
+window.completeWO = async(id)=>{
+
+  let comment=document.getElementById("c-"+id).value;
+
+  await updateDoc(doc(db,"workOrders",id),{
+    status:"Completed",
+    comment:comment
+  });
+
+  await addDoc(collection(db,"notifications"),{
+    title:"Work Completed",
+    message:comment || "Completed",
+    read:false,
+    createdAt:new Date()
+  });
+
+  loadWO();
+  loadNotifications();
+};
+
+/* NOTIFICATIONS */
+window.toggleNotif=()=>{
+  notifBox.style.display = notifBox.style.display==="none"?"block":"none";
+};
+
+async function loadNotifications(){
+
+  const snap = await getDocs(collection(db,"notifications"));
+
+  let html="";
+  let count=0;
+
+  snap.forEach(d=>{
+    let n=d.data();
+    if(!n.read) count++;
+
+    html+=`
+      <div style="border-bottom:1px solid #eee;">
+        <b>${n.title}</b><br>
+        ${n.message}
+        <button onclick="markRead('${d.id}')">✔</button>
+      </div>
+    `;
+  });
+
+  notifBox.innerHTML=html;
+  notifCount.innerText=count?`(${count})`:"";
+}
+
+window.markRead=async(id)=>{
+  await updateDoc(doc(db,"notifications",id),{read:true});
+  loadNotifications();
+};
+
+/* INIT */
 loadAssets();
 loadWO();
+loadNotifications();
+
 </script>
 
 </body>
