@@ -5,157 +5,123 @@
 <link rel="stylesheet" href="style.css">
 
 <style>
-
-/* GLOBAL LAYOUT FIX */
-body {
-  margin:0;
-  font-family:Arial;
-  background:#f5f7fb;
+@media print {
+  .sidebar, button, .tabs { display:none !important; }
+  @page { size: A4 landscape; }
 }
-
-/* SIDEBAR */
-.sidebar {
-  position:fixed;
-  left:0;
-  top:0;
-  width:220px;
-  height:100vh;
-  background:#0f172a;
-  color:white;
-  padding:20px;
-}
-
-.sidebar h3 {
-  color:white;
-  margin-bottom:20px;
-}
-
-.sidebar a {
-  display:block;
-  color:#cbd5e1;
-  padding:10px;
-  text-decoration:none;
-  border-radius:6px;
-}
-
-.sidebar a:hover {
-  background:#1e293b;
-  color:white;
-}
-
-/* MAIN AREA */
-.main {
-  margin-left:240px;
-  padding:20px;
-}
-
-/* HEADER */
-.header {
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* KPI GRID */
-.grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-}
-
-.card {
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  text-align:center;
-  box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-
-.card h2 {
-  color:#2563eb;
-  font-size:28px;
-}
-
-/* NAV BUTTONS */
-.nav {
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-}
-
-.btn {
-  background:#2563eb;
-  color:white;
-  padding:15px;
-  border-radius:10px;
-  text-align:center;
-  cursor:pointer;
-}
-
-.btn:hover {
-  background:#1d4ed8;
-}
-
 </style>
 
 </head>
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+
+  <div class="header-left">
+    <img src="logo-left.png" class="logo">
+  </div>
+
+  <div class="header-center">
+    CMMS DASHBOARD - DCAS FACILITY
+  </div>
+
+  <div class="header-right">
+    🔔 <span id="notifCount"></span>
+    <button onclick="logout()">Logout</button>
+    <img src="logo-right.png" class="logo">
+  </div>
+
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h3>CMMS Admin</h3>
-
-  <a href="dashboard.html">Dashboard</a>
-  <a href="assets.html">Assets</a>
-  <a href="assets_list.html">Assets List</a>
-  <a href="ppm.html">PPM</a>
-  <a href="workorders.html">Work Orders</a>
-  <a href="users.html">Users</a>
+  <button onclick="go('dashboard.html')">Dashboard</button>
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- HEADER -->
-<div class="header">
-  <h2>Admin Dashboard</h2>
-  <p>CMMS Control Panel</p>
-</div>
+<h2>Admin Dashboard</h2>
 
-<!-- KPI -->
-<div class="grid">
+<!-- TABS -->
+<div class="tabs">
 
-  <div class="card">
-    <h2 id="a">0</h2>
-    <p>Assets</p>
-  </div>
+  <button onclick="showTab('assetsTab')">Assets</button>
+  <button onclick="showTab('ppmTab')">PPM</button>
+  <button onclick="showTab('woTab')">Work Orders</button>
 
-  <div class="card">
-    <h2 id="p">0</h2>
-    <p>PPM</p>
-  </div>
-
-  <div class="card">
-    <h2 id="w">0</h2>
-    <p>Work Orders</p>
-  </div>
+  <button onclick="window.print()">PDF Report</button>
 
 </div>
 
-<!-- NAV -->
-<div class="nav">
+<br>
 
-  <div class="btn" onclick="go('assets.html')">Assets</div>
-  <div class="btn" onclick="go('assets_list.html')">Assets List</div>
-  <div class="btn" onclick="go('ppm.html')">PPM</div>
+<!-- =========================
+     ASSETS TAB
+========================= -->
+<div id="assetsTab" class="tabSection">
 
-  <div class="btn" onclick="go('workorders.html')">Work Orders</div>
-  <div class="btn" onclick="go('users.html')">Users</div>
-  <div class="btn" onclick="go('supervisor.html')">Supervisor</div>
+  <h3>Assets Overview</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="dashAssets"></tbody>
+  </table>
+
+</div>
+
+<!-- =========================
+     PPM TAB
+========================= -->
+<div id="ppmTab" class="tabSection" style="display:none">
+
+  <h3>PPM Overview</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Task</th>
+        <th>Frequency</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="dashPPM"></tbody>
+  </table>
+
+</div>
+
+<!-- =========================
+     WORK ORDERS TAB
+========================= -->
+<div id="woTab" class="tabSection" style="display:none">
+
+  <h3>Work Orders Overview</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="dashWO"></tbody>
+  </table>
 
 </div>
 
@@ -164,23 +130,107 @@ body {
 <script type="module">
 
 import { db } from "./firebase.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-/* LOAD COUNTS */
-async function load() {
-
-  const a = await getDocs(collection(db,"assets"));
-  const p = await getDocs(collection(db,"ppm"));
-  const w = await getDocs(collection(db,"workOrders"));
-
-  document.getElementById("a").innerText = a.size;
-  document.getElementById("p").innerText = p.size;
-  document.getElementById("w").innerText = w.size;
-}
-
-load();
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
+window.logout = ()=>location="login.html";
+
+/* =========================
+   TAB SWITCH
+========================= */
+window.showTab = (id) => {
+
+  document.querySelectorAll(".tabSection").forEach(t=>{
+    t.style.display = "none";
+  });
+
+  document.getElementById(id).style.display = "block";
+};
+
+/* =========================
+   LOAD ASSETS
+========================= */
+async function loadAssets() {
+
+  const snap = await getDocs(collection(db,"assets"));
+
+  let html = "";
+
+  snap.forEach(d=>{
+    let a = d.data();
+
+    html += `
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.location}</td>
+        <td>${a.status}</td>
+      </tr>
+    `;
+  });
+
+  dashAssets.innerHTML = html;
+}
+
+/* =========================
+   LOAD PPM
+========================= */
+async function loadPPM() {
+
+  const snap = await getDocs(collection(db,"ppm"));
+
+  let html = "";
+
+  snap.forEach(d=>{
+    let p = d.data();
+
+    html += `
+      <tr>
+        <td>${p.asset}</td>
+        <td>${p.task}</td>
+        <td>${p.frequency}</td>
+        <td>${p.date}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  });
+
+  dashPPM.innerHTML = html;
+}
+
+/* =========================
+   LOAD WORK ORDERS
+========================= */
+async function loadWO() {
+
+  const snap = await getDocs(collection(db,"workOrders"));
+
+  let html = "";
+
+  snap.forEach(d=>{
+    let w = d.data();
+
+    html += `
+      <tr>
+        <td>${w.title}</td>
+        <td>${w.asset}</td>
+        <td>${w.location}</td>
+        <td>${w.status}</td>
+      </tr>
+    `;
+  });
+
+  dashWO.innerHTML = html;
+}
+
+/* INIT */
+loadAssets();
+loadPPM();
+loadWO();
 
 </script>
 
