@@ -8,54 +8,44 @@
 <body>
 
 <div class="header">
-
-  <div class="header-left">
-    <img src="logo-left.png" class="logo">
-  </div>
-
-  <div class="header-center">
-    CMMS Data for DCAS Facility
-  </div>
-
+  <div class="header-left"><img src="logo-left.png" class="logo"></div>
+  <div class="header-center">PPM Management</div>
   <div class="header-right">
-
-    <div class="notif">
-      🔔 <span id="notifCount"></span>
-    </div>
-
+    🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
-
     <img src="logo-right.png" class="logo">
-
   </div>
+</div>
 
+<div class="sidebar">
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
 <div class="main">
 
 <h2>PPM</h2>
 
-<select id="assetSelect"></select>
-<input id="task" placeholder="Task">
-<input id="frequency" placeholder="Frequency">
-<input id="nextDue" type="date">
-<input id="comment" placeholder="Comment">
+<select id="ppmAsset"></select>
+<input id="ppmTask" placeholder="Task">
+<input id="ppmFrequency" placeholder="Frequency">
+<input id="ppmDate" type="date">
+<input id="ppmComment" placeholder="Comment">
 
-<button onclick="createPPM()">Create PPM</button>
-<button onclick="window.print()">PDF Report</button>
+<button onclick="addPPM()">Create PPM</button>
 
 <table>
 <thead>
 <tr>
-  <th>Asset</th>
-  <th>Task</th>
-  <th>Frequency</th>
-  <th>Next Due</th>
-  <th>Comment</th>
-  <th>Status</th>
+<th>Asset</th>
+<th>Task</th>
+<th>Frequency</th>
+<th>Date</th>
+<th>Comment</th>
+<th>Status</th>
 </tr>
 </thead>
-
 <tbody id="ppmList"></tbody>
 </table>
 
@@ -74,63 +64,57 @@ window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
 /* LOAD ASSETS */
-async function loadAssets(){
+async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html="<option>Select Asset</option>";
+  let html = `<option>Select Asset</option>`;
 
   snap.forEach(d=>{
-    html+=`<option>${d.data().name}</option>`;
+    html += `<option value="${d.data().name}">${d.data().name}</option>`;
   });
 
-  assetSelect.innerHTML=html;
+  ppmAsset.innerHTML = html;
 }
 
-/* CREATE PPM */
-window.createPPM = async () => {
+/* ADD PPM */
+window.addPPM = async () => {
 
   await addDoc(collection(db,"ppm"), {
-    asset:assetSelect.value,
-    task:task.value,
-    frequency:frequency.value,
-    nextDue:nextDue.value,
-    comment:comment.value,
-    status:"Pending"
-  });
-
-  await addDoc(collection(db,"notifications"), {
-    title:"PPM Created",
-    message:task.value,
-    read:false
+    asset: ppmAsset.value,
+    task: ppmTask.value,
+    frequency: ppmFrequency.value,
+    date: ppmDate.value,
+    comment: ppmComment.value,
+    status: "Pending"
   });
 
   loadPPM();
 };
 
 /* LOAD */
-async function loadPPM(){
+async function loadPPM() {
 
   const snap = await getDocs(collection(db,"ppm"));
 
-  let html="";
+  let html = "";
 
   snap.forEach(d=>{
-    let p=d.data();
+    let p = d.data();
 
-    html+=`
+    html += `
       <tr>
         <td>${p.asset}</td>
         <td>${p.task}</td>
         <td>${p.frequency}</td>
-        <td>${p.nextDue}</td>
-        <td>${p.comment || ""}</td>
+        <td>${p.date}</td>
+        <td>${p.comment}</td>
         <td>${p.status}</td>
       </tr>
     `;
   });
 
-  ppmList.innerHTML=html;
+  ppmList.innerHTML = html;
 }
 
 loadAssets();
