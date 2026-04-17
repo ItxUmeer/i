@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>PPM System</title>
+<title>PPM</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="sidebar">
-  <h3>CMMS</h3>
-  <a href="assets.html">Assets</a>
-  <a href="ppm.html">PPM</a>
-  <a href="workorders.html">Work Orders</a>
+<!-- HEADER -->
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>PPM Management</h2>
+  <img src="logo-right.png" class="logo">
 </div>
 
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
+</div>
+
+<!-- MAIN -->
 <div class="main">
 
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>PPM Management</h2>
-  <img src="logo-right.png">
+<!-- TABS -->
+<div class="tab-buttons">
+  <button onclick="showTab('add')">Add PPM</button>
+  <button onclick="showTab('list')">PPM List</button>
 </div>
 
-<!-- CREATE PPM -->
-<div class="section">
+<!-- ADD PPM -->
+<div id="add" class="section">
 
   <h3>Create PPM</h3>
 
+  <!-- ASSET SELECT -->
   <select id="assetSelect"></select>
 
-  <input id="task" placeholder="Task">
-  <input id="frequency" placeholder="Monthly / Weekly">
+  <input id="task" placeholder="Task (Filter Cleaning)">
+  <input id="frequency" placeholder="Frequency (Monthly)">
   <input id="nextDue" type="date">
 
-  <button onclick="createPPM()">Create PPM</button>
+  <button class="action-btn" onclick="createPPM()">Create PPM</button>
 
 </div>
 
-<!-- PPM LIST -->
-<div class="section">
+<!-- LIST -->
+<div id="list" class="section" style="display:none">
 
   <h3>PPM List</h3>
+
   <div id="ppmList"></div>
 
 </div>
@@ -49,46 +59,55 @@
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
+import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- LOAD ---------------- */
-auth.onAuthStateChanged(async (user) => {
+/* NAV */
+window.go = (p)=>location=p;
 
-  if (!user) location = "login.html";
+/* TAB */
+window.showTab = (t)=>{
+  add.style.display="none";
+  list.style.display="none";
+  document.getElementById(t).style.display="block";
+};
 
-  loadAssets();
-  loadPPM();
-});
+/* LOAD ASSETS INTO DROPDOWN */
+async function loadAssets(){
 
-/* ---------------- LOAD ASSETS FOR DROPDOWN ---------------- */
-async function loadAssets() {
-
-  const snap = await getDocs(collection(db, "assets"));
+  const snap = await getDocs(collection(db,"assets"));
 
   let html = `<option value="">Select Asset</option>`;
 
-  snap.forEach(d => {
-
+  snap.forEach(d=>{
     const a = d.data();
 
-    html += `<option value="${a.name}">
-      ${a.name} (${a.building})
-    </option>`;
+    html += `
+      <option value="${a.name}">
+        ${a.name} (${a.building})
+      </option>
+    `;
   });
 
-  assetSelect.innerHTML = html;
+  document.getElementById("assetSelect").innerHTML = html;
 }
 
-/* ---------------- CREATE PPM ---------------- */
+/* CREATE PPM */
 window.createPPM = async () => {
 
-  await addDoc(collection(db, "ppm"), {
-    assetId: assetSelect.value,
+  const asset = assetSelect.value;
+
+  if(!asset){
+    alert("Select Asset");
+    return;
+  }
+
+  await addDoc(collection(db,"ppm"), {
+    assetId: asset,
     task: task.value,
     frequency: frequency.value,
     nextDue: nextDue.value,
@@ -99,29 +118,30 @@ window.createPPM = async () => {
   loadPPM();
 };
 
-/* ---------------- LOAD PPM ---------------- */
-async function loadPPM() {
+/* LOAD PPM */
+async function loadPPM(){
 
-  const snap = await getDocs(collection(db, "ppm"));
+  const snap = await getDocs(collection(db,"ppm"));
 
   let html = "";
 
-  snap.forEach(d => {
-
+  snap.forEach(d=>{
     const p = d.data();
 
     html += `
-      <div class="card">
-        <b>${p.assetId}</b><br>
-        ${p.task}<br>
-        ${p.frequency}<br>
-        ${p.status}
+      <div>
+        ${p.assetId} > ${p.task} > ${p.frequency} > ${p.nextDue} > ${p.status}
       </div>
     `;
   });
 
-  document.getElementById("ppmList").innerHTML = html;
+  document.getElementById("ppmList").innerHTML =
+    html || "No PPM Records";
 }
+
+/* INIT */
+loadAssets();
+loadPPM();
 
 </script>
 
