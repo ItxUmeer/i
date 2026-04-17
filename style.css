@@ -1,158 +1,96 @@
-body{
+
+/* GLOBAL */
+body {
   margin:0;
-  font-family:Segoe UI;
-  background:#f8fafc;
+  font-family:Arial;
+  background:#f5f7fb;
 }
 
 /* HEADER */
-.header-bar{
+.header {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:10px 20px;
-}
-
-.header-bar img{
-  height:80px;
-}
-
-/* LOGIN */
-.login-container{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.login-box{
-  width:350px;
   background:white;
-  padding:25px;
-  border-radius:10px;
-  text-align:center;
+  padding:10px 20px;
+  border-bottom:2px solid #2563eb;
 }
 
-.login-box input{
-  width:100%;
-  margin:8px 0;
-  padding:10px;
-}
-
-.login-box button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#2563eb;
-  color:white;
-  border:none;
+.logo {
+  height:60px;
 }
 
 /* SIDEBAR */
-.sidebar{
-  width:240px;
-  height:100vh;
+.sidebar {
   position:fixed;
-  background:white;
-  border-right:2px solid #e5e7eb;
-  padding:15px;
-}
-
-.sidebar a{
-  display:block;
-  padding:10px;
-  margin:6px 0;
-  text-decoration:none;
-  color:black;
-}
-
-.sidebar a:hover{
-  background:#e0f2fe;
-}
-
-/* MAIN */
-.main{
-  margin-left:260px;
-  padding:20px;
-}
-
-/* SECTION */
-.section{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-}
-
-/* ROLE BOX */
-.role-box{
-  position:absolute;
-  right:0;
-  top:90px;
-  background:white;
-  border:1px solid #ddd;
-  padding:12px;
-  border-radius:8px;
-  display:none;
+  left:0;
+  top:80px;
   width:220px;
-}
-/* KPI CARDS */
-.kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-}
-
-.kpi{
-  background:white;
+  height:100%;
+  background:#0f172a;
   padding:15px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  text-align:center;
-  transition:0.3s;
+  border-right:4px solid #2563eb;
 }
 
-.kpi:hover{
-  transform:translateY(-5px);
-}
-
-.kpi h2{
-  margin:0;
-  color:#2563eb;
-}
-
-/* SIDEBAR ICON STYLE */
-.sidebar a{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.sidebar a img{
-  width:18px;
-}
-
-/* NOTIFICATION */
-.notif{
-  position:relative;
+.sidebar button {
+  width:100%;
+  margin-bottom:10px;
+  padding:12px;
+  background:#1e293b;
+  color:white;
+  border:none;
+  border-radius:6px;
   cursor:pointer;
 }
 
-.notif span{
-  position:absolute;
-  top:-5px;
-  right:-5px;
-  background:red;
+.sidebar button:hover {
+  background:#2563eb;
+}
+
+/* MAIN */
+.main {
+  margin-left:240px;
+  padding:20px;
+}
+
+/* TABS */
+.tab-buttons {
+  margin-bottom:15px;
+}
+
+.tab-buttons button {
+  padding:10px 15px;
+  margin-right:10px;
+  border:none;
+  background:#2563eb;
   color:white;
-  border-radius:50%;
-  padding:2px 6px;
-  font-size:12px;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-/* ANIMATION */
-.sidebar a{
-  transition:0.3s;
+/* SECTION */
+.section {
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
 }
 
-.sidebar a:hover{
-  transform:translateX(5px);
+/* INPUT */
+input, select {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+/* BUTTON */
+.action-btn {
+  background:#2563eb;
+  color:white;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
