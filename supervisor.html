@@ -11,13 +11,30 @@
 <div class="header">
   <img src="logo-left.png" class="logo">
   <h2>Supervisor Dashboard</h2>
+
+  <div onclick="toggleNotif()" style="cursor:pointer;">
+    🔔 <span id="notifCount" style="color:red;"></span>
+    <div id="notifBox" style="
+      display:none;
+      position:absolute;
+      right:20px;
+      top:60px;
+      background:white;
+      width:300px;
+      border:1px solid #ccc;
+      max-height:300px;
+      overflow:auto;
+      padding:10px;">
+    </div>
+  </div>
+
   <img src="logo-right.png" class="logo">
 </div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
   <button onclick="showTab('wo')">Work Orders</button>
-  <button onclick="showTab('ppm')">PPM Schedule</button>
+  <button onclick="showTab('ppm')">PPM</button>
   <button onclick="showTab('assets')">Assets</button>
 </div>
 
@@ -25,63 +42,64 @@
 <div class="main">
 
 <!-- WORK ORDERS -->
-<div id="wo" class="section">
+<div id="wo">
 
-  <h3>Work Orders</h3>
+<h3>Work Orders</h3>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Asset</th>
-        <th>Location</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Title</th>
+<th>Asset</th>
+<th>Status</th>
+<th>Comment</th>
+<th>Action</th>
+</tr>
+</thead>
 
-    <tbody id="woList"></tbody>
-  </table>
+<tbody id="woList"></tbody>
+</table>
 
 </div>
 
 <!-- PPM -->
-<div id="ppm" class="section" style="display:none">
+<div id="ppm" style="display:none">
 
-  <h3>PPM Schedule</h3>
+<h3>PPM</h3>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Task</th>
-        <th>Next Due</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Asset</th>
+<th>Task</th>
+<th>Status</th>
+<th>Comment</th>
+<th>Action</th>
+</tr>
+</thead>
 
-    <tbody id="ppmList"></tbody>
-  </table>
+<tbody id="ppmList"></tbody>
+</table>
 
 </div>
 
 <!-- ASSETS -->
-<div id="assets" class="section" style="display:none">
+<div id="assets" style="display:none">
 
-  <h3>Assets</h3>
+<h3>Assets</h3>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Building</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Building</th>
+<th>Status</th>
+</tr>
+</thead>
 
-    <tbody id="assetList"></tbody>
-  </table>
+<tbody id="assetList"></tbody>
+</table>
 
 </div>
 
@@ -93,11 +111,12 @@ import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
+  updateDoc,
   doc,
-  updateDoc
+  addDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* TAB SWITCH */
+/* TAB */
 window.showTab = (t)=>{
   wo.style.display="none";
   ppm.style.display="none";
@@ -105,94 +124,133 @@ window.showTab = (t)=>{
   document.getElementById(t).style.display="block";
 };
 
-/* LOAD WORK ORDERS */
+/* WORK ORDERS */
 async function loadWO(){
-
   const snap = await getDocs(collection(db,"workOrders"));
-
   let html="";
-
   snap.forEach(d=>{
-    const w=d.data();
-
+    let w=d.data();
     html+=`
-      <tr>
-        <td>${w.title}</td>
-        <td>${w.assetId}</td>
-        <td>${w.location}</td>
-        <td>${w.status}</td>
-        <td>
-          <button onclick="startWO('${d.id}')">Start</button>
-          <button onclick="completeWO('${d.id}')">Complete</button>
-        </td>
-      </tr>
-    `;
+    <tr>
+      <td>${w.title}</td>
+      <td>${w.assetId}</td>
+      <td>${w.status}</td>
+      <td><input id="c-${d.id}" placeholder="comment"></td>
+      <td>
+        <button onclick="updateWO('${d.id}','Started')">Start</button>
+        <button onclick="updateWO('${d.id}','Completed')">Complete</button>
+      </td>
+    </tr>`;
   });
-
   woList.innerHTML=html;
 }
 
-/* UPDATE STATUS */
-window.startWO = async (id)=>{
-  await updateDoc(doc(db,"workOrders",id),{status:"Started"});
-  loadWO();
-};
+window.updateWO = async(id,status)=>{
+  let comment=document.getElementById("c-"+id).value;
 
-window.completeWO = async (id)=>{
-  await updateDoc(doc(db,"workOrders",id),{status:"Completed"});
-  loadWO();
-};
-
-/* LOAD PPM */
-async function loadPPM(){
-
-  const snap = await getDocs(collection(db,"ppm"));
-
-  let html="";
-
-  snap.forEach(d=>{
-    const p=d.data();
-
-    html+=`
-      <tr>
-        <td>${p.assetId}</td>
-        <td>${p.task}</td>
-        <td>${p.nextDue}</td>
-        <td>${p.status}</td>
-      </tr>
-    `;
+  await updateDoc(doc(db,"workOrders",id),{
+    status:status,
+    comment:comment
   });
 
+  await addDoc(collection(db,"notifications"),{
+    title:"Work Order Updated",
+    message:status+" - "+comment,
+    read:false,
+    createdAt:new Date()
+  });
+
+  loadWO();
+  loadNotifications();
+};
+
+/* PPM */
+async function loadPPM(){
+  const snap=await getDocs(collection(db,"ppm"));
+  let html="";
+  snap.forEach(d=>{
+    let p=d.data();
+    html+=`
+    <tr>
+      <td>${p.assetId}</td>
+      <td>${p.task}</td>
+      <td>${p.status}</td>
+      <td><input id="p-${d.id}" placeholder="comment"></td>
+      <td><button onclick="updatePPM('${d.id}')">Done</button></td>
+    </tr>`;
+  });
   ppmList.innerHTML=html;
 }
 
-/* LOAD ASSETS */
-async function loadAssets(){
+window.updatePPM = async(id)=>{
+  let comment=document.getElementById("p-"+id).value;
 
-  const snap = await getDocs(collection(db,"assets"));
-
-  let html="";
-
-  snap.forEach(d=>{
-    const a=d.data();
-
-    html+=`
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.type}</td>
-        <td>${a.building}</td>
-        <td>${a.status}</td>
-      </tr>
-    `;
+  await updateDoc(doc(db,"ppm",id),{
+    status:"Done",
+    comment:comment
   });
 
+  await addDoc(collection(db,"notifications"),{
+    title:"PPM Completed",
+    message:comment,
+    read:false,
+    createdAt:new Date()
+  });
+
+  loadPPM();
+  loadNotifications();
+};
+
+/* ASSETS */
+async function loadAssets(){
+  const snap=await getDocs(collection(db,"assets"));
+  let html="";
+  snap.forEach(d=>{
+    let a=d.data();
+    html+=`<tr>
+      <td>${a.name}</td>
+      <td>${a.type}</td>
+      <td>${a.building}</td>
+      <td>${a.status}</td>
+    </tr>`;
+  });
   assetList.innerHTML=html;
 }
+
+/* NOTIFICATIONS */
+window.toggleNotif=()=>{
+  notifBox.style.display = notifBox.style.display==="none"?"block":"none";
+};
+
+async function loadNotifications(){
+  const snap=await getDocs(collection(db,"notifications"));
+  let html="",count=0;
+
+  snap.forEach(d=>{
+    let n=d.data();
+    if(!n.read) count++;
+
+    html+=`
+    <div style="border-bottom:1px solid #eee;">
+      <b>${n.title}</b><br>${n.message}
+      <button onclick="markRead('${d.id}')">✔</button>
+    </div>`;
+  });
+
+  notifBox.innerHTML=html;
+  notifCount.innerText=count?`(${count})`:"";
+}
+
+window.markRead=async(id)=>{
+  await updateDoc(doc(db,"notifications",id),{read:true});
+  loadNotifications();
+};
 
 /* INIT */
 loadWO();
 loadPPM();
 loadAssets();
+loadNotifications();
 
 </script>
 
