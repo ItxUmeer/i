@@ -7,186 +7,192 @@
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>Supervisor Dashboard</h2>
+  <img src="logo-right.png" class="logo">
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h3>Supervisor</h3>
-
-  <a href="supervisor.html">My Tasks</a>
-  <a href="#" onclick="logout()">Logout</a>
+  <button onclick="showTab('wo')">Work Orders</button>
+  <button onclick="showTab('ppm')">PPM Schedule</button>
+  <button onclick="showTab('assets')">Assets</button>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- HEADER -->
-<div class="header-bar">
-  <img src="logo-left.png">
-  <h2>Facility Supervisor Dashboard</h2>
-  <img src="logo-right.png">
-</div>
-
 <!-- WORK ORDERS -->
-<div class="section">
-  <h3>My Work Orders</h3>
-  <div id="workList">Loading...</div>
+<div id="wo" class="section">
+
+  <h3>Work Orders</h3>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Asset</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="woList"></tbody>
+  </table>
+
 </div>
 
 <!-- PPM -->
-<div class="section">
-  <h3>My PPM Tasks</h3>
-  <div id="ppmList">Loading...</div>
+<div id="ppm" class="section" style="display:none">
+
+  <h3>PPM Schedule</h3>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>Task</th>
+        <th>Next Due</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="ppmList"></tbody>
+  </table>
+
+</div>
+
+<!-- ASSETS -->
+<div id="assets" class="section" style="display:none">
+
+  <h3>Assets</h3>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Building</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="assetList"></tbody>
+  </table>
+
 </div>
 
 </div>
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
-
+import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
   doc,
-  getDoc,
-  updateDoc,
-  query,
-  where
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let uid = "";
+/* TAB SWITCH */
+window.showTab = (t)=>{
+  wo.style.display="none";
+  ppm.style.display="none";
+  assets.style.display="none";
+  document.getElementById(t).style.display="block";
+};
 
-/* ---------------- AUTH ---------------- */
-auth.onAuthStateChanged(async (user) => {
+/* LOAD WORK ORDERS */
+async function loadWO(){
 
-  if (!user) {
-    location = "login.html";
-    return;
-  }
+  const snap = await getDocs(collection(db,"workOrders"));
 
-  uid = user.uid;
+  let html="";
 
-  loadWorkOrders();
-  loadPPM();
-});
+  snap.forEach(d=>{
+    const w=d.data();
 
-/* ---------------- WORK ORDERS (ONLY ASSIGNED) ---------------- */
-async function loadWorkOrders() {
-
-  const q = query(
-    collection(db, "workOrders"),
-    where("assignedTo", "==", uid)
-  );
-
-  const snap = await getDocs(q);
-
-  let html = "";
-
-  snap.forEach(d => {
-
-    const w = d.data();
-
-    html += `
-      <div class="card">
-        <b>${w.title}</b><br>
-        Status: ${w.status}<br>
-
-        <button onclick="updateWO('${d.id}', 'Started')">Start</button>
-        <button onclick="updateWO('${d.id}', 'Completed')">Complete</button>
-
-        <br><br>
-        <input id="c_${d.id}" placeholder="Add comment">
-        <button onclick="addComment('${d.id}')">Send</button>
-      </div>
+    html+=`
+      <tr>
+        <td>${w.title}</td>
+        <td>${w.assetId}</td>
+        <td>${w.location}</td>
+        <td>${w.status}</td>
+        <td>
+          <button onclick="startWO('${d.id}')">Start</button>
+          <button onclick="completeWO('${d.id}')">Complete</button>
+        </td>
+      </tr>
     `;
   });
 
-  document.getElementById("workList").innerHTML =
-    html || "No assigned work orders";
+  woList.innerHTML=html;
 }
 
-/* ---------------- PPM (ONLY ASSIGNED) ---------------- */
-async function loadPPM() {
+/* UPDATE STATUS */
+window.startWO = async (id)=>{
+  await updateDoc(doc(db,"workOrders",id),{status:"Started"});
+  loadWO();
+};
 
-  const q = query(
-    collection(db, "ppm"),
-    where("assignedTo", "==", uid)
-  );
+window.completeWO = async (id)=>{
+  await updateDoc(doc(db,"workOrders",id),{status:"Completed"});
+  loadWO();
+};
 
-  const snap = await getDocs(q);
+/* LOAD PPM */
+async function loadPPM(){
 
-  let html = "";
+  const snap = await getDocs(collection(db,"ppm"));
 
-  snap.forEach(d => {
+  let html="";
 
-    const p = d.data();
+  snap.forEach(d=>{
+    const p=d.data();
 
-    html += `
-      <div class="card">
-        <b>${p.assetId}</b><br>
-        Task: ${p.task || "-"}<br>
-        Status: ${p.status}<br>
-
-        <button onclick="completePPM('${d.id}')">
-          Complete
-        </button>
-      </div>
+    html+=`
+      <tr>
+        <td>${p.assetId}</td>
+        <td>${p.task}</td>
+        <td>${p.nextDue}</td>
+        <td>${p.status}</td>
+      </tr>
     `;
   });
 
-  document.getElementById("ppmList").innerHTML =
-    html || "No assigned PPM tasks";
+  ppmList.innerHTML=html;
 }
 
-/* ---------------- UPDATE WORK ORDER ---------------- */
-window.updateWO = async (id, status) => {
+/* LOAD ASSETS */
+async function loadAssets(){
 
-  await updateDoc(doc(db, "workOrders", id), {
-    status: status
+  const snap = await getDocs(collection(db,"assets"));
+
+  let html="";
+
+  snap.forEach(d=>{
+    const a=d.data();
+
+    html+=`
+      <tr>
+        <td>${a.name}</td>
+        <td>${a.type}</td>
+        <td>${a.building}</td>
+        <td>${a.status}</td>
+      </tr>
+    `;
   });
 
-  loadWorkOrders();
-};
+  assetList.innerHTML=html;
+}
 
-/* ---------------- ADD COMMENT ---------------- */
-window.addComment = async (id) => {
-
-  const text = document.getElementById("c_" + id).value;
-
-  if (!text) return;
-
-  const ref = doc(db, "workOrders", id);
-  const snap = await getDoc(ref);
-
-  const data = snap.data();
-
-  const comments = data.comments || [];
-
-  comments.push({
-    text: text,
-    time: new Date().toISOString(),
-    user: uid
-  });
-
-  await updateDoc(ref, { comments });
-
-  loadWorkOrders();
-};
-
-/* ---------------- COMPLETE PPM ---------------- */
-window.completePPM = async (id) => {
-
-  await updateDoc(doc(db, "ppm", id), {
-    status: "Completed"
-  });
-
-  loadPPM();
-};
-
-/* ---------------- LOGOUT ---------------- */
-window.logout = async () => {
-  await auth.signOut();
-  location = "login.html";
-};
+/* INIT */
+loadWO();
+loadPPM();
+loadAssets();
 
 </script>
 
