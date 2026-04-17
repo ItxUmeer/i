@@ -39,29 +39,29 @@ body {
 }
 
 /* HEADER SECTIONS */
-.header-left,
-.header-center,
-.header-right {
-  display: flex;
-  align-items: center;
-}
+.<div class="header">
 
-/* CENTER TITLE */
-.header-center {
-  justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-}
+  <div class="header-left">
+    <img src="logo-left.png" class="logo">
+  </div>
 
-/* RIGHT SIDE */
-.header-right {
-  justify-content: flex-end;
-  gap: 15px;
-}
+  <div class="header-center">
+    CMMS Data for DCAS Facility
+  </div>
 
-/* LOGO */
-.logo {
-  height: 40px;
+  <div class="header-right">
+
+    <div class="notif">
+      🔔 <span id="notifCount"></span>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+
+    <img src="logo-right.png" class="logo">
+
+  </div>
+
+</div>
 }
 
 /* =========================
