@@ -8,17 +8,27 @@
 <body>
 
 <div class="header">
-  <img src="logo-left.png">
-  <h3>PPM Management</h3>
-  <div>🔔 <span id="notifCount"></span></div>
-  <img src="logo-right.png">
-</div>
 
-<div class="sidebar">
-  <button onclick="go('assets.html')">Assets</button>
-  <button onclick="go('ppm.html')">PPM</button>
-  <button onclick="go('workorders.html')">Work Orders</button>
-  <button onclick="logout()">Logout</button>
+  <div class="header-left">
+    <img src="logo-left.png" class="logo">
+  </div>
+
+  <div class="header-center">
+    CMMS Data for DCAS Facility
+  </div>
+
+  <div class="header-right">
+
+    <div class="notif">
+      🔔 <span id="notifCount"></span>
+    </div>
+
+    <button onclick="logout()">Logout</button>
+
+    <img src="logo-right.png" class="logo">
+
+  </div>
+
 </div>
 
 <div class="main">
