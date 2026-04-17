@@ -3,171 +3,56 @@
 <head>
 <title>Work Orders</title>
 <link rel="stylesheet" href="style.css">
-
-<style>
-
-/* GLOBAL */
-body {
-  margin:0;
-  font-family:Arial;
-  background:#f5f7fb;
-  color:#111827;
-}
-
-/* SIDEBAR */
-.sidebar {
-  position:fixed;
-  left:0;
-  top:0;
-  width:230px;
-  height:100vh;
-  background:#0f172a;
-  color:white;
-  padding:15px;
-  border-right:3px solid #2563eb; /* separation FIX */
-}
-
-.sidebar a {
-  display:block;
-  color:#cbd5e1;
-  padding:10px;
-  text-decoration:none;
-}
-
-.sidebar a:hover {
-  background:#1f2937;
-}
-
-/* MAIN AREA (PROPER SEPARATION FIX) */
-.main {
-  margin-left:250px; /* stronger separation */
-  padding:25px;
-}
-
-/* PAGE TITLE */
-h2 {
-  color:#111827;
-  margin-bottom:15px;
-}
-
-/* SECTION BOX */
-.section {
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #e5e7eb;
-  margin-bottom:20px;
-}
-
-/* INPUTS */
-input, select {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border:1px solid #d1d5db;
-  border-radius:6px;
-}
-
-/* BUTTON */
-button {
-  background:#2563eb;
-  color:white;
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-/* LIST WRAPPER */
-.list {
-  width:100%;
-}
-
-/* WORK ORDER ROW (CLEAN LIGHT THEME) */
-.wo-row {
-  background:white;
-  border:1px solid #e5e7eb;
-  margin-bottom:10px;
-  padding:12px;
-  border-radius:8px;
-
-  display:flex;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:10px;
-
-  color:#111827; /* FIX: dark text */
-}
-
-/* TEXT BLOCKS */
-.wo-row span {
-  background:#f9fafb;
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:13px;
-  color:#111827; /* FIX: black text */
-}
-
-/* STATUS COLORS */
-.badge {
-  padding:5px 10px;
-  border-radius:6px;
-  font-size:12px;
-  color:white;
-}
-
-.pending { background:#dc2626; }
-.started { background:#f59e0b; }
-.completed { background:#16a34a; }
-
-</style>
-
 </head>
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+  <img src="logo-left.png" class="logo">
+  <h2>Work Order Management</h2>
+  <img src="logo-right.png" class="logo">
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h3>CMMS</h3>
-
-  <a href="dashboard.html">Dashboard</a>
-  <a href="assets.html">Assets</a>
-  <a href="assets_list.html">Assets List</a>
-  <a href="ppm.html">PPM</a>
-  <a href="workorders.html">Work Orders</a>
+  <button onclick="go('assets.html')">Assets</button>
+  <button onclick="go('ppm.html')">PPM</button>
+  <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<h2>Work Orders</h2>
+<!-- TABS -->
+<div class="tab-buttons">
+  <button onclick="showTab('create')">Create Work Order</button>
+  <button onclick="showTab('list')">Work Order List</button>
+</div>
 
-<!-- CREATE SECTION -->
-<div class="section">
+<!-- CREATE -->
+<div id="create" class="section">
 
   <h3>Create Work Order</h3>
 
-  <input id="title" placeholder="Title">
+  <input id="title" placeholder="Work Order Title">
 
-  <select id="assetId"></select>
+  <!-- ASSET SELECT -->
+  <select id="assetSelect"></select>
 
   <input id="location" placeholder="Location (HQ / Building)">
   <input id="subLocation" placeholder="Sub Location (Floor / Room)">
 
-  <select id="assignedTo">
-    <option value="">Auto Assign Supervisor</option>
-  </select>
-
-  <button onclick="createWO()">Create Work Order</button>
+  <button class="action-btn" onclick="createWO()">Create Work Order</button>
 
 </div>
 
-<!-- LIST SECTION -->
-<div class="list">
+<!-- LIST -->
+<div id="list" class="section" style="display:none">
 
-  <h3>All Work Orders</h3>
+  <h3>Work Order List</h3>
 
-  <div id="list">Loading...</div>
+  <div id="woList"></div>
 
 </div>
 
@@ -175,118 +60,94 @@ button {
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
-
+import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* ---------------- AUTH ---------------- */
-auth.onAuthStateChanged(async (user) => {
+/* NAV */
+window.go = (p)=>location=p;
 
-  if (!user) location = "login.html";
+/* TAB SWITCH */
+window.showTab = (t)=>{
+  create.style.display="none";
+  list.style.display="none";
+  document.getElementById(t).style.display="block";
+};
 
-  loadAssets();
-  loadSupervisors();
-  loadWorkOrders();
-});
-
-/* ---------------- LOAD ASSETS ---------------- */
-async function loadAssets() {
+/* LOAD ASSETS */
+async function loadAssets(){
 
   const snap = await getDocs(collection(db,"assets"));
 
   let html = `<option value="">Select Asset</option>`;
 
-  snap.forEach(d => {
+  snap.forEach(d=>{
     const a = d.data();
-    html += `<option value="${a.name}">${a.name}</option>`;
+
+    html += `
+      <option value="${a.name}">
+        ${a.name} (${a.building})
+      </option>
+    `;
   });
 
-  document.getElementById("assetId").innerHTML = html;
+  document.getElementById("assetSelect").innerHTML = html;
 }
 
-/* ---------------- SUPERVISOR LOAD FIX ---------------- */
-async function loadSupervisors() {
-
-  const snap = await getDocs(collection(db,"users"));
-
-  let html = `<option value="">Auto Assign Supervisor</option>`;
-
-  snap.forEach(d => {
-
-    const u = d.data();
-
-    if (u.role === "facilities_supervisor") {
-
-      html += `
-        <option value="${d.id}">
-          ${u.name || u.email || d.id}
-        </option>
-      `;
-    }
-  });
-
-  document.getElementById("assignedTo").innerHTML = html;
-}
-
-/* ---------------- AUTO ASSIGN ---------------- */
-function getSupervisor() {
-
-  const val = document.getElementById("assignedTo").value;
-
-  if (val) return val;
-
-  // fallback auto assign first supervisor
-  const select = document.getElementById("assignedTo");
-
-  return select.options[1]?.value || "";
-}
-
-/* ---------------- CREATE ---------------- */
+/* CREATE WORK ORDER */
 window.createWO = async () => {
+
+  if(!assetSelect.value){
+    alert("Select Asset");
+    return;
+  }
 
   await addDoc(collection(db,"workOrders"), {
     title: title.value,
-    assetId: assetId.value,
+    assetId: assetSelect.value,
     location: location.value,
     subLocation: subLocation.value,
-    assignedTo: getSupervisor(),
     status: "Pending",
     createdAt: new Date()
   });
 
   alert("Work Order Created ✔");
 
-  loadWorkOrders();
+  loadWO();
 };
 
-/* ---------------- LOAD WORK ORDERS (VISIBLE TO ALL USERS) ---------------- */
-async function loadWorkOrders() {
+/* LOAD WORK ORDERS (GLOBAL FOR ALL USERS) */
+async function loadWO(){
 
   const snap = await getDocs(collection(db,"workOrders"));
 
   let html = "";
 
-  snap.forEach(d => {
+  snap.forEach(d=>{
 
     const w = d.data();
 
-    let color = "pending";
-    if (w.status === "Started") color = "started";
-    if (w.status === "Completed") color = "completed";
+    let color = "#dc2626"; // pending red
+    if(w.status === "Started") color = "#f59e0b";
+    if(w.status === "Completed") color = "#16a34a";
 
     html += `
-      <div class="wo-row">
+      <div style="
+        background:white;
+        padding:12px;
+        margin-bottom:10px;
+        border-radius:8px;
+        border-left:5px solid ${color};
+      ">
 
-        <span><b>${w.title}</b></span>
-        <span>${w.assetId}</span>
-        <span>${w.location}</span>
-        <span>${w.subLocation}</span>
+        <b>${w.title}</b><br>
 
-        <span class="badge ${color}">
+        ${w.assetId} > ${w.location} > ${w.subLocation}<br>
+
+        <span style="color:${color}; font-weight:bold;">
           ${w.status}
         </span>
 
@@ -294,9 +155,13 @@ async function loadWorkOrders() {
     `;
   });
 
-  document.getElementById("list").innerHTML =
+  document.getElementById("woList").innerHTML =
     html || "No Work Orders";
 }
+
+/* INIT */
+loadAssets();
+loadWO();
 
 </script>
 
