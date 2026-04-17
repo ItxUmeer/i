@@ -1,177 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>CMMS Login</title>
+<title>CMMS DCAS</title>
 
 <style>
-
 body{
   margin:0;
-  font-family:Arial;
-  background:#f4f7fb;
+  font-family:Segoe UI;
+  background:url("bg.jpg") no-repeat center center fixed;
+  background-size:cover;
+}
+
+/* NO WHITE OVERLAY */
+.overlay{
+  height:100vh;
 }
 
 /* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding:10px 20px;
-  background:white;
-  border-bottom:2px solid #1e88e5;
+  padding:20px;
 }
 
 .header img{
-  height:70px;
+  height:80px;
 }
 
-/* CENTER CONTAINER */
-.container{
-  height:85vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-/* LOGIN BOX */
-.login-box{
-  width:100%;
-  max-width:420px;
-  background:white;
-  padding:30px;
-  border-radius:10px;
-  box-shadow:0 0 15px rgba(0,0,0,0.1);
-}
-
-/* TITLE */
-.login-box h2{
+/* CENTER TITLE */
+.center{
   text-align:center;
-  margin-bottom:20px;
-  color:#1e88e5;
+  margin-top:80px;
+  background:rgba(255,255,255,0.85); /* readability */
+  display:inline-block;
+  padding:20px;
+  border-radius:12px;
 }
 
-/* INPUTS */
-input{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border:1px solid #ccc;
-  border-radius:6px;
-  font-size:16px;
-  box-sizing:border-box;
+/* MAIN CARD */
+.card{
+  background:rgba(255,255,255,0.9);
+  width:60%;
+  margin:30px auto;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.2);
 }
 
 /* BUTTON */
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:#1e88e5;
+.btn{
+  padding:12px 25px;
+  background:#2563eb;
   color:white;
   border:none;
-  border-radius:6px;
-  font-size:16px;
+  border-radius:8px;
   cursor:pointer;
 }
-
-button:hover{
-  background:#1565c0;
-}
-
-/* FOOTER */
-.footer{
-  text-align:center;
-  padding:10px;
-  font-size:12px;
-  color:#777;
-}
-
-/* MOBILE FIX */
-@media(max-width:600px){
-
-  .header img{
-    height:55px;
-  }
-
-  .login-box{
-    margin:0 15px;
-  }
-}
-
 </style>
 
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <img src="logo-left.png">
-  <h3 style="color:#1e88e5;">CMMS LOGIN</h3>
-  <img src="logo-right.png">
-</div>
+<div class="overlay">
 
-<!-- LOGIN CENTER -->
-<div class="container">
+  <!-- HEADER LOGOS -->
+  <div class="header">
+    <img src="logo-left.png">
+    <img src="logo-right.png">
+  </div>
 
-  <div class="login-box">
+  <!-- TITLE -->
+  <div style="text-align:center">
+    <div class="center">
+      <h1>CMMS - DCAS</h1>
+      <p>Dubai Corporation for Ambulance Services</p>
+    </div>
+  </div>
 
-    <h2>Welcome Back</h2>
+  <!-- CONTENT -->
+  <div class="card">
 
-    <input id="email" type="email" placeholder="Email">
+    <h3>System Introduction</h3>
+    <p>
+      This Centralized Maintenance Management System (CMMS)
+      helps manage Assets, Work Orders, and Preventive Maintenance (PPM)
+      efficiently across all DCAS facilities.
+    </p>
 
-    <input id="password" type="password" placeholder="Password">
+    <h3>Your Access Roles</h3>
+    <ul>
+      <li><b>Admin</b> – Full system control</li>
+      <li><b>Assets Officer</b> – Asset & PPM management</li>
+      <li><b>Facility Supervisor</b> – Work order execution & follow-up</li>
+    </ul>
 
-    <button onclick="login()">Login</button>
+    <div style="text-align:center">
+      <button class="btn" onclick="location='login.html'">
+        Enter System
+      </button>
+    </div>
 
   </div>
 
 </div>
-
-<!-- FOOTER -->
-<div class="footer">
-  CMMS System for DCAS Facility Management
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-/* FIREBASE */
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-/* LOGIN */
-window.login = async () => {
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  try {
-
-    await signInWithEmailAndPassword(auth,email,password);
-
-    localStorage.setItem("login","true");
-
-    window.location.href = "dashboard.html";
-
-  } catch(err){
-    alert("Login Failed: " + err.message);
-  }
-};
-
-</script>
 
 </body>
 </html>
