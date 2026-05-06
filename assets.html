@@ -28,26 +28,61 @@
 
 <h2>Assets</h2>
 
+<!-- FILTERS -->
+<input id="filterCategory" placeholder="Filter Category">
+<input id="filterBuilding" placeholder="Filter Building">
+<button onclick="loadAssets()">Filter</button>
+
+<hr>
+
+<!-- FORM -->
 <input id="assetName" placeholder="Asset Name">
-<input id="assetType" placeholder="Type">
+<input id="assetCategory" placeholder="Category">
 <input id="assetBuilding" placeholder="Building">
 <input id="assetLocation" placeholder="Location">
 
+<input id="assetManufacturer" placeholder="Manufacturer">
+<input id="assetModel" placeholder="Model">
+<input id="assetSerial" placeholder="Serial Number">
+
+<input id="assetInstallDate" type="date">
+
+<select id="assetCondition">
+  <option>Good</option>
+  <option>Fair</option>
+  <option>Critical</option>
+</select>
+
+<select id="assetStatus">
+  <option>Active</option>
+  <option>Under Maintenance</option>
+  <option>Faulty</option>
+</select>
+
 <button onclick="addAsset()">Add Asset</button>
 
+<!-- TABLE -->
 <table>
 <thead>
 <tr>
+<th>ID</th>
 <th>Name</th>
-<th>Type</th>
+<th>Category</th>
 <th>Building</th>
-<th>Location</th>
 <th>Status</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody id="assetList"></tbody>
 </table>
 
+</div>
+
+<!-- POPUP -->
+<div id="popup" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid #ccc;">
+  <h3>Asset Details</h3>
+  <div id="popupContent"></div>
+  <button onclick="closePopup()">Close</button>
 </div>
 
 <script type="module">
@@ -56,49 +91,168 @@ import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
-  getDocs
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
-/* ADD ASSET */
+let currentEditId = null;
+
+/* ID */
+function generateAssetId() {
+  return "AST-" + Math.floor(Math.random() * 100000);
+}
+
+/* ADD */
 window.addAsset = async () => {
 
   await addDoc(collection(db,"assets"), {
-    name: document.getElementById("assetName").value,
-    type: document.getElementById("assetType").value,
-    building: document.getElementById("assetBuilding").value,
-    location: document.getElementById("assetLocation").value,
-    status: "Active"
+    assetId: generateAssetId(),
+    name: assetName.value,
+    category: assetCategory.value,
+    building: assetBuilding.value,
+    location: assetLocation.value,
+    manufacturer: assetManufacturer.value,
+    model: assetModel.value,
+    serial: assetSerial.value,
+    installDate: assetInstallDate.value,
+    condition: assetCondition.value,
+    status: assetStatus.value,
+    createdAt: serverTimestamp()
   });
 
   loadAssets();
 };
 
-/* LOAD */
+/* LOAD WITH FILTER */
 async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
   let html = "";
 
+  const catFilter = filterCategory.value.toLowerCase();
+  const bldFilter = filterBuilding.value.toLowerCase();
+
   snap.forEach(d=>{
     let a = d.data();
 
+    if (
+      (catFilter && !a.category?.toLowerCase().includes(catFilter)) ||
+      (bldFilter && !a.building?.toLowerCase().includes(bldFilter))
+    ) return;
+
     html += `
-      <tr>
+      <tr onclick="viewAsset('${d.id}')">
+        <td>${a.assetId}</td>
         <td>${a.name}</td>
-        <td>${a.type}</td>
+        <td>${a.category}</td>
         <td>${a.building}</td>
-        <td>${a.location}</td>
         <td>${a.status}</td>
+        <td>
+          <button onclick="event.stopPropagation(); editAsset('${d.id}')">Edit</button>
+          <button onclick="event.stopPropagation(); deleteAsset('${d.id}')">Delete</button>
+        </td>
       </tr>
     `;
   });
 
   assetList.innerHTML = html;
 }
+
+/* VIEW */
+window.viewAsset = async (id) => {
+
+  const snap = await getDocs(collection(db,"assets"));
+  snap.forEach(d=>{
+    if(d.id === id){
+      let a = d.data();
+
+      popupContent.innerHTML = `
+        <b>ID:</b> ${a.assetId}<br>
+        <b>Name:</b> ${a.name}<br>
+        <b>Category:</b> ${a.category}<br>
+        <b>Building:</b> ${a.building}<br>
+        <b>Location:</b> ${a.location}<br>
+        <b>Manufacturer:</b> ${a.manufacturer}<br>
+        <b>Model:</b> ${a.model}<br>
+        <b>Serial:</b> ${a.serial}<br>
+        <b>Condition:</b> ${a.condition}<br>
+        <b>Status:</b> ${a.status}<br>
+      `;
+
+      popup.style.display = "block";
+    }
+  });
+};
+
+window.closePopup = () => popup.style.display = "none";
+
+/* DELETE */
+window.deleteAsset = async (id) => {
+  if(confirm("Delete this asset?")){
+    await deleteDoc(doc(db,"assets",id));
+    loadAssets();
+  }
+};
+
+/* EDIT */
+window.editAsset = async (id) => {
+
+  const snap = await getDocs(collection(db,"assets"));
+
+  snap.forEach(d=>{
+    if(d.id === id){
+      let a = d.data();
+
+      assetName.value = a.name;
+      assetCategory.value = a.category;
+      assetBuilding.value = a.building;
+      assetLocation.value = a.location;
+      assetManufacturer.value = a.manufacturer;
+      assetModel.value = a.model;
+      assetSerial.value = a.serial;
+      assetInstallDate.value = a.installDate;
+      assetCondition.value = a.condition;
+      assetStatus.value = a.status;
+
+      currentEditId = id;
+    }
+  });
+
+  /* CHANGE BUTTON TO UPDATE */
+  document.querySelector("button[onclick='addAsset()']").innerText = "Update Asset";
+  document.querySelector("button[onclick='addAsset()']").onclick = updateAsset;
+};
+
+/* UPDATE */
+window.updateAsset = async () => {
+
+  await updateDoc(doc(db,"assets",currentEditId), {
+    name: assetName.value,
+    category: assetCategory.value,
+    building: assetBuilding.value,
+    location: assetLocation.value,
+    manufacturer: assetManufacturer.value,
+    model: assetModel.value,
+    serial: assetSerial.value,
+    installDate: assetInstallDate.value,
+    condition: assetCondition.value,
+    status: assetStatus.value
+  });
+
+  currentEditId = null;
+
+  document.querySelector("button").innerText = "Add Asset";
+  document.querySelector("button").onclick = addAsset;
+
+  loadAssets();
+};
 
 loadAssets();
 
