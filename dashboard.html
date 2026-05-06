@@ -7,18 +7,61 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
+/* KPI GRID */
+.kpiContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
 .kpiBox {
-  display:inline-block;
-  width:180px;
-  padding:15px;
-  margin:10px;
-  border:1px solid #ccc;
-  text-align:center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  text-align: center;
+  border-radius: 8px;
+  background: #fff;
 }
-canvas {
-  max-width:400px;
-  margin:20px;
+
+.kpiBox h3 {
+  font-size: 28px;
 }
+
+/* ALERT */
+.alertBox {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid red;
+  background: #ffe5e5;
+  color: #900;
+}
+
+/* CHART GRID */
+.chartContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chartBox {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* TABLE */
+.tableBox {
+  margin-top: 30px;
+}
+
+@media(max-width:768px){
+  .chartContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 
 </head>
@@ -46,8 +89,11 @@ canvas {
 
 <h2>Admin Dashboard</h2>
 
-<!-- KPI SECTION -->
-<div id="kpis">
+<!-- ALERTS -->
+<div id="alerts"></div>
+
+<!-- KPI -->
+<div class="kpiContainer">
 
   <div class="kpiBox">
     <h3 id="kpiAssets">0</h3>
@@ -71,17 +117,46 @@ canvas {
 
   <div class="kpiBox">
     <h3 id="kpiMTTR">0</h3>
-    <p>Avg Breakdown Time (hrs)</p>
+    <p>Avg Breakdown (hrs)</p>
+  </div>
+
+  <div class="kpiBox">
+    <h3 id="kpiOverdue">0</h3>
+    <p>Overdue Jobs</p>
   </div>
 
 </div>
 
-<!-- GRAPHS -->
-<h3>Work Orders Status</h3>
-<canvas id="statusChart"></canvas>
+<!-- CHARTS -->
+<div class="chartContainer">
 
-<h3>Priority Distribution</h3>
-<canvas id="priorityChart"></canvas>
+  <div class="chartBox">
+    <h3>Work Order Status</h3>
+    <canvas id="statusChart"></canvas>
+  </div>
+
+  <div class="chartBox">
+    <h3>Priority Distribution</h3>
+    <canvas id="priorityChart"></canvas>
+  </div>
+
+</div>
+
+<!-- BREAKDOWN RANKING -->
+<div class="tableBox">
+<h3>Top Breakdown Assets</h3>
+
+<table>
+<thead>
+<tr>
+<th>Asset</th>
+<th>Breakdowns</th>
+</tr>
+</thead>
+<tbody id="breakdownTable"></tbody>
+</table>
+
+</div>
 
 </div>
 
@@ -96,9 +171,8 @@ import {
 window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
-/* =========================
-   LOAD KPI DATA
-========================= */
+let statusChart, priorityChart;
+
 async function loadDashboard() {
 
   const assetsSnap = await getDocs(collection(db,"assets"));
@@ -106,82 +180,114 @@ async function loadDashboard() {
   const ppmSnap = await getDocs(collection(db,"ppm"));
 
   let totalAssets = assetsSnap.size;
-
-  let openWO = 0;
-  let closedWO = 0;
+  let openWO = 0, closedWO = 0;
+  let overdue = 0;
 
   let statusCount = {Open:0, "In Progress":0, Completed:0};
   let priorityCount = {Low:0, Medium:0, High:0, Critical:0};
 
-  let totalTime = 0;
-  let completedCount = 0;
+  let totalTime = 0, completedCount = 0;
+
+  let breakdownMap = {};
+
+  let alertHTML = "";
 
   woSnap.forEach(d=>{
     let w = d.data();
 
-    // STATUS KPI
+    // KPI
     if(w.status === "Completed") closedWO++;
     else openWO++;
 
-    // STATUS GRAPH
+    // STATUS
     if(statusCount[w.status] !== undefined)
       statusCount[w.status]++;
 
-    // PRIORITY GRAPH
+    // PRIORITY
     if(priorityCount[w.priority] !== undefined)
       priorityCount[w.priority]++;
 
-    // MTTR (basic)
+    // BREAKDOWN COUNT
+    if(w.assetName){
+      breakdownMap[w.assetName] = (breakdownMap[w.assetName] || 0) + 1;
+    }
+
+    // MTTR
     if(w.status === "Completed" && w.createdAt){
       let created = w.createdAt.toDate();
       let now = new Date();
-
-      let hours = (now - created) / (1000 * 60 * 60);
+      let hours = (now - created) / (1000*60*60);
 
       totalTime += hours;
       completedCount++;
     }
 
+    // SLA (Overdue > 48 hrs open)
+    if(w.status !== "Completed" && w.createdAt){
+      let created = w.createdAt.toDate();
+      let hours = (new Date() - created) / (1000*60*60);
+
+      if(hours > 48){
+        overdue++;
+        alertHTML += `<div class="alertBox">⚠ Overdue: ${w.title} (${w.assetName})</div>`;
+      }
+    }
+
   });
 
   let pendingPPM = 0;
-
   ppmSnap.forEach(d=>{
     if(d.data().status === "Pending") pendingPPM++;
   });
 
-  let avgMTTR = completedCount ? (totalTime / completedCount).toFixed(1) : 0;
+  let avgMTTR = completedCount ? (totalTime/completedCount).toFixed(1) : 0;
 
-  /* SET KPI */
+  // KPI SET
   kpiAssets.innerText = totalAssets;
   kpiOpenWO.innerText = openWO;
   kpiClosedWO.innerText = closedWO;
   kpiPPM.innerText = pendingPPM;
   kpiMTTR.innerText = avgMTTR;
+  kpiOverdue.innerText = overdue;
 
-  /* CHARTS */
+  alerts.innerHTML = alertHTML || "<div>No overdue jobs</div>";
 
-  new Chart(document.getElementById("statusChart"), {
+  // CHARTS
+  if(statusChart) statusChart.destroy();
+  if(priorityChart) priorityChart.destroy();
+
+  statusChart = new Chart(statusChartCanvas, {
     type: "pie",
     data: {
       labels: Object.keys(statusCount),
-      datasets: [{
-        data: Object.values(statusCount)
-      }]
+      datasets: [{ data: Object.values(statusCount) }]
     }
   });
 
-  new Chart(document.getElementById("priorityChart"), {
+  priorityChart = new Chart(priorityChartCanvas, {
     type: "bar",
     data: {
       labels: Object.keys(priorityCount),
-      datasets: [{
-        data: Object.values(priorityCount)
-      }]
+      datasets: [{ data: Object.values(priorityCount) }]
     }
   });
 
+  // BREAKDOWN TABLE
+  let sorted = Object.entries(breakdownMap)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5);
+
+  let html = "";
+  sorted.forEach(i=>{
+    html += `<tr><td>${i[0]}</td><td>${i[1]}</td></tr>`;
+  });
+
+  breakdownTable.innerHTML = html;
+
 }
+
+const statusChartCanvas = document.getElementById("statusChart");
+const priorityChartCanvas = document.getElementById("priorityChart");
 
 loadDashboard();
 
