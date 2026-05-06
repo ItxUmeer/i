@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CMMS Dashboard</title>
+<title>DCAS CMMS Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
@@ -23,7 +23,7 @@
   </div>
 
   <div class="header-center">
-    CMMS DASHBOARD - DCAS FACILITY
+    CMMS DASHBOARD - DCAS FACILITES MANAGEMENT
   </div>
 
   <div class="header-right">
@@ -49,7 +49,7 @@
 
 <!-- TABS -->
 <div class="tabs">
-
+  <button onclick="go('dashboard.html')">Dashboard</button>
   <button onclick="showTab('assetsTab')">Assets</button>
   <button onclick="showTab('ppmTab')">PPM</button>
   <button onclick="showTab('woTab')">Work Orders</button>
@@ -74,6 +74,7 @@
         <th>Type</th>
         <th>Building</th>
         <th>Location</th>
+        <th>Site</th>
         <th>Status</th>
       </tr>
     </thead>
