@@ -3,6 +3,45 @@
 <head>
 <title>Assets</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.tabs {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.tabs button {
+  padding:10px;
+  border:1px solid #ccc;
+  background:#fff;
+  cursor:pointer;
+}
+
+.tabs button.active {
+  background:#ddd;
+}
+
+/* FORM MODAL */
+.formModal {
+  display:none;
+  position:fixed;
+  top:10%;
+  left:25%;
+  width:50%;
+  background:#fff;
+  padding:20px;
+  border:1px solid #ccc;
+  z-index:1000;
+}
+
+.formModal input, .formModal select {
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+}
+</style>
+
 </head>
 
 <body>
@@ -11,7 +50,6 @@
   <div class="header-left"><img src="logo-left.png" class="logo"></div>
   <div class="header-center">Assets Management</div>
   <div class="header-right">
-    🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
     <img src="logo-right.png" class="logo">
   </div>
@@ -26,49 +64,24 @@
 
 <div class="main">
 
-<h2>Assets</h2>
+<h2>Assets - Site Management</h2>
 
-<!-- FILTERS -->
-<input id="filterCategory" placeholder="Filter Category">
-<input id="filterBuilding" placeholder="Filter Building">
-<button onclick="loadAssets()">Filter</button>
+<!-- TABS -->
+<div class="tabs">
+  <button onclick="selectSite('HQ', this)" class="active">DCAS Head Quarter</button>
+  <button onclick="selectSite('STAFF', this)">DCAS Staff Accommodation</button>
+  <button onclick="selectSite('OUTSIDE', this)">DCAS Outside Stations</button>
+</div>
 
-<hr>
+<button onclick="openForm()">+ Add Asset</button>
 
-<!-- FORM -->
-<input id="assetName" placeholder="Asset Name">
-<input id="assetCategory" placeholder="Category">
-<input id="assetBuilding" placeholder="Building">
-<input id="assetLocation" placeholder="Location">
-
-<input id="assetManufacturer" placeholder="Manufacturer">
-<input id="assetModel" placeholder="Model">
-<input id="assetSerial" placeholder="Serial Number">
-
-<input id="assetInstallDate" type="date">
-
-<select id="assetCondition">
-  <option>Good</option>
-  <option>Fair</option>
-  <option>Critical</option>
-</select>
-
-<select id="assetStatus">
-  <option>Active</option>
-  <option>Under Maintenance</option>
-  <option>Faulty</option>
-</select>
-
-<button onclick="addAsset()">Add Asset</button>
-
-<!-- TABLE -->
 <table>
 <thead>
 <tr>
 <th>ID</th>
 <th>Name</th>
 <th>Category</th>
-<th>Building</th>
+<th>Location</th>
 <th>Status</th>
 <th>Action</th>
 </tr>
@@ -78,11 +91,25 @@
 
 </div>
 
-<!-- POPUP -->
-<div id="popup" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid #ccc;">
-  <h3>Asset Details</h3>
-  <div id="popupContent"></div>
-  <button onclick="closePopup()">Close</button>
+<!-- FORM MODAL -->
+<div id="formModal" class="formModal">
+
+<h3>Add Asset</h3>
+
+<input id="name" placeholder="Asset Name">
+<input id="category" placeholder="Category">
+<input id="location" placeholder="Location">
+<input id="manufacturer" placeholder="Manufacturer">
+<input id="model" placeholder="Model">
+
+<select id="status">
+  <option>Active</option>
+  <option>Faulty</option>
+</select>
+
+<button onclick="saveAsset()">Save</button>
+<button onclick="closeForm()">Cancel</button>
+
 </div>
 
 <script type="module">
@@ -93,70 +120,67 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc,
-  updateDoc,
-  serverTimestamp
+  doc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
-let currentEditId = null;
+let currentSite = "HQ";
 
-/* ID */
-function generateAssetId() {
-  return "AST-" + Math.floor(Math.random() * 100000);
-}
+/* SELECT SITE */
+window.selectSite = (site, btn) => {
 
-/* ADD */
-window.addAsset = async () => {
+  currentSite = site;
 
-  await addDoc(collection(db,"assets"), {
-    assetId: generateAssetId(),
-    name: assetName.value,
-    category: assetCategory.value,
-    building: assetBuilding.value,
-    location: assetLocation.value,
-    manufacturer: assetManufacturer.value,
-    model: assetModel.value,
-    serial: assetSerial.value,
-    installDate: assetInstallDate.value,
-    condition: assetCondition.value,
-    status: assetStatus.value,
-    createdAt: serverTimestamp()
-  });
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
 
   loadAssets();
 };
 
-/* LOAD WITH FILTER */
+/* FORM */
+window.openForm = () => formModal.style.display = "block";
+window.closeForm = () => formModal.style.display = "none";
+
+/* ADD */
+window.saveAsset = async () => {
+
+  await addDoc(collection(db,"assets"), {
+    site: currentSite,
+    name: name.value,
+    category: category.value,
+    location: location.value,
+    manufacturer: manufacturer.value,
+    model: model.value,
+    status: status.value
+  });
+
+  closeForm();
+  loadAssets();
+};
+
+/* LOAD */
 async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
   let html = "";
 
-  const catFilter = filterCategory.value.toLowerCase();
-  const bldFilter = filterBuilding.value.toLowerCase();
-
   snap.forEach(d=>{
     let a = d.data();
 
-    if (
-      (catFilter && !a.category?.toLowerCase().includes(catFilter)) ||
-      (bldFilter && !a.building?.toLowerCase().includes(bldFilter))
-    ) return;
+    if(a.site !== currentSite) return;
 
     html += `
-      <tr onclick="viewAsset('${d.id}')">
-        <td>${a.assetId}</td>
+      <tr>
+        <td>${d.id}</td>
         <td>${a.name}</td>
         <td>${a.category}</td>
-        <td>${a.building}</td>
+        <td>${a.location}</td>
         <td>${a.status}</td>
         <td>
-          <button onclick="event.stopPropagation(); editAsset('${d.id}')">Edit</button>
-          <button onclick="event.stopPropagation(); deleteAsset('${d.id}')">Delete</button>
+          <button onclick="deleteAsset('${d.id}')">Delete</button>
         </td>
       </tr>
     `;
@@ -165,93 +189,12 @@ async function loadAssets() {
   assetList.innerHTML = html;
 }
 
-/* VIEW */
-window.viewAsset = async (id) => {
-
-  const snap = await getDocs(collection(db,"assets"));
-  snap.forEach(d=>{
-    if(d.id === id){
-      let a = d.data();
-
-      popupContent.innerHTML = `
-        <b>ID:</b> ${a.assetId}<br>
-        <b>Name:</b> ${a.name}<br>
-        <b>Category:</b> ${a.category}<br>
-        <b>Building:</b> ${a.building}<br>
-        <b>Location:</b> ${a.location}<br>
-        <b>Manufacturer:</b> ${a.manufacturer}<br>
-        <b>Model:</b> ${a.model}<br>
-        <b>Serial:</b> ${a.serial}<br>
-        <b>Condition:</b> ${a.condition}<br>
-        <b>Status:</b> ${a.status}<br>
-      `;
-
-      popup.style.display = "block";
-    }
-  });
-};
-
-window.closePopup = () => popup.style.display = "none";
-
 /* DELETE */
 window.deleteAsset = async (id) => {
-  if(confirm("Delete this asset?")){
+  if(confirm("Delete asset?")){
     await deleteDoc(doc(db,"assets",id));
     loadAssets();
   }
-};
-
-/* EDIT */
-window.editAsset = async (id) => {
-
-  const snap = await getDocs(collection(db,"assets"));
-
-  snap.forEach(d=>{
-    if(d.id === id){
-      let a = d.data();
-
-      assetName.value = a.name;
-      assetCategory.value = a.category;
-      assetBuilding.value = a.building;
-      assetLocation.value = a.location;
-      assetManufacturer.value = a.manufacturer;
-      assetModel.value = a.model;
-      assetSerial.value = a.serial;
-      assetInstallDate.value = a.installDate;
-      assetCondition.value = a.condition;
-      assetStatus.value = a.status;
-
-      currentEditId = id;
-    }
-  });
-
-  /* CHANGE BUTTON TO UPDATE */
-  document.querySelector("button[onclick='addAsset()']").innerText = "Update Asset";
-  document.querySelector("button[onclick='addAsset()']").onclick = updateAsset;
-};
-
-/* UPDATE */
-window.updateAsset = async () => {
-
-  await updateDoc(doc(db,"assets",currentEditId), {
-    name: assetName.value,
-    category: assetCategory.value,
-    building: assetBuilding.value,
-    location: assetLocation.value,
-    manufacturer: assetManufacturer.value,
-    model: assetModel.value,
-    serial: assetSerial.value,
-    installDate: assetInstallDate.value,
-    condition: assetCondition.value,
-    status: assetStatus.value
-  });
-
-  currentEditId = null;
-
-  document.querySelector("button").innerText = "Add Asset";
-  document.querySelector("button").onclick = addAsset;
-
-  loadAssets();
 };
 
 loadAssets();
