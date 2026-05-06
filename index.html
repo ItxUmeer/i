@@ -1,60 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>CMMS DCAS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPM CMMS DCAS</title>
 
 <style>
 body{
   margin:0;
-  font-family:Segoe UI;
+  font-family:Segoe UI, Arial, sans-serif;
   background:url("bg.jpg") no-repeat center center fixed;
   background-size:cover;
+  color:#111;
 }
 
-/* NO WHITE OVERLAY */
+/* LAYOUT */
 .overlay{
-  height:100vh;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
 /* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
-  padding:20px;
+  align-items:center;
+  padding:15px 25px;
 }
 
 .header img{
-  height:80px;
+  height:70px;
+  max-width:45%;
+  object-fit:contain;
 }
 
-/* CENTER TITLE */
+/* TITLE */
+.title-wrap{
+  display:flex;
+  justify-content:center;
+  margin-top:40px;
+}
+
 .center{
   text-align:center;
-  margin-top:80px;
-  background:rgba(255,255,255,0.85); /* readability */
-  display:inline-block;
-  padding:20px;
-  border-radius:12px;
+  background:rgba(255,255,255,0.88);
+  padding:20px 30px;
+  border-radius:14px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  max-width:90%;
 }
 
-/* MAIN CARD */
+/* CARD */
 .card{
-  background:rgba(255,255,255,0.9);
-  width:60%;
+  background:rgba(255,255,255,0.92);
+  width:55%;
   margin:30px auto;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.2);
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.25);
 }
 
 /* BUTTON */
 .btn{
-  padding:12px 25px;
-  background:#2563eb;
-  color:white;
+  padding:12px 28px;
+  background:#16a34a;
+  color:#fff;
   border:none;
   border-radius:8px;
   cursor:pointer;
+  font-size:16px;
+}
+
+.btn:hover{
+  background:#12803a;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .card{ width:85%; }
+  .header img{ height:55px; }
+}
+
+@media(max-width:500px){
+  .card{ width:92%; padding:18px; }
+  .center{ padding:15px 18px; }
 }
 </style>
 
@@ -64,40 +94,48 @@ body{
 
 <div class="overlay">
 
-  <!-- HEADER LOGOS -->
+  <!-- HEADER -->
   <div class="header">
-    <img src="logo-left.png">
-    <img src="logo-right.png">
+    <img src="logo-left.png" alt="DCAS Logo">
+    <img src="logo-right.png" alt="CMMS Logo">
   </div>
 
   <!-- TITLE -->
-  <div style="text-align:center">
+  <div class="title-wrap">
     <div class="center">
-      <h1>CMMS - DCAS</h1>
-      <p>Dubai Corporation for Ambulance Services</p>
+      <h1>PPM SYSTEM - DCAS</h1>
+      <p>Preventive Maintenance Management System</p>
     </div>
   </div>
 
   <!-- CONTENT -->
   <div class="card">
 
-    <h3>System Introduction</h3>
+    <h3>System Purpose</h3>
     <p>
-      This Centralized Maintenance Management System (CMMS)
-      helps manage Assets, Work Orders, and Preventive Maintenance (PPM)
-      efficiently across all DCAS facilities.
+      This system is dedicated to <b>Preventive Maintenance (PPM)</b> only.
+      It is designed to manage assets and track scheduled maintenance activities
+      across all DCAS facilities.
     </p>
 
-    <h3>Your Access Roles</h3>
+    <h3>Core Modules</h3>
     <ul>
-      <li><b>Admin</b> – Full system control</li>
-      <li><b>Assets Officer</b> – Asset & PPM management</li>
-      <li><b>Facility Supervisor</b> – Work order execution & follow-up</li>
+      <li><b>Assets Register</b> – All equipment & facility assets</li>
+      <li><b>PPM Schedule</b> – Planned maintenance intervals</li>
+      <li><b>PPM Records</b> – Completed maintenance history</li>
+      <li><b>Compliance Tracking</b> – Maintenance status monitoring</li>
     </ul>
 
-    <div style="text-align:center">
-      <button class="btn" onclick="location='login.html'">
-        Enter System
+    <h3>User Roles</h3>
+    <ul>
+      <li><b>Admin</b> – Full system control & configuration</li>
+      <li><b>Maintenance Planner</b> – PPM scheduling & updates</li>
+      <li><b>Technician Viewer</b> – View assigned maintenance plans</li>
+    </ul>
+
+    <div style="text-align:center;margin-top:20px;">
+      <button class="btn" onclick="location.href='login.html'">
+        Enter PPM System
       </button>
     </div>
 
