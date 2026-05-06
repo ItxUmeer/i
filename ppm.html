@@ -3,6 +3,42 @@
 <head>
 <title>PPM</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.tabs {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.tabs button {
+  padding:10px;
+  border:1px solid #ccc;
+  background:#fff;
+}
+
+.tabs button.active {
+  background:#ddd;
+}
+
+.formModal {
+  display:none;
+  position:fixed;
+  top:10%;
+  left:25%;
+  width:50%;
+  background:#fff;
+  padding:20px;
+  border:1px solid #ccc;
+}
+
+.formModal input, .formModal select {
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+}
+</style>
+
 </head>
 
 <body>
@@ -11,7 +47,6 @@
   <div class="header-left"><img src="logo-left.png" class="logo"></div>
   <div class="header-center">PPM Management</div>
   <div class="header-right">
-    🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
     <img src="logo-right.png" class="logo">
   </div>
@@ -26,29 +61,16 @@
 
 <div class="main">
 
-<h2>PPM</h2>
+<h2>PPM - Site Based</h2>
 
-<select id="ppmAsset"></select>
+<!-- SITE TABS -->
+<div class="tabs">
+  <button onclick="selectSite('HQ', this)" class="active">DCAS Head Quarter</button>
+  <button onclick="selectSite('STAFF', this)">DCAS Staff Accommodation</button>
+  <button onclick="selectSite('OUTSIDE', this)">DCAS Outside Stations</button>
+</div>
 
-<input id="ppmTask" placeholder="Task">
-
-<select id="ppmFrequency">
-  <option>Monthly</option>
-  <option>Quarterly</option>
-  <option>Half Yearly</option>
-  <option>Yearly</option>
-</select>
-
-<input id="ppmDate" type="date">
-
-<input id="ppmComment" placeholder="Comment">
-
-<select id="ppmStatus">
-  <option>Pending</option>
-  <option>Completed</option>
-</select>
-
-<button onclick="addPPM()">Create PPM</button>
+<button onclick="openForm()">+ Create PPM</button>
 
 <table>
 <thead>
@@ -66,11 +88,31 @@
 
 </div>
 
-<!-- POPUP -->
-<div id="popup" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid #ccc;">
-  <h3>PPM Details</h3>
-  <div id="popupContent"></div>
-  <button onclick="closePopup()">Close</button>
+<!-- FORM -->
+<div id="formModal" class="formModal">
+
+<h3>Create PPM</h3>
+
+<select id="ppmAsset"></select>
+
+<input id="ppmTask" placeholder="Task">
+
+<select id="ppmFrequency">
+  <option>Monthly</option>
+  <option>Quarterly</option>
+  <option>Yearly</option>
+</select>
+
+<input id="ppmDate" type="date">
+
+<select id="ppmStatus">
+  <option>Pending</option>
+  <option>Completed</option>
+</select>
+
+<button onclick="savePPM()">Save</button>
+<button onclick="closeForm()">Cancel</button>
+
 </div>
 
 <script type="module">
@@ -81,60 +123,76 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc,
-  updateDoc,
-  serverTimestamp
+  doc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
-let currentEditId = null;
+let currentSite = "HQ";
 let assetsMap = {};
 
-/* ID */
-function generatePPMId() {
-  return "PPM-" + Math.floor(Math.random() * 100000);
-}
+/* SELECT SITE */
+window.selectSite = (site, btn) => {
 
-/* LOAD ASSETS */
+  currentSite = site;
+
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+
+  loadAssets();
+  loadPPM();
+};
+
+/* FORM */
+window.openForm = () => {
+  formModal.style.display = "block";
+  loadAssets();
+};
+
+window.closeForm = () => formModal.style.display = "none";
+
+/* LOAD ASSETS (FILTERED BY SITE) */
 async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html = `<option value="">Select Asset</option>`;
+  let html = "<option>Select Asset</option>";
+  assetsMap = {};
 
   snap.forEach(d=>{
     let a = d.data();
+
+    if(a.site !== currentSite) return;
+
     assetsMap[d.id] = a;
 
-    html += `<option value="${d.id}">${a.name} (${a.assetId})</option>`;
+    html += `<option value="${d.id}">${a.name}</option>`;
   });
 
   ppmAsset.innerHTML = html;
 }
 
 /* ADD */
-window.addPPM = async () => {
+window.savePPM = async () => {
 
-  let assetData = assetsMap[ppmAsset.value] || {};
+  let asset = assetsMap[ppmAsset.value];
 
   await addDoc(collection(db,"ppm"), {
-    ppmId: generatePPMId(),
+    site: currentSite,
     assetId: ppmAsset.value,
-    assetName: assetData.name || "",
+    assetName: asset?.name || "",
     task: ppmTask.value,
     frequency: ppmFrequency.value,
     date: ppmDate.value,
-    comment: ppmComment.value,
-    status: ppmStatus.value,
-    createdAt: serverTimestamp()
+    status: ppmStatus.value
   });
 
+  closeForm();
   loadPPM();
 };
 
-/* LOAD */
+/* LOAD PPM */
 async function loadPPM() {
 
   const snap = await getDocs(collection(db,"ppm"));
@@ -144,17 +202,18 @@ async function loadPPM() {
   snap.forEach(d=>{
     let p = d.data();
 
+    if(p.site !== currentSite) return;
+
     html += `
-      <tr onclick="viewPPM('${d.id}')">
+      <tr>
         <td>${p.assetName}</td>
         <td>${p.task}</td>
         <td>${p.frequency}</td>
         <td>${p.date}</td>
         <td>${p.status}</td>
         <td>
-          <button onclick="event.stopPropagation(); editPPM('${d.id}')">Edit</button>
-          <button onclick="event.stopPropagation(); deletePPM('${d.id}')">Delete</button>
-          <button onclick="event.stopPropagation(); createWO('${d.id}')">Create WO</button>
+          <button onclick="deletePPM('${d.id}')">Delete</button>
+          <button onclick="createWO('${d.id}')">Create WO</button>
         </td>
       </tr>
     `;
@@ -163,84 +222,15 @@ async function loadPPM() {
   ppmList.innerHTML = html;
 }
 
-/* VIEW */
-window.viewPPM = async (id) => {
-
-  const snap = await getDocs(collection(db,"ppm"));
-
-  snap.forEach(d=>{
-    if(d.id === id){
-      let p = d.data();
-
-      popupContent.innerHTML = `
-        <b>ID:</b> ${p.ppmId}<br>
-        <b>Asset:</b> ${p.assetName}<br>
-        <b>Task:</b> ${p.task}<br>
-        <b>Frequency:</b> ${p.frequency}<br>
-        <b>Date:</b> ${p.date}<br>
-        <b>Status:</b> ${p.status}<br>
-        <b>Comment:</b> ${p.comment}<br>
-      `;
-
-      popup.style.display = "block";
-    }
-  });
-};
-
-window.closePopup = () => popup.style.display = "none";
-
 /* DELETE */
 window.deletePPM = async (id) => {
-  if(confirm("Delete this PPM?")){
+  if(confirm("Delete PPM?")){
     await deleteDoc(doc(db,"ppm",id));
     loadPPM();
   }
 };
 
-/* EDIT */
-window.editPPM = async (id) => {
-
-  const snap = await getDocs(collection(db,"ppm"));
-
-  snap.forEach(d=>{
-    if(d.id === id){
-      let p = d.data();
-
-      ppmAsset.value = p.assetId;
-      ppmTask.value = p.task;
-      ppmFrequency.value = p.frequency;
-      ppmDate.value = p.date;
-      ppmComment.value = p.comment;
-      ppmStatus.value = p.status;
-
-      currentEditId = id;
-    }
-  });
-
-  document.querySelector("button[onclick='addPPM()']").innerText = "Update PPM";
-  document.querySelector("button[onclick='addPPM()']").onclick = updatePPM;
-};
-
-/* UPDATE */
-window.updatePPM = async () => {
-
-  await updateDoc(doc(db,"ppm",currentEditId), {
-    task: ppmTask.value,
-    frequency: ppmFrequency.value,
-    date: ppmDate.value,
-    comment: ppmComment.value,
-    status: ppmStatus.value
-  });
-
-  currentEditId = null;
-
-  document.querySelector("button").innerText = "Create PPM";
-  document.querySelector("button").onclick = addPPM;
-
-  loadPPM();
-};
-
-/* 🔥 CREATE WORK ORDER FROM PPM */
+/* CREATE WO FROM PPM */
 window.createWO = async (id) => {
 
   const snap = await getDocs(collection(db,"ppm"));
@@ -250,19 +240,15 @@ window.createWO = async (id) => {
       let p = d.data();
 
       await addDoc(collection(db,"workorders"), {
-        woId: "WO-" + Math.floor(Math.random()*100000),
+        site: p.site,
         title: "PPM - " + p.task,
         assetId: p.assetId,
         assetName: p.assetName,
-        location: "",
-        subLocation: "",
         priority: "Medium",
-        status: "Open",
-        technician: "",
-        createdAt: serverTimestamp()
+        status: "Open"
       });
 
-      alert("Work Order Created from PPM");
+      alert("Work Order Created");
     }
   });
 };
