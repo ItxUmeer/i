@@ -4,10 +4,20 @@
 <title>DCAS CMMS Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-@media print {
-  .sidebar, button, .tabs { display:none !important; }
-  @page { size: A4 landscape; }
+.kpiBox {
+  display:inline-block;
+  width:180px;
+  padding:15px;
+  margin:10px;
+  border:1px solid #ccc;
+  text-align:center;
+}
+canvas {
+  max-width:400px;
+  margin:20px;
 }
 </style>
 
@@ -15,26 +25,16 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-
-  <div class="header-left">
-    <img src="logo-left.png" class="logo">
-  </div>
-
-  <div class="header-center">
-    CMMS DASHBOARD - DCAS FACILITES MANAGEMENT
-  </div>
-
+  <div class="header-left"><img src="logo-left.png" class="logo"></div>
+  <div class="header-center">CMMS DASHBOARD - DCAS FACILITIES MANAGEMENT</div>
   <div class="header-right">
     🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
     <img src="logo-right.png" class="logo">
   </div>
-
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <button onclick="go('dashboard.html')">Dashboard</button>
   <button onclick="go('assets.html')">Assets</button>
@@ -42,89 +42,46 @@
   <button onclick="go('workorders.html')">Work Orders</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <h2>Admin Dashboard</h2>
 
-<!-- TABS -->
-<div class="tabs">
-  <button onclick="go('dashboard.html')">Dashboard</button>
-  <button onclick="showTab('assetsTab')">Assets</button>
-  <button onclick="showTab('ppmTab')">PPM</button>
-  <button onclick="showTab('woTab')">Work Orders</button>
+<!-- KPI SECTION -->
+<div id="kpis">
 
-  <button onclick="window.print()">PDF Report</button>
+  <div class="kpiBox">
+    <h3 id="kpiAssets">0</h3>
+    <p>Total Assets</p>
+  </div>
 
-</div>
+  <div class="kpiBox">
+    <h3 id="kpiOpenWO">0</h3>
+    <p>Open Work Orders</p>
+  </div>
 
-<br>
+  <div class="kpiBox">
+    <h3 id="kpiClosedWO">0</h3>
+    <p>Completed Work Orders</p>
+  </div>
 
-<!-- =========================
-     ASSETS TAB
-========================= -->
-<div id="assetsTab" class="tabSection">
+  <div class="kpiBox">
+    <h3 id="kpiPPM">0</h3>
+    <p>Pending PPM</p>
+  </div>
 
-  <h3>Assets Overview</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Building</th>
-        <th>Location</th>
-        <th>Site</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="dashAssets"></tbody>
-  </table>
+  <div class="kpiBox">
+    <h3 id="kpiMTTR">0</h3>
+    <p>Avg Breakdown Time (hrs)</p>
+  </div>
 
 </div>
 
-<!-- =========================
-     PPM TAB
-========================= -->
-<div id="ppmTab" class="tabSection" style="display:none">
+<!-- GRAPHS -->
+<h3>Work Orders Status</h3>
+<canvas id="statusChart"></canvas>
 
-  <h3>PPM Overview</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Asset</th>
-        <th>Task</th>
-        <th>Frequency</th>
-        <th>Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="dashPPM"></tbody>
-  </table>
-
-</div>
-
-<!-- =========================
-     WORK ORDERS TAB
-========================= -->
-<div id="woTab" class="tabSection" style="display:none">
-
-  <h3>Work Orders Overview</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Asset</th>
-        <th>Location</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="dashWO"></tbody>
-  </table>
-
-</div>
+<h3>Priority Distribution</h3>
+<canvas id="priorityChart"></canvas>
 
 </div>
 
@@ -140,98 +97,93 @@ window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
 /* =========================
-   TAB SWITCH
+   LOAD KPI DATA
 ========================= */
-window.showTab = (id) => {
+async function loadDashboard() {
 
-  document.querySelectorAll(".tabSection").forEach(t=>{
-    t.style.display = "none";
-  });
+  const assetsSnap = await getDocs(collection(db,"assets"));
+  const woSnap = await getDocs(collection(db,"workorders"));
+  const ppmSnap = await getDocs(collection(db,"ppm"));
 
-  document.getElementById(id).style.display = "block";
-};
+  let totalAssets = assetsSnap.size;
 
-/* =========================
-   LOAD ASSETS
-========================= */
-async function loadAssets() {
+  let openWO = 0;
+  let closedWO = 0;
 
-  const snap = await getDocs(collection(db,"assets"));
+  let statusCount = {Open:0, "In Progress":0, Completed:0};
+  let priorityCount = {Low:0, Medium:0, High:0, Critical:0};
 
-  let html = "";
+  let totalTime = 0;
+  let completedCount = 0;
 
-  snap.forEach(d=>{
-    let a = d.data();
-
-    html += `
-      <tr>
-        <td>${a.name}</td>
-        <td>${a.type}</td>
-        <td>${a.building}</td>
-        <td>${a.location}</td>
-        <td>${a.status}</td>
-      </tr>
-    `;
-  });
-
-  dashAssets.innerHTML = html;
-}
-
-/* =========================
-   LOAD PPM
-========================= */
-async function loadPPM() {
-
-  const snap = await getDocs(collection(db,"ppm"));
-
-  let html = "";
-
-  snap.forEach(d=>{
-    let p = d.data();
-
-    html += `
-      <tr>
-        <td>${p.asset}</td>
-        <td>${p.task}</td>
-        <td>${p.frequency}</td>
-        <td>${p.date}</td>
-        <td>${p.status}</td>
-      </tr>
-    `;
-  });
-
-  dashPPM.innerHTML = html;
-}
-
-/* =========================
-   LOAD WORK ORDERS
-========================= */
-async function loadWO() {
-
-  const snap = await getDocs(collection(db,"workOrders"));
-
-  let html = "";
-
-  snap.forEach(d=>{
+  woSnap.forEach(d=>{
     let w = d.data();
 
-    html += `
-      <tr>
-        <td>${w.title}</td>
-        <td>${w.asset}</td>
-        <td>${w.location}</td>
-        <td>${w.status}</td>
-      </tr>
-    `;
+    // STATUS KPI
+    if(w.status === "Completed") closedWO++;
+    else openWO++;
+
+    // STATUS GRAPH
+    if(statusCount[w.status] !== undefined)
+      statusCount[w.status]++;
+
+    // PRIORITY GRAPH
+    if(priorityCount[w.priority] !== undefined)
+      priorityCount[w.priority]++;
+
+    // MTTR (basic)
+    if(w.status === "Completed" && w.createdAt){
+      let created = w.createdAt.toDate();
+      let now = new Date();
+
+      let hours = (now - created) / (1000 * 60 * 60);
+
+      totalTime += hours;
+      completedCount++;
+    }
+
   });
 
-  dashWO.innerHTML = html;
+  let pendingPPM = 0;
+
+  ppmSnap.forEach(d=>{
+    if(d.data().status === "Pending") pendingPPM++;
+  });
+
+  let avgMTTR = completedCount ? (totalTime / completedCount).toFixed(1) : 0;
+
+  /* SET KPI */
+  kpiAssets.innerText = totalAssets;
+  kpiOpenWO.innerText = openWO;
+  kpiClosedWO.innerText = closedWO;
+  kpiPPM.innerText = pendingPPM;
+  kpiMTTR.innerText = avgMTTR;
+
+  /* CHARTS */
+
+  new Chart(document.getElementById("statusChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(statusCount),
+      datasets: [{
+        data: Object.values(statusCount)
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("priorityChart"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(priorityCount),
+      datasets: [{
+        data: Object.values(priorityCount)
+      }]
+    }
+  });
+
 }
 
-/* INIT */
-loadAssets();
-loadPPM();
-loadWO();
+loadDashboard();
 
 </script>
 
