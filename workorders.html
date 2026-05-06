@@ -3,6 +3,43 @@
 <head>
 <title>Work Orders</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.tabs {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.tabs button {
+  padding:10px;
+  border:1px solid #ccc;
+  background:#fff;
+}
+
+.tabs button.active {
+  background:#ddd;
+}
+
+/* FORM */
+.formModal {
+  display:none;
+  position:fixed;
+  top:10%;
+  left:25%;
+  width:50%;
+  background:#fff;
+  padding:20px;
+  border:1px solid #ccc;
+}
+
+.formModal input, .formModal select {
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+}
+</style>
+
 </head>
 
 <body>
@@ -11,7 +48,6 @@
   <div class="header-left"><img src="logo-left.png" class="logo"></div>
   <div class="header-center">Work Orders</div>
   <div class="header-right">
-    🔔 <span id="notifCount"></span>
     <button onclick="logout()">Logout</button>
     <img src="logo-right.png" class="logo">
   </div>
@@ -26,15 +62,42 @@
 
 <div class="main">
 
-<h2>Work Orders</h2>
+<h2>Work Orders - Site Based</h2>
+
+<!-- SITE TABS -->
+<div class="tabs">
+  <button onclick="selectSite('HQ', this)" class="active">DCAS Head Quarter</button>
+  <button onclick="selectSite('STAFF', this)">DCAS Staff Accommodation</button>
+  <button onclick="selectSite('OUTSIDE', this)">DCAS Outside Stations</button>
+</div>
+
+<button onclick="openForm()">+ Create Work Order</button>
+
+<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Asset</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="woList"></tbody>
+</table>
+
+</div>
 
 <!-- FORM -->
+<div id="formModal" class="formModal">
+
+<h3>Create Work Order</h3>
+
 <input id="woTitle" placeholder="Title">
 
 <select id="woAsset"></select>
 
 <input id="woLocation" placeholder="Location">
-<input id="woSubLocation" placeholder="Sub Location">
 
 <select id="woPriority">
   <option>Low</option>
@@ -49,32 +112,11 @@
   <option>Completed</option>
 </select>
 
-<input id="woTechnician" placeholder="Assign Technician">
+<input id="woTechnician" placeholder="Technician">
 
-<button onclick="addWorkOrder()">Create Work Order</button>
+<button onclick="saveWO()">Save</button>
+<button onclick="closeForm()">Cancel</button>
 
-<!-- TABLE -->
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Title</th>
-<th>Asset</th>
-<th>Priority</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="woList"></tbody>
-</table>
-
-</div>
-
-<!-- POPUP -->
-<div id="popup" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid #ccc;">
-  <h3>Work Order Details</h3>
-  <div id="popupContent"></div>
-  <button onclick="closePopup()">Close</button>
 </div>
 
 <script type="module">
@@ -85,66 +127,80 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc,
-  updateDoc,
-  serverTimestamp
+  doc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 window.go = (p)=>location=p;
 window.logout = ()=>location="login.html";
 
-let currentEditId = null;
+let currentSite = "HQ";
 let assetsMap = {};
 
-/* GENERATE ID */
-function generateWOId() {
-  return "WO-" + Math.floor(Math.random() * 100000);
-}
+/* SELECT SITE */
+window.selectSite = (site, btn) => {
 
-/* LOAD ASSETS INTO DROPDOWN */
-async function loadAssetsDropdown() {
+  currentSite = site;
+
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+
+  loadAssets();
+  loadWO();
+};
+
+/* FORM */
+window.openForm = () => {
+  formModal.style.display = "block";
+  loadAssets();
+};
+
+window.closeForm = () => formModal.style.display = "none";
+
+/* LOAD ASSETS (FILTER BY SITE) */
+async function loadAssets() {
 
   const snap = await getDocs(collection(db,"assets"));
 
-  let html = "<option value=''>Select Asset</option>";
+  let html = "<option>Select Asset</option>";
+  assetsMap = {};
 
   snap.forEach(d=>{
     let a = d.data();
 
+    if(a.site !== currentSite) return;
+
     assetsMap[d.id] = a;
 
-    html += `<option value="${d.id}">${a.name} (${a.assetId})</option>`;
+    html += `<option value="${d.id}">${a.name}</option>`;
   });
 
   woAsset.innerHTML = html;
 }
 
-/* AUTO FILL LOCATION FROM ASSET */
+/* AUTO FILL LOCATION */
 woAsset.onchange = () => {
   let a = assetsMap[woAsset.value];
-  if(a){
-    woLocation.value = a.location || "";
-  }
+  if(a) woLocation.value = a.location || "";
 };
 
 /* ADD */
-window.addWorkOrder = async () => {
+window.saveWO = async () => {
 
-  let assetData = assetsMap[woAsset.value] || {};
+  let a = assetsMap[woAsset.value];
 
   await addDoc(collection(db,"workorders"), {
-    woId: generateWOId(),
+    site: currentSite,
     title: woTitle.value,
     assetId: woAsset.value,
-    assetName: assetData.name || "",
+    assetName: a?.name || "",
     location: woLocation.value,
-    subLocation: woSubLocation.value,
     priority: woPriority.value,
     status: woStatus.value,
     technician: woTechnician.value,
-    createdAt: serverTimestamp()
+    createdAt: new Date()
   });
 
+  closeForm();
   loadWO();
 };
 
@@ -158,16 +214,16 @@ async function loadWO() {
   snap.forEach(d=>{
     let w = d.data();
 
+    if(w.site !== currentSite) return;
+
     html += `
-      <tr onclick="viewWO('${d.id}')">
-        <td>${w.woId}</td>
+      <tr>
         <td>${w.title}</td>
         <td>${w.assetName}</td>
         <td>${w.priority}</td>
         <td>${w.status}</td>
         <td>
-          <button onclick="event.stopPropagation(); editWO('${d.id}')">Edit</button>
-          <button onclick="event.stopPropagation(); deleteWO('${d.id}')">Delete</button>
+          <button onclick="deleteWO('${d.id}')">Delete</button>
         </td>
       </tr>
     `;
@@ -176,92 +232,16 @@ async function loadWO() {
   woList.innerHTML = html;
 }
 
-/* VIEW */
-window.viewWO = async (id) => {
-
-  const snap = await getDocs(collection(db,"workorders"));
-
-  snap.forEach(d=>{
-    if(d.id === id){
-      let w = d.data();
-
-      popupContent.innerHTML = `
-        <b>ID:</b> ${w.woId}<br>
-        <b>Title:</b> ${w.title}<br>
-        <b>Asset:</b> ${w.assetName}<br>
-        <b>Location:</b> ${w.location}<br>
-        <b>Sub Location:</b> ${w.subLocation}<br>
-        <b>Priority:</b> ${w.priority}<br>
-        <b>Status:</b> ${w.status}<br>
-        <b>Technician:</b> ${w.technician}<br>
-      `;
-
-      popup.style.display = "block";
-    }
-  });
-};
-
-window.closePopup = () => popup.style.display = "none";
-
 /* DELETE */
 window.deleteWO = async (id) => {
-  if(confirm("Delete this work order?")){
+  if(confirm("Delete work order?")){
     await deleteDoc(doc(db,"workorders",id));
     loadWO();
   }
 };
 
-/* EDIT */
-window.editWO = async (id) => {
-
-  const snap = await getDocs(collection(db,"workorders"));
-
-  snap.forEach(d=>{
-    if(d.id === id){
-      let w = d.data();
-
-      woTitle.value = w.title;
-      woAsset.value = w.assetId;
-      woLocation.value = w.location;
-      woSubLocation.value = w.subLocation;
-      woPriority.value = w.priority;
-      woStatus.value = w.status;
-      woTechnician.value = w.technician;
-
-      currentEditId = id;
-    }
-  });
-
-  document.querySelector("button[onclick='addWorkOrder()']").innerText = "Update Work Order";
-  document.querySelector("button[onclick='addWorkOrder()']").onclick = updateWO;
-};
-
-/* UPDATE */
-window.updateWO = async () => {
-
-  let assetData = assetsMap[woAsset.value] || {};
-
-  await updateDoc(doc(db,"workorders",currentEditId), {
-    title: woTitle.value,
-    assetId: woAsset.value,
-    assetName: assetData.name || "",
-    location: woLocation.value,
-    subLocation: woSubLocation.value,
-    priority: woPriority.value,
-    status: woStatus.value,
-    technician: woTechnician.value
-  });
-
-  currentEditId = null;
-
-  document.querySelector("button").innerText = "Create Work Order";
-  document.querySelector("button").onclick = addWorkOrder;
-
-  loadWO();
-};
-
 /* INIT */
-loadAssetsDropdown();
+loadAssets();
 loadWO();
 
 </script>
