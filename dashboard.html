@@ -1,46 +1,3 @@
-/**
- * DCAS CMMS Enterprise Access Routing Shield
- * Protects frontend routes against unauthenticated and unauthorized account access vectors.
- */
-export function checkAccess(onVerifiedCallback) {
-    const sessionUid = localStorage.getItem("uid");
-    const sessionRole = localStorage.getItem("role");
-    
-    // 1. Force eject if no session data is active
-    if (!sessionUid || !sessionRole) {
-        localStorage.clear();
-        window.location.href = "index.html";
-        return;
-    }
-
-    // 2. Extract current filename execution string
-    const currentPathFile = window.location.pathname.split("/").pop();
-
-    // 3. Structural Access Allocation Map matrix (Configure your route rules here)
-    const accessMatrixRules = {
-        "dashboard.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "tickets.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "assets.html": ["admin", "planner"], // Block contractors and viewers out of asset editing
-        "ppm.html": ["admin", "planner", "supervisor_viewer"] // Block contractors out of scheduling plans
-    };
-
-    const permittedRolesForRoute = accessMatrixRules[currentPathFile];
-
-    if (permittedRolesForRoute) {
-        if (permittedRolesForRoute.includes(sessionRole)) {
-            // Authorized! Pass control back to the layout file
-            if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-        } else {
-            // Eject if authorized role token mismatch is captured
-            alert("Security Alert: Your access classification level does not permit entrance to this zone.");
-            window.location.href = "dashboard.html"; // Safely bounce back to center home
-        }
-    } else {
-        // Fallback for general unlocked layout frames
-        if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-    }
-}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,7 +35,7 @@ export function checkAccess(onVerifiedCallback) {
         .shortcut-icon { font-size: 20px; }
 
         /* ==========================================================================
-           🎨 NEW REAL-TIME SLA & KPI ANALYTICS GRID STYLES
+           🎨 REAL-TIME SLA & KPI ANALYTICS GRID STYLES
            ========================================================================== */
         .analytics-chart-section {
             display: grid;
@@ -157,12 +114,12 @@ export function checkAccess(onVerifiedCallback) {
 <div class="main-content">
     <div class="dashboard-container">
         
-        <div class="framework-shortcuts-bar">
-            <a href="ppm.html" class="shortcut-link-card">
+        <div class="framework-shortcuts-bar" id="dashboardShortcutsBar">
+            <a href="ppm.html" class="shortcut-link-card" id="shortcutPpmLink">
                 <span>📅 PPM Maintenance Engine Plan</span>
                 <span class="shortcut-icon">→</span>
             </a>
-            <a href="assets.html" class="shortcut-link-card">
+            <a href="assets.html" class="shortcut-link-card" id="shortcutAssetsLink">
                 <span>🏭 Asset Control Infrastructure Registers</span>
                 <span class="shortcut-icon">→</span>
             </a>
@@ -172,7 +129,7 @@ export function checkAccess(onVerifiedCallback) {
             </a>
         </div>
 
-        <h2 class="page-title">Executive Control Analytics</h2>
+        <h2 class="page-title" id="dashboardTitleScope">Executive Control Analytics</h2>
 
         <div class="location-summary-strip">
             <div class="summary-segment-box">
@@ -226,7 +183,7 @@ export function checkAccess(onVerifiedCallback) {
             </div>
         </div>
 
-        <div class="services-section-wrapper">
+        <div class="services-section-wrapper" id="amcServicesWrapperSection">
             <h3>16 Contractual AMC Core Services</h3>
             <div class="services-main-grid" id="amcServicesCardsGridContainer"></div>
         </div>
@@ -259,9 +216,22 @@ export function checkAccess(onVerifiedCallback) {
         { id: "cradle-suspension", num: "16", title: "Facade Cradle Suspension Machinery", scope: "External Window Washing Cranes Inspections" }
     ];
 
+    let currentSessionUserRole = "";
+
+    // 🛡️ Trigger the Role Access Shield Matrix
     checkAccess((validatedUserRole) => {
+        currentSessionUserRole = validatedUserRole;
         document.getElementById("userRole").innerText = validatedUserRole.toUpperCase();
         loadSidebar(validatedUserRole);
+        
+        // Dynamic Layout Adjustment for Contractors
+        if (validatedUserRole.startsWith("contractor_")) {
+            document.getElementById("dashboardTitleScope").innerText = "Contractor Operations Hub";
+            document.getElementById("shortcutAssetsLink").style.display = "none";
+            document.getElementById("shortcutPpmLink").style.display = "none";
+            document.getElementById("dashboardShortcutsBar").style.gridTemplateColumns = "1fr";
+        }
+        
         executeLiveMetricsStreamingAggregationPipeline();
     });
 
@@ -273,12 +243,32 @@ export function checkAccess(onVerifiedCallback) {
     async function executeLiveMetricsStreamingAggregationPipeline() {
         try {
             const ticketsSnapshot = await getDocs(collection(db, "maintenance_tickets"));
-            let processedTicketsList = [];
-            ticketsSnapshot.forEach(doc => processedTicketsList.push(doc.data()));
+            let rawTicketsList = [];
+            ticketsSnapshot.forEach(doc => rawTicketsList.push(doc.data()));
 
             const ppmSnapshot = await getDocs(collection(db, "ppm_schedules"));
+            let rawPpmList = [];
+            ppmSnapshot.forEach(doc => rawPpmList.push(doc.data()));
+
+            // ==========================================================================
+            // 🔒 BACKEND DATA ISOLATION PIPELINE BY ACCOUNT SECURITY CATEGORY
+            // ==========================================================================
+            let processedTicketsList = [];
             let processedPpmList = [];
-            ppmSnapshot.forEach(doc => processedPpmList.push(doc.data()));
+
+            if (currentSessionUserRole.startsWith("contractor_")) {
+                let targetCategoryFilter = "";
+                if (currentSessionUserRole === "contractor_hvac") targetCategoryFilter = "air-conditioning";
+                if (currentSessionUserRole === "contractor_civil") targetCategoryFilter = "building-maintenance";
+                if (currentSessionUserRole === "contractor_fire") targetCategoryFilter = "fire-system";
+
+                processedTicketsList = rawTicketsList.filter(t => t.amcCategory === targetCategoryFilter);
+                processedPpmList = rawPpmList.filter(p => p.amcCategory === targetCategoryFilter);
+            } else {
+                // Admins, Planners, and Supervisor Viewers read all matrix tokens globally
+                processedTicketsList = rawTicketsList;
+                processedPpmList = rawPpmList;
+            }
 
             const metricsCounters = {
                 hq: { total: 0, active: 0, ppm: 0 },
@@ -343,7 +333,7 @@ export function checkAccess(onVerifiedCallback) {
     }
 
     // ==========================================================================
-    // 📊 NEW: COMPUTE & RENDER REAL-TIME CHART BARS FOR SLA & VOLUME BOUNDS
+    // 📊 CHART VISUALIZATION DISPATCH ROUTER (ADAPTIVE INTERCEPT)
     // ==========================================================================
     function renderSlaAndKpiChartsVisualization(tickets, ppms) {
         const slaContainer = document.getElementById("slaRealtimeBarsContainer");
@@ -352,21 +342,26 @@ export function checkAccess(onVerifiedCallback) {
         slaContainer.innerHTML = "";
         kpiContainer.innerHTML = "";
 
-        // We choose top operational categories to feature in the main charts
-        const targetCategories = [
+        let targetCategories = [
             { id: "air-conditioning", label: "HVAC Systems" },
             { id: "building-maintenance", label: "Civil / Building" },
             { id: "fire-system", label: "Fire & Safety" },
             { id: "cleaning-janitorial", label: "Janitorial Service" }
         ];
 
+        // Isolate single row charts for contractors to hide unrelated data matrices
+        if (currentSessionUserRole.startsWith("contractor_")) {
+            if (currentSessionUserRole === "contractor_hvac") targetCategories = [{ id: "air-conditioning", label: "HVAC Systems" }];
+            if (currentSessionUserRole === "contractor_civil") targetCategories = [{ id: "building-maintenance", label: "Civil / Building" }];
+            if (currentSessionUserRole === "contractor_fire") targetCategories = [{ id: "fire-system", label: "Fire & Safety" }];
+        }
+
         targetCategories.forEach(cat => {
-            // --- 1. Compute SLA Real-time Delivery Rates ---
+            // Compute SLA Real-time Delivery Rates
             const catTickets = tickets.filter(t => t.amcCategory === cat.id);
             const totalCatCount = catTickets.length;
             const resolvedCatCount = catTickets.filter(t => t.status === "resolved").length;
             
-            // Default to 100% SLA compliance if no tickets exist yet for that division
             let slaPercentage = (totalCatCount > 0) ? Math.round((resolvedCatCount / totalCatCount) * 100) : 100;
             
             let colorClass = "sla-high";
@@ -385,12 +380,11 @@ export function checkAccess(onVerifiedCallback) {
                 </div>
             `);
 
-            // --- 2. Compute PPM Volume Bounds (Planned vs Done) ---
+            // Compute PPM Volume Bounds (Planned vs Done)
             const catPpms = ppms.filter(p => p.amcCategory === cat.id);
             const totalPpmPlanned = catPpms.length;
             const completedPpm = catPpms.filter(p => p.status === "completed").length;
             
-            // Build visual percentage capacity track
             let kpiPerformancePercentage = (totalPpmPlanned > 0) ? Math.round((completedPpm / totalPpmPlanned) * 100) : 0;
 
             kpiContainer.insertAdjacentHTML("beforeend", `
@@ -411,7 +405,19 @@ export function checkAccess(onVerifiedCallback) {
         const gridContainer = document.getElementById("amcServicesCardsGridContainer");
         gridContainer.innerHTML = "";
 
-        BASELINE_AMC_SERVICES_DEFINITIONS.forEach(service => {
+        let visibleServices = BASELINE_AMC_SERVICES_DEFINITIONS;
+
+        // Contractors only see their own active operational card row block
+        if (currentSessionUserRole.startsWith("contractor_")) {
+            let targetCardId = "";
+            if (currentSessionUserRole === "contractor_hvac") targetCardId = "air-conditioning";
+            if (currentSessionUserRole === "contractor_civil") targetCardId = "building-maintenance";
+            if (currentSessionUserRole === "contractor_fire") targetCardId = "fire-system";
+            
+            visibleServices = BASELINE_AMC_SERVICES_DEFINITIONS.filter(s => s.id === targetCardId);
+        }
+
+        visibleServices.forEach(service => {
             const serviceBreakdownsCount = ticketsArray.filter(t => 
                 t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval")
             ).length;
