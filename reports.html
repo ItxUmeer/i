@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DCAS Facilities - Mobile Request Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .public-wrapper { 
+            width: 100%; 
+            max-width: 520px; 
+            padding: 16px; 
+        }
+        
+        .public-card { 
+            background: #ffffff; 
+            width: 100%; 
+            padding: 28px 24px; 
+            border-radius: 14px; 
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08); 
+        }
+        
+        .public-header { 
+            text-align: center; 
+            margin-bottom: 24px; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 16px; 
+        }
+        
+        .public-header h1 { 
+            font-size: 20px; 
+            color: #1e3a8a; 
+            font-weight: 800; 
+        }
+
+        /* Mobile Optimization Fixes */
+        .modal-form input, .modal-form select, .modal-form textarea {
+            font-size: 16px !important; /* Forces iOS Safari to prevent auto-zooming on focus */
+            height: 48px; /* Larger touch targets for mobile thumbs */
+        }
+        
+        .modal-form textarea {
+            height: 100px !important;
+            padding: 12px;
+        }
+
+        .btn-primary {
+            height: 48px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        
+        .success-state { 
+            text-align: center; 
+            padding: 30px 10px; 
+            display: none; 
+        }
+        
+        .success-icon { 
+            font-size: 56px; 
+            color: var(--success); 
+            margin-bottom: 16px; 
+        }
+
+        /* Smooth feedback animations for mobile interactions */
+        .btn-primary:active {
+            transform: scale(0.98);
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+
+<div class="public-wrapper">
+    <div class="public-card" id="formContainer">
+        
+        <div class="public-header">
+            <h1>Raise Maintenance Request</h1>
+            <p style="font-size:12px; color:var(--muted); margin-top:4px;">DCAS Facilities & Engineering Support Portal</p>
+        </div>
+
+        <form id="publicIssueForm" class="modal-form">
+            <div class="form-input-container">
+                <label>Target Property Scope</label>
+                <select id="issueScope" required>
+                    <option value="" disabled selected>Select location group...</option>
+                    <option value="hq">Headquarters Building</option>
+                    <option value="staff">Staff Accommodation</option>
+                    <option value="station">Outside Station Network</option>
+                </select>
+            </div>
+
+            <div class="form-input-container">
+                <label>Specific Location / Zone Detail</label>
+                <input type="text" id="issueLocationDetail" placeholder="e.g., Station 4 Al Barsha, Server Room" required>
+            </div>
+
+            <div class="form-input-container">
+                <label>Maintenance Discipline Category</label>
+                <select id="issueCategory" required>
+                    <option value="" disabled selected>Select service group...</option>
+                    <option value="air-conditioning">1. Air Conditioning (HVAC)</option>
+                    <option value="building-maintenance">2. Building Maintenance Civil</option>
+                    <option value="fire-system">3. Fire & Safety Systems</option>
+                    <option value="elevators">4. Elevators & Lifts</option>
+                </select>
+            </div>
+
+            <div class="form-input-container">
+                <label>Issue Description</label>
+                <textarea id="issueDescription" placeholder="Provide details regarding the breakdown or fault..." required></textarea>
+            </div>
+
+            <div class="form-input-container">
+                <label>Urgency Priority Level</label>
+                <select id="issuePriority" required>
+                    <option value="low">Low (Routine Check)</option>
+                    <option value="medium" selected>Medium (Standard Repair)</option>
+                    <option value="high">High (Operational Impact)</option>
+                    <option value="critical">Critical (Emergency Breakdown)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitIssueBtn" style="margin-top:10px;">Submit Request</button>
+        </form>
+
+        <div class="success-state" id="successState">
+            <div class="success-icon">✓</div>
+            <h2 style="color:#0f172a; font-weight:700; font-size:22px;">Request Lodged</h2>
+            <p style="color:var(--muted); font-size:14px; margin-top:8px;" id="ticketTrackingId"></p>
+            <p style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;">Dispatched to DCAS Admin Triage Desk.</p>
+            <button class="btn-primary" style="margin-top:28px; width:100%;" onclick="window.location.reload()">File Another Issue</button>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { db } from "./firebase.js";
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    document.getElementById("publicIssueForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submitIssueBtn");
+        btn.disabled = true;
+        btn.innerText = "Transmitting Request...";
+
+        // Generate clean public tracking hash reference
+        const referenceId = "TKT-" + Math.floor(100000 + Math.random() * 900000);
+
+        const ticketPayload = {
+            ticketId: referenceId,
+            type: "reactive",
+            locationScope: document.getElementById("issueScope").value,
+            specificLocation: document.getElementById("issueLocationDetail").value.trim(),
+            amcCategory: document.getElementById("issueCategory").value,
+            description: document.getElementById("issueDescription").value.trim(),
+            priority: document.getElementById("issuePriority").value,
+            status: "pending_approval", 
+            reportedDate: new Date().toISOString(),
+            assignedContractorUid: null,
+            resolvedDate: null
+        };
+
+        try {
+            await addDoc(collection(db, "maintenance_tickets"), ticketPayload);
+            document.getElementById("publicIssueForm").style.display = "none";
+            document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style="color:#1e3a8a;">${referenceId}</b>`;
+            document.getElementById("successState").style.display = "block";
+        } catch (error) {
+            alert("Submission error: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "Submit Request";
+        }
+    });
+</script>
+
+</body>
+</html>
