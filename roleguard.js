@@ -16,15 +16,20 @@ const PAGE_ACCESS_RULES = {
  * @param {Function} successCallback - Runs if the user passes the role check
  */
 export function checkAccess(successCallback) {
-    const sessionRole = localStorage.getItem("userRole");
+    // FIX: Look for both possible token names to remain bulletproof
+    let sessionRole = localStorage.getItem("role") || localStorage.getItem("userRole");
     const currentFile = window.location.pathname.split("/").pop() || "dashboard.html";
 
     // 1. If no role exists, they aren't logged in
     if (!sessionRole) {
+        console.warn("Access Denied: Stale or missing local storage identity token.");
         alert("Access Denied: Please log in to verify your identity.");
-        window.location.href = "index.html"; // Redirects straight to your new login root
+        window.location.href = "index.html";
         return;
     }
+
+    // Normalize casing for robust matrix matching
+    sessionRole = sessionRole.toLowerCase().trim();
 
     // 2. Check if the current page has restrictions defined
     if (PAGE_ACCESS_RULES[currentFile]) {
