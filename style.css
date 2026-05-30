@@ -1,255 +1,234 @@
-/* =========================
-   CMMS CLEAN PROFESSIONAL UI
-   (WHITE + LIGHT GREY THEME)
-========================= */
+:root{
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+--sidebar:#0f172a;
+--sidebar-hover:#1e293b;
+
+--header:#ffffffdd;
+
+--primary:#2563eb;
+
+--bg:#f4f7fb;
+
+--card:#ffffff;
+
+--text:#1f2937;
+
 }
 
-body {
-  background: #f4f6f8;
-  color: #222;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:
+"Segoe UI",
+sans-serif;
 }
 
-/* =========================
-   HEADER (CLEAN WHITE + STRONG SHADOW)
-========================= */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
-  height: 85px;
-
-  display: grid;
-  grid-template-columns: 220px 1fr 260px;
-
-  align-items: center;
-
-  background: #ffffff;
-
-  border-bottom: 2px solid #e6e6e6;
-
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-
-  z-index: 1000;
-
-  padding: 0 15px;
+body{
+background:var(--bg);
+color:var(--text);
 }
 
-/* HEADER SECTIONS */
-.header-left,
-.header-center,
-.header-right {
-  display: flex;
-  align-items: center;
+/* LOGIN */
+
+.login-page{
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+background:
+linear-gradient(
+135deg,
+#0f172a,
+#1e3a8a
+);
+
 }
 
-/* CENTER TITLE */
-.header-center {
-  justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-  color: #333;
+.login-card{
+
+width:95%;
+max-width:420px;
+
+background:white;
+
+padding:40px;
+
+border-radius:20px;
+
+box-shadow:
+0 20px 40px
+rgba(0,0,0,.2);
+
 }
 
-/* RIGHT SIDE */
-.header-right {
-  justify-content: flex-end;
-  gap: 12px;
+.login-card input{
+
+width:100%;
+
+height:52px;
+
+margin-top:15px;
+
+padding:12px;
+
+border:1px solid #ddd;
+
+border-radius:12px;
+
 }
 
-/* LOGO */
-.logo {
-  height: 45px;
+/* HEADER */
+
+.header{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+right:0;
+
+height:70px;
+
+background:var(--header);
+
+backdrop-filter:blur(10px);
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 20px;
+
+z-index:1000;
+
 }
 
-/* =========================
-   SIDEBAR (LIGHT + CLEAN - FIXED ISSUE)
-========================= */
-.sidebar {
-  position: fixed;
-  top: 85px;
-  left: 0;
+/* SIDEBAR */
 
-  width: 230px;
-  height: calc(100vh - 85px);
+.sidebar{
 
-  background: #ffffff;
+position:fixed;
 
-  border-right: 2px solid #e6e6e6;
+top:70px;
 
-  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+left:0;
 
-  padding-top: 15px;
+width:260px;
+
+height:100vh;
+
+background:var(--sidebar);
+
+padding:20px;
+
+overflow:auto;
+
 }
 
-/* SIDEBAR BUTTONS */
-.sidebar button {
-  width: 100%;
-  padding: 12px;
+.menu-item{
 
-  background: transparent;
+display:block;
 
-  border: none;
+padding:14px;
 
-  color: #333;
+color:white;
 
-  text-align: left;
+text-decoration:none;
 
-  cursor: pointer;
+border-radius:10px;
 
-  border-left: 3px solid transparent;
+margin-bottom:8px;
 
-  transition: 0.2s;
 }
 
-.sidebar button:hover {
-  background: #f1f3f5;
-  border-left: 3px solid #999;
+.menu-item:hover{
+
+background:
+var(--sidebar-hover);
+
 }
 
-/* =========================
-   MAIN CONTENT (PROPER ALIGNMENT)
-========================= */
-.main {
-  margin-left: 230px;
-  margin-top: 85px;
+/* MAIN */
 
-  padding: 20px;
+.main-content{
+
+margin-left:260px;
+
+margin-top:70px;
+
+padding:25px;
+
 }
 
-/* =========================
-   TABLE (CLEAN BUSINESS STYLE)
-========================= */
-table {
-  width: 100%;
-  border-collapse: collapse;
+.kpi-grid{
 
-  background: white;
+display:grid;
 
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
 }
 
-th, td {
-  border: 1px solid #e6e6e6;
-  padding: 10px;
+.kpi-card{
 
-  text-align: left;
+background:white;
+
+padding:20px;
+
+border-radius:16px;
+
+box-shadow:
+0 4px 12px
+rgba(0,0,0,.08);
+
 }
 
-th {
-  background: #f2f2f2;
-  font-weight: bold;
+.kpi-card p{
+
+font-size:32px;
+
+font-weight:bold;
+
+margin-top:10px;
+
 }
 
-/* =========================
-   BUTTONS (CLEAN UI)
-========================= */
-button {
-  padding: 8px 12px;
+/* MOBILE */
 
-  border: 1px solid #ddd;
+@media(max-width:768px){
 
-  background: #ffffff;
+.sidebar{
 
-  color: #222;
+left:-280px;
 
-  cursor: pointer;
+transition:.3s;
 
-  margin: 2px;
+width:280px;
 
-  transition: 0.2s;
 }
 
-button:hover {
-  background: #f5f5f5;
+.sidebar.mobile-open{
+
+left:0;
+
 }
 
-/* =========================
-   INPUTS
-========================= */
-input, select {
-  padding: 8px;
-  margin: 5px;
+.main-content{
 
-  border: 1px solid #ddd;
+margin-left:0;
 
-  background: white;
 }
 
-/* =========================
-   NOTIFICATION BOX
-========================= */
-#notifBox {
-  position: absolute;
-  right: 10px;
-  top: 85px;
-
-  background: white;
-  width: 320px;
-  max-height: 300px;
-
-  overflow: auto;
-
-  border: 1px solid #ddd;
-
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-
-  z-index: 999;
-}
-
-/* =========================
-   LOGIN PAGE (CENTER FIXED)
-========================= */
-.login-container {
-  height: 100vh;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background: #f4f6f8;
-}
-
-.login-box {
-  background: white;
-
-  padding: 30px;
-
-  width: 320px;
-
-  text-align: center;
-
-  border: 1px solid #ddd;
-
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.login-box input {
-  width: 100%;
-  margin: 10px 0;
-}
-
-/* =========================
-   PRINT / PDF EXPORT
-========================= */
-@media print {
-  .sidebar,
-  button {
-    display: none !important;
-  }
-
-  body {
-    background: white;
-  }
-
-  @page {
-    size: A4 landscape;
-  }
 }
