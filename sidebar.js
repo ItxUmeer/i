@@ -1,86 +1,54 @@
 export function loadSidebar(role) {
-
     const menu = document.getElementById("sidebarMenu");
-
     let items = [];
 
-    switch(role){
-
+    switch(role) {
         case "staff":
-
             items = [
-                ["🏠 Dashboard","dashboard.html"],
-                ["📝 Raise Request","requests.html"],
-                ["📋 My Requests","myrequests.html"]
+                ["🏠 Home Hub", "dashboard.html"],
+                ["📝 Raise Request", "requests.html"],
+                ["📋 My Requests", "myrequests.html"]
             ];
+            break;
 
-        break;
-
-        case "fsu":
-
+        case "supervisor":
             items = [
-                ["🏠 Dashboard","dashboard.html"],
-                ["✅ Approvals","approvals.html"],
-                ["📝 Requests","requests.html"],
-                ["🔧 Work Orders","workorders.html"],
-                ["🏭 Assets","assets.html"],
-                ["📅 PPM","ppm.html"],
-                ["📊 Reports","reports.html"]
+                ["🏠 Work Area", "dashboard.html"],
+                ["🔧 Work Orders", "workorders.html"],
+                ["📅 PPM Schedule", "ppm.html"]
             ];
+            break;
 
-        break;
-
-        case "contractor":
-
+        case "contractor": // Contractor Manager Mode
             items = [
-                ["🏠 Dashboard","dashboard.html"],
-                ["🔧 Work Orders","workorders.html"],
-                ["📅 PPM","ppm.html"],
-                ["🏭 Assets","assets.html"],
-                ["📦 Inventory","inventory.html"]
+                ["🏠 Admin Hub", "dashboard.html"],
+                ["🔧 Work Orders", "workorders.html"],
+                ["🏭 Assets Control", "assets.html"],
+                ["📅 PPM Records", "ppm.html"],
+                ["📦 Inventory", "inventory.html"]
             ];
-
-        break;
+            break;
 
         case "management":
-
-            items = [
-                ["🏠 Dashboard","dashboard.html"],
-                ["📈 KPI Dashboard","kpi.html"],
-                ["📊 Reports","reports.html"],
-                ["📉 Analytics","analytics.html"]
-            ];
-
-        break;
-
         case "admin":
-
             items = [
-                ["🏠 Dashboard","dashboard.html"],
-                ["📝 Requests","requests.html"],
-                ["✅ Approvals","approvals.html"],
-                ["🔧 Work Orders","workorders.html"],
-                ["🏭 Assets","assets.html"],
-                ["📅 PPM","ppm.html"],
-                ["📦 Inventory","inventory.html"],
-                ["📊 Reports","reports.html"],
-                ["⚙️ Settings","settings.html"]
+                ["🏠 Dashboard", "dashboard.html"],
+                ["📝 Requests Registry", "requests.html"],
+                ["🔧 Work Orders", "workorders.html"],
+                ["🏭 Asset Register", "assets.html"],
+                ["📅 Planned PPM", "ppm.html"],
+                ["📦 Inventory Stock", "inventory.html"]
             ];
-
-        break;
-
+            break;
     }
 
     menu.innerHTML = "";
-
     items.forEach(item => {
-
+        const isActive = window.location.pathname.includes(item[1]) ? "active" : "";
         menu.innerHTML += `
-            <a href="${item[1]}" class="menu-item">
+            <a href="${item[1]}" class="menu-item ${isActive}">
                 ${item[0]}
             </a>
         `;
-
     });
-
 }
