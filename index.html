@@ -29,15 +29,14 @@
             <button type="submit" class="btn-primary" id="loginSubmitBtn" style="margin-top: 10px;">
                 Authenticate Account
             </button>
-            <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; font-weight: 600; text-align: center;"></div>
+            <div id="loginError" style="color: red; font-size: 13px; margin-top: 10px; font-weight: 600; text-align: center;"></div>
         </form>
     </div>
 </div>
 
 <script type="module">
-    import { auth, db } from "./firebase.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    // 🔗 Routing authentication handling through the central auth.js script helper
+    import { login } from "./auth.js";
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -48,46 +47,25 @@
         btn.innerText = "Verifying Credentials...";
         errDiv.innerText = "";
 
-        const email = document.getElementById("loginEmail").value.trim();
+        const email = document.getElementById("loginEmail").value;
         const password = document.getElementById("loginPassword").value;
 
         try {
-            // 1. Authenticate with Firebase Auth Core
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            // Process core authentication and dynamic role extraction safely
+            const sessionProfile = await login(email, password);
 
-            // 2. Fetch the custom Role configuration document from Firestore
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocSnap = await getDoc(userDocRef);
+            // 🧼 Flush old session state data tokens from browser cache memory
+            localStorage.clear();
+            localStorage.setItem("uid", sessionProfile.uid);
+            localStorage.setItem("role", sessionProfile.role);
+            localStorage.setItem("email", sessionProfile.email);
 
-            if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
-                const systemRole = userData.role; // e.g., 'admin', 'planner', 'contractor_hvac'
-
-                if (!systemRole) {
-                    throw new Error("Role property missing from your database profile object.");
-                }
-
-                // 3. 🧼 FLUSH STALE STORAGE & COMMIT FRESH AUTHORIZATION PARAMS
-                localStorage.clear();
-                localStorage.setItem("uid", user.uid);
-                localStorage.setItem("role", systemRole.toLowerCase().trim());
-                localStorage.setItem("email", user.email);
-
-                // 4. Dispatch directly to the main workspace control center
-                window.location.href = "dashboard.html";
-            } else {
-                throw new Error("Your user profile UID string key was not found inside the users Firestore collection registry.");
-            }
+            // Dispatch user into the live application system space
+            window.location.href = "dashboard.html";
 
         } catch (error) {
-            console.error("Login Exception:", error);
-            // Provide localized hints for administrative mapping oversights
-            if (error.message.includes("Firestore")) {
-                errDiv.innerText = "Security Halt: Account exists but profile is missing in Firestore /users collection.";
-            } else {
-                errDiv.innerText = "Authentication Failed: " + error.message;
-            }
+            console.error("Login Page Catch Exception:", error);
+            errDiv.innerText = "Authentication Failed: " + error.message;
             btn.disabled = false;
             btn.innerText = "Authenticate Account";
         }
