@@ -1,295 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>DCAS CMMS Dashboard</title>
-<link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
 
-<style>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-/* KPI GRID */
-.kpiContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
-}
+<title>Dashboard</title>
 
-.kpiBox {
-  padding: 20px;
-  border: 1px solid #ddd;
-  text-align: center;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.kpiBox h3 {
-  font-size: 28px;
-}
-
-/* ALERT */
-.alertBox {
-  padding: 15px;
-  margin-bottom: 20px;
-  border: 1px solid red;
-  background: #ffe5e5;
-  color: #900;
-}
-
-/* CHART GRID */
-.chartContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.chartBox {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-}
-
-/* TABLE */
-.tableBox {
-  margin-top: 30px;
-}
-
-@media(max-width:768px){
-  .chartContainer {
-    grid-template-columns: 1fr;
-  }
-}
-
-</style>
+<link rel="stylesheet"
+href="style.css">
 
 </head>
 
 <body>
 
-<div class="header">
-  <div class="header-left"><img src="logo-left.png" class="logo"></div>
-  <div class="header-center">CMMS DASHBOARD - DCAS FACILITIES MANAGEMENT</div>
-  <div class="header-right">
-    🔔 <span id="notifCount"></span>
-    <button onclick="logout()">Logout</button>
-    <img src="logo-right.png" class="logo">
-  </div>
+<header class="header">
+
+<button id="menuBtn">
+☰
+</button>
+
+<div class="header-title">
+DCAS Facilities CMMS
 </div>
 
-<div class="sidebar">
-  <button onclick="go('dashboard.html')">Dashboard</button>
-  <button onclick="go('assets.html')">Assets</button>
-  <button onclick="go('ppm.html')">PPM</button>
-  <button onclick="go('workorders.html')">Work Orders</button>
-</div>
+<div class="user-box">
 
-<div class="main">
+<span id="userRole"></span>
 
-<h2>Admin Dashboard</h2>
-
-<!-- ALERTS -->
-<div id="alerts"></div>
-
-<!-- KPI -->
-<div class="kpiContainer">
-
-  <div class="kpiBox">
-    <h3 id="kpiAssets">0</h3>
-    <p>Total Assets</p>
-  </div>
-
-  <div class="kpiBox">
-    <h3 id="kpiOpenWO">0</h3>
-    <p>Open Work Orders</p>
-  </div>
-
-  <div class="kpiBox">
-    <h3 id="kpiClosedWO">0</h3>
-    <p>Completed Work Orders</p>
-  </div>
-
-  <div class="kpiBox">
-    <h3 id="kpiPPM">0</h3>
-    <p>Pending PPM</p>
-  </div>
-
-  <div class="kpiBox">
-    <h3 id="kpiMTTR">0</h3>
-    <p>Avg Breakdown (hrs)</p>
-  </div>
-
-  <div class="kpiBox">
-    <h3 id="kpiOverdue">0</h3>
-    <p>Overdue Jobs</p>
-  </div>
+<button id="logoutBtn">
+Logout
+</button>
 
 </div>
 
-<!-- CHARTS -->
-<div class="chartContainer">
+</header>
 
-  <div class="chartBox">
-    <h3>Work Order Status</h3>
-    <canvas id="statusChart"></canvas>
-  </div>
+<aside class="sidebar"
+id="sidebar">
 
-  <div class="chartBox">
-    <h3>Priority Distribution</h3>
-    <canvas id="priorityChart"></canvas>
-  </div>
+<div id="sidebarMenu"></div>
+
+</aside>
+
+<main class="main-content">
+
+<div class="page-title">
+Dashboard
+</div>
+
+<div class="kpi-grid">
+
+<div class="kpi-card">
+<h3>Open Requests</h3>
+<p>0</p>
+</div>
+
+<div class="kpi-card">
+<h3>Pending Approval</h3>
+<p>0</p>
+</div>
+
+<div class="kpi-card">
+<h3>Open Work Orders</h3>
+<p>0</p>
+</div>
+
+<div class="kpi-card">
+<h3>PPM Due</h3>
+<p>0</p>
+</div>
 
 </div>
 
-<!-- BREAKDOWN RANKING -->
-<div class="tableBox">
-<h3>Top Breakdown Assets</h3>
-
-<table>
-<thead>
-<tr>
-<th>Asset</th>
-<th>Breakdowns</th>
-</tr>
-</thead>
-<tbody id="breakdownTable"></tbody>
-</table>
-
-</div>
-
-</div>
+</main>
 
 <script type="module">
 
-import { db } from "./firebase.js";
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { checkAccess }
+from "./roleguard.js";
 
-window.go = (p)=>location=p;
-window.logout = ()=>location="login.html";
+import { loadSidebar }
+from "./sidebar.js";
 
-let statusChart, priorityChart;
+const role =
+checkAccess();
 
-async function loadDashboard() {
+document.getElementById(
+"userRole"
+).innerText = role;
 
-  const assetsSnap = await getDocs(collection(db,"assets"));
-  const woSnap = await getDocs(collection(db,"workorders"));
-  const ppmSnap = await getDocs(collection(db,"ppm"));
+loadSidebar(role);
 
-  let totalAssets = assetsSnap.size;
-  let openWO = 0, closedWO = 0;
-  let overdue = 0;
+document.getElementById(
+"menuBtn"
+).onclick = ()=>{
 
-  let statusCount = {Open:0, "In Progress":0, Completed:0};
-  let priorityCount = {Low:0, Medium:0, High:0, Critical:0};
+document.getElementById(
+"sidebar"
+).classList.toggle(
+"mobile-open"
+);
 
-  let totalTime = 0, completedCount = 0;
+};
 
-  let breakdownMap = {};
+document.getElementById(
+"logoutBtn"
+).onclick = ()=>{
 
-  let alertHTML = "";
+localStorage.clear();
 
-  woSnap.forEach(d=>{
-    let w = d.data();
+window.location.href =
+"login.html";
 
-    // KPI
-    if(w.status === "Completed") closedWO++;
-    else openWO++;
-
-    // STATUS
-    if(statusCount[w.status] !== undefined)
-      statusCount[w.status]++;
-
-    // PRIORITY
-    if(priorityCount[w.priority] !== undefined)
-      priorityCount[w.priority]++;
-
-    // BREAKDOWN COUNT
-    if(w.assetName){
-      breakdownMap[w.assetName] = (breakdownMap[w.assetName] || 0) + 1;
-    }
-
-    // MTTR
-    if(w.status === "Completed" && w.createdAt){
-      let created = w.createdAt.toDate();
-      let now = new Date();
-      let hours = (now - created) / (1000*60*60);
-
-      totalTime += hours;
-      completedCount++;
-    }
-
-    // SLA (Overdue > 48 hrs open)
-    if(w.status !== "Completed" && w.createdAt){
-      let created = w.createdAt.toDate();
-      let hours = (new Date() - created) / (1000*60*60);
-
-      if(hours > 48){
-        overdue++;
-        alertHTML += `<div class="alertBox">⚠ Overdue: ${w.title} (${w.assetName})</div>`;
-      }
-    }
-
-  });
-
-  let pendingPPM = 0;
-  ppmSnap.forEach(d=>{
-    if(d.data().status === "Pending") pendingPPM++;
-  });
-
-  let avgMTTR = completedCount ? (totalTime/completedCount).toFixed(1) : 0;
-
-  // KPI SET
-  kpiAssets.innerText = totalAssets;
-  kpiOpenWO.innerText = openWO;
-  kpiClosedWO.innerText = closedWO;
-  kpiPPM.innerText = pendingPPM;
-  kpiMTTR.innerText = avgMTTR;
-  kpiOverdue.innerText = overdue;
-
-  alerts.innerHTML = alertHTML || "<div>No overdue jobs</div>";
-
-  // CHARTS
-  if(statusChart) statusChart.destroy();
-  if(priorityChart) priorityChart.destroy();
-
-  statusChart = new Chart(statusChartCanvas, {
-    type: "pie",
-    data: {
-      labels: Object.keys(statusCount),
-      datasets: [{ data: Object.values(statusCount) }]
-    }
-  });
-
-  priorityChart = new Chart(priorityChartCanvas, {
-    type: "bar",
-    data: {
-      labels: Object.keys(priorityCount),
-      datasets: [{ data: Object.values(priorityCount) }]
-    }
-  });
-
-  // BREAKDOWN TABLE
-  let sorted = Object.entries(breakdownMap)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,5);
-
-  let html = "";
-  sorted.forEach(i=>{
-    html += `<tr><td>${i[0]}</td><td>${i[1]}</td></tr>`;
-  });
-
-  breakdownTable.innerHTML = html;
-
-}
-
-const statusChartCanvas = document.getElementById("statusChart");
-const priorityChartCanvas = document.getElementById("priorityChart");
-
-loadDashboard();
+};
 
 </script>
 
