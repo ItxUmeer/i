@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCAS Facilities CMMS - Work Order Dispatch</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .badge-pending_approval { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-active { background: rgba(37, 99, 235, 0.15); color: var(--primary); }
+        .badge-resolved { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .action-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight:600; outline:none; }
+        .action-btn { padding: 6px 12px; background: var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:12px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <button id="menuBtn">☰</button>
+            <span class="header-title">DCAS CMMS</span>
+        </div>
+        <div class="header-search-location-bar">
+            <span class="location-scope-icon">🔧</span>
+            <select id="ticketScopeFilter" class="header-location-selector" style="border:none;">
+                <option value="all">All Ticket Archives</option>
+                <option value="pending_approval">Pending Triage Review</option>
+                <option value="active">Active Operations</option>
+                <option value="resolved">Resolved Closures</option>
+            </select>
+            <input type="text" id="ticketSearch" class="header-global-input-search" placeholder="Filter by Ticket Code, Description or Zone Detail...">
+        </div>
+        <div class="user-box">
+            <span id="userRole">...</span>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+        <div id="sidebarMenu"></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="dashboard-container">
+            <div class="page-title">Work Order Triage Dispatch</div>
+
+            <div class="data-table-wrapper">
+                <table class="enterprise-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Scope / Zone Location</th>
+                            <th>Discipline Service</th>
+                            <th>Issue Breakdown Summary</th>
+                            <th>Priority</th>
+                            <th>Status Matrix</th>
+                            <th>Triage Action Control</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">
+                                Streaming dispatch ledger...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from "./firebase.js";
+        import { collection, onSnapshot, query, doc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+        import { checkAccess } from "./roleguard.js";
+        import { loadSidebar } from "./sidebar.js";
+
+        const tableBody = document.getElementById("ticketsTableBody");
+        let masterTicketsArray = [];
+        let systemCurrentUserRole = "";
+
+        checkAccess((role) => {
+            systemCurrentUserRole = role || localStorage.getItem("userRole") || "staff";
+            document.getElementById("userRole").innerText = systemCurrentUserRole;
+            loadSidebar(systemCurrentUserRole);
+            initializeTicketStream();
+        });
+
+        function initializeTicketStream() {
+            const q = query(collection(db, "maintenance_tickets"), orderBy("reportedDate", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
+                masterTicketsArray = [];
+                snapshot.forEach((docSnap) => {
+                    masterTicketsArray.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderTicketsTable();
+            });
+        }
+
+        function renderTicketsTable() {
+            const scopeFilter = document.getElementById("ticketScopeFilter").value;
+            const searchKeyword = document.getElementById("ticketSearch").value.toLowerCase().trim();
+
+            let results = masterTicketsArray;
+
+            // 1. Apply status filtration structures
+            if (scopeFilter !== "all") {
+                results = results.filter(t => t.status === scopeFilter);
+            }
+
+            // 2. Filter data arrays based on user search queries
+            if (searchKeyword !== "") {
+                results = results.filter(t => 
+                    t.ticketId.toLowerCase().includes(searchKeyword) ||
+                    t.description.toLowerCase().includes(searchKeyword) ||
+                    t.specificLocation.toLowerCase().includes(searchKeyword)
+                );
+            }
+
+            tableBody.innerHTML = "";
+
+            if (results.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);">No matching maintenance records found within this workspace segment.</td></tr>`;
+                return;
+            }
+
+            results.forEach((ticket) => {
+                const tr = document.createElement("tr");
+                
+                // Set custom operational badge text layouts
+                let actionInterfaceMarkup = `<span style="color:var(--muted); font-size:12px;">No Actions Pending</span>`;
+                
+                if (ticket.status === "pending_approval" && systemCurrentUserRole === "admin") {
+                    actionInterfaceMarkup = `
+                        <select id="assign-${ticket.id}" class="action-select">
+                            <option value="contractor_hvac">Al-Futtaim HVAC Team</option>
+                            <option value="contractor_civil">Imdaad Civil Support</option>
+                            <option value="contractor_fire">Khansaheb Fire Safety</option>
+                        </select>
+                        <button class="action-btn" onclick="approveAndRouteTicket('${ticket.id}')">Route</button>
+                    `;
+                } else if (ticket.status === "active" && systemCurrentUserRole.startsWith("contractor")) {
+                    actionInterfaceMarkup = `
+                        <button class="action-btn" style="background:var(--success);" onclick="resolveTicket('${ticket.id}')">Mark Resolved</button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td style="font-weight:700; color:#1e3a8a;">${ticket.ticketId}</td>
+                    <td><b>${ticket.locationScope.toUpperCase()}</b><br><span style="font-size:12px; color:var(--muted);">${escapeHtml(ticket.specificLocation)}</span></td>
+                    <td style="text-transform:capitalize; font-size:13px;">${ticket.amcCategory.replace("-", " ")}</td>
+                    <td style="max-width:250px; font-size:13px; line-height:1.4;">${escapeHtml(ticket.description)}</td>
+                    <td><span style="font-weight:700; font-size:12px; text-transform:uppercase; color:${ticket.priority === 'critical' ? 'var(--danger)' : 'inherit'}">${ticket.priority}</span></td>
+                    <td><span class="badge badge-${ticket.status}">${ticket.status.replace("_", " ")}</span></td>
+                    <td>${actionInterfaceMarkup}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Expose function parameters to window context scope variables
+        window.approveAndRouteTicket = async function(docId) {
+            const selectElement = document.getElementById(`assign-${docId}`);
+            const assignedContractor = selectElement.value;
+            
+            const docRef = doc(db, "maintenance_tickets", docId);
+            try {
+                await updateDoc(docRef, {
+                    status: "active",
+                    assignedContractorUid: assignedContractor
+                });
+            } catch (err) {
+                alert("Routing update rejected: " + err.message);
+            }
+        };
+
+        window.resolveTicket = async function(docId) {
+            const docRef = doc(db, "maintenance_tickets", docId);
+            try {
+                await updateDoc(docRef, {
+                    status: "resolved",
+                    resolvedDate: new Date().toISOString()
+                });
+            } catch (err) {
+                alert("Resolution status write failure: " + err.message);
+            }
+        };
+
+        document.getElementById("ticketScopeFilter").onchange = () => renderTicketsTable();
+        document.getElementById("ticketSearch").oninput = () => renderTicketsTable();
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        document.getElementById("logoutBtn").onclick = () => {
+            localStorage.clear();
+            window.location.href = "login.html";
+        };
+    </script>
+</body>
+</html>
