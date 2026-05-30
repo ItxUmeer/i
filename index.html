@@ -29,7 +29,7 @@
             <button type="submit" class="btn-primary" id="loginSubmitBtn" style="margin-top: 10px;">
                 Authenticate Account
             </button>
-            <div id="loginError"></div>
+            <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; font-weight: 600; text-align: center;"></div>
         </form>
     </div>
 </div>
@@ -64,20 +64,30 @@
                 const userData = userDocSnap.data();
                 const systemRole = userData.role; // e.g., 'admin', 'planner', 'contractor_hvac'
 
-                // 3. Save parameters into local browser session state tokens
+                if (!systemRole) {
+                    throw new Error("Role property missing from your database profile object.");
+                }
+
+                // 3. 🧼 FLUSH STALE STORAGE & COMMIT FRESH AUTHORIZATION PARAMS
+                localStorage.clear();
                 localStorage.setItem("uid", user.uid);
-                localStorage.setItem("role", systemRole);
+                localStorage.setItem("role", systemRole.toLowerCase().trim());
                 localStorage.setItem("email", user.email);
 
                 // 4. Dispatch directly to the main workspace control center
                 window.location.href = "dashboard.html";
             } else {
-                throw new Error("Your user profile configuration token was not found by Firestore.");
+                throw new Error("Your user profile UID string key was not found inside the users Firestore collection registry.");
             }
 
         } catch (error) {
             console.error("Login Exception:", error);
-            errDiv.innerText = "Authentication Failed: " + error.message;
+            // Provide localized hints for administrative mapping oversights
+            if (error.message.includes("Firestore")) {
+                errDiv.innerText = "Security Halt: Account exists but profile is missing in Firestore /users collection.";
+            } else {
+                errDiv.innerText = "Authentication Failed: " + error.message;
+            }
             btn.disabled = false;
             btn.innerText = "Authenticate Account";
         }
