@@ -12,10 +12,22 @@
     <header class="header">
         <div class="header-left">
             <button id="menuBtn">☰</button>
-            <span class="header-title">DCAS Facilities Hub</span>
+            <span class="header-title">DCAS CMMS</span>
         </div>
+
+        <div class="header-search-location-bar">
+            <span class="location-scope-icon">📍</span>
+            <select id="headerGlobalLocationFilter" class="header-location-selector">
+                <option value="all">All 3 Property Scopes</option>
+                <option value="hq">Headquarters Building</option>
+                <option value="staff">Staff Accommodation</option>
+                <option value="station">Outside Station Network</option>
+            </select>
+            <input type="text" id="headerGlobalSearch" class="header-global-input-search" placeholder="Search tasks, assets, or AMC numbers globally...">
+        </div>
+
         <div class="user-box">
-            <span id="userRole">Checking Profile...</span>
+            <span id="userRole">Checking Credentials...</span>
             <button id="logoutBtn">Logout</button>
         </div>
     </header>
@@ -29,127 +41,82 @@
             
             <div class="page-title" id="dashTitle">Facilities Hub Dashboard</div>
 
-            <div class="filter-bar restricted-executive-view" id="executiveFilters">
-                <div class="filter-group">
-                    <label>Contract Service Line</label>
-                    <select id="filterStream"><option>All 16 AMC Services</option></select>
+            <div class="location-summary-strip restricted-executive-view" id="executiveSummaryStrip">
+                
+                <div class="summary-segment-box" style="border-left: 4px solid #2563eb;">
+                    <h4>🏢 Headquarters Building</h4>
+                    <div class="segment-metrics-row">
+                        <div class="segment-datapoint"><span>Total Logs</span><val>1,840</val></div>
+                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">42</val></div>
+                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">11</val></div>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <label>Execution Mode</label>
-                    <select><option>All Active Tasks</option><option>Planned Schedules</option><option>On-Request Services</option></select>
+
+                <div class="summary-segment-box" style="border-left: 4px solid #10b981;">
+                    <h4>🏠 Staff Accommodation</h4>
+                    <div class="segment-metrics-row">
+                        <div class="segment-datapoint"><span>Total Logs</span><val>920</val></div>
+                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">28</val></div>
+                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">06</val></div>
+                    </div>
                 </div>
+
+                <div class="summary-segment-box" style="border-left: 4px solid #f59e0b;">
+                    <h4>🚑 Outside Station Network</h4>
+                    <div class="segment-metrics-row">
+                        <div class="segment-datapoint"><span>Total Logs</span><val>1,360</val></div>
+                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">44</val></div>
+                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">15</val></div>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="metrics-grid-6 restricted-executive-view" id="executiveMetrics">
-                <div class="metric-mini" style="border-top: 3px solid #f59e0b;"><h4>Total Requests</h4><p style="color:#f59e0b;">4,120</p></div>
-                <div class="metric-mini" style="border-top: 3px solid #2563eb;"><h4>Active Open</h4><p style="color:#2563eb;">114</p></div>
-                <div class="metric-mini" style="border-top: 3px solid #d946ef;"><h4>Rejected</h4><p style="color:#d946ef;">32</p></div>
-                <div class="metric-mini" style="border-top: 3px solid #10b981;"><h4>Resolved</h4><p style="color:#10b981;">3,974</p></div>
-                <div class="metric-mini" style="border-top: 3px solid #ea580c;"><h4>Planned PPM</h4><p style="color:#ea580c;">512</p></div>
-                <div class="metric-mini" style="border-top: 3px solid #ef4444;"><h4>Overdue Tasks</h4><p style="color:#ef4444;">8</p></div>
+            <div class="kpi-grid restricted-executive-view" id="executiveMetrics">
+                <div class="kpi-card" style="border-top: 3px solid #f59e0b;"><h3>Total Requests</h3><p style="color:#f59e0b;" id="valTotalReq">4,120</p></div>
+                <div class="kpi-card" style="border-top: 3px solid #2563eb;"><h3>Active Open</h3><p style="color:#2563eb;" id="valActiveOpen">114</p></div>
+                <div class="kpi-card" style="border-top: 3px solid #d946ef;"><h3>Rejected Jobs</h3><p style="color:#d946ef;" id="valRejectedJobs">32</p></div>
+                <div class="kpi-card" style="border-top: 3px solid #10b981;"><h3>Resolved Logs</h3><p style="color:#10b981;" id="valResolvedLogs">3,974</p></div>
+                <div class="kpi-card" style="border-top: 3px solid #ea580c;"><h3>Planned PPM</h3><p style="color:#ea580c;" id="valPlannedPpm">512</p></div>
+                <div class="kpi-card" style="border-top: 3px solid #ef4444;"><h3>Overdue Tasks</h3><p style="color:#ef4444;" id="valOverdueTasks">8</p></div>
             </div>
 
             <div class="charts-row-split restricted-executive-view" id="executiveCharts">
                 <div class="chart-box-card">
-                    <h3>Service Contract SLA Delivery Rate</h3>
-                    <div class="chart-canvas-wrapper"><canvas id="chartSla"></canvas></div>
+                    <h3>Service AMC Target vs Realized Delivery Rate (SLA %)</h3>
+                    <div class="chart-canvas-wrapper"><canvas id="chartSlaCandle"></canvas></div>
                 </div>
                 <div class="chart-box-card">
-                    <h3>PPM Planned Schedules vs On-Request Jobs</h3>
-                    <div class="chart-canvas-wrapper"><canvas id="chartTypeDistribution"></canvas></div>
+                    <h3>PPM Operations Execution Bounds (Task Capacity Boundaries)</h3>
+                    <div class="chart-canvas-wrapper"><canvas id="chartPpmCandle"></canvas></div>
                 </div>
             </div>
 
-            <div class="section-headline">System Utility Frameworks</div>
+            <div class="section-headline">System Core Framework Engines</div>
             <div class="core-sys-grid">
-                <a href="ppm.html" class="sys-card"><h3>📅 PPM Management Section</h3> <span>→</span></a>
-                <a href="assets.html" class="sys-card"><h3>🏭 Assets Inventory Module</h3> <span>→</span></a>
-                <a href="inventory.html" class="sys-card"><h3>📦 Stock Materials Control</h3> <span>→</span></a>
+                <a href="ppm.html" class="sys-card"><h3>📅 PPM Maintenance Engine Plan</h3> <span>→</span></a>
+                <a href="assets.html" class="sys-card"><h3>🏭 Asset Control Infrastructure Registers</h3> <span>→</span></a>
+                <a href="inventory.html" class="sys-card"><h3>📦 Materials Inventory Stockhouse</h3> <span>→</span></a>
             </div>
 
             <div class="section-headline">16 Contractual AMC Core Services</div>
             <div class="services-portal-grid">
-                
-                <a href="building-maintenance.html" class="portal-card">
-                    <div class="portal-icon">🏢</div>
-                    <div class="portal-meta"><h3>1. Building Maintenance</h3><p>Civil & Structural Work</p></div>
-                </a>
-
-                <a href="swimming-pool.html" class="portal-card">
-                    <div class="portal-icon">🏊‍♂️</div>
-                    <div class="portal-meta"><h3>2. Swimming Pool</h3><p>Filtration & Water Testing</p></div>
-                </a>
-
-                <a href="cleaning.html" class="portal-card">
-                    <div class="portal-icon">🧹</div>
-                    <div class="portal-meta"><h3>3. Cleaning & Janitorial</h3><p>Sanitation Rotations</p></div>
-                </a>
-
-                <a href="pestcontrol.html" class="portal-card">
-                    <div class="portal-icon">🪰</div>
-                    <div class="portal-meta"><h3>4. Pest Control</h3><p>Vector Spray Treatments</p></div>
-                </a>
-
-                <a href="security-guards.html" class="portal-card">
-                    <div class="portal-icon">💂‍♂️</div>
-                    <div class="portal-meta"><h3>5. Security Services</h3><p>Guard Deployment Records</p></div>
-                </a>
-
-                <a href="air-conditioning.html" class="portal-card">
-                    <div class="portal-icon">❄️</div>
-                    <div class="portal-meta"><h3>6. Air Conditioning</h3><p>HVAC & Chiller Tuning</p></div>
-                </a>
-
-                <a href="elevators.html" class="portal-card">
-                    <div class="portal-icon">🛗</div>
-                    <div class="portal-meta"><h3>7. Elevators & Lifts</h3><p>Safety Cable Diagnostics</p></div>
-                </a>
-
-                <a href="fire-system.html" class="portal-card">
-                    <div class="portal-icon">🔥</div>
-                    <div class="portal-meta"><h3>8. Fire System</h3><p>Alarms & Pump Stations</p></div>
-                </a>
-
-                <a href="security-systems.html" class="portal-card">
-                    <div class="portal-icon">🛡️</div>
-                    <div class="portal-meta"><h3>9. Security Systems</h3><p>CCTV, Barriers & Gates</p></div>
-                </a>
-
-                <a href="audio-visual.html" class="portal-card">
-                    <div class="portal-icon">🔊</div>
-                    <div class="portal-meta"><h3>10. Audio & Visual</h3><p>PA Systems & Comms Rigging</p></div>
-                </a>
-
-                <a href="medicalwaste.html" class="portal-card">
-                    <div class="portal-icon">🏥</div>
-                    <div class="portal-meta"><h3>11. Medical Waste</h3><p>Hazardous Incineration Run</p></div>
-                </a>
-
-                <a href="generalwaste.html" class="portal-card">
-                    <div class="portal-icon">🗑️</div>
-                    <div class="portal-meta"><h3>12. General Waste</h3><p>Daily Refuse Dump Cycles</p></div>
-                </a>
-
-                <a href="sewage.html" class="portal-card">
-                    <div class="portal-icon">🚰</div>
-                    <div class="portal-meta"><h3>13. Sewage Waste</h3><p>Tanker Drainage Dispatches</p></div>
-                </a>
-
-                <a href="landscaping.html" class="portal-card">
-                    <div class="portal-icon">🌳</div>
-                    <div class="portal-meta"><h3>14. Landscaping</h3><p>Gardens & Water Lines</p></div>
-                </a>
-
-                <a href="flagsupply.html" class="portal-card">
-                    <div class="portal-icon">🚩</div>
-                    <div class="portal-meta"><h3>15. Flag & Pole Supply</h3><p>Masts, Rigging & Halyards</p></div>
-                </a>
-
-                <a href="hr-obligation.html" class="portal-card">
-                    <div class="portal-icon">📋</div>
-                    <div class="portal-meta"><h3>16. HR Obligation</h3><p>Contract Labor Compliance</p></div>
-                </a>
-
+                <a href="building-maintenance.html" class="portal-card"><div class="portal-icon">🏢</div><div class="portal-meta"><h3>1. Building Maintenance</h3><p>Civil & Structural Repairs</p></div></a>
+                <a href="swimming-pool.html" class="portal-card"><div class="portal-icon">🏊‍♂️</div><div class="portal-meta"><h3>2. Swimming Pool</h3><p>Filtration & Chemical Pumps</p></div></a>
+                <a href="cleaning.html" class="portal-card"><div class="portal-icon">🧹</div><div class="portal-meta"><h3>3. Cleaning & Janitorial</h3><p>Sanitation & Housekeeping</p></div></a>
+                <a href="pestcontrol.html" class="portal-card"><div class="portal-icon">🪰</div><div class="portal-meta"><h3>4. Pest Control</h3><p>Vector Spray Disinfection</p></div></a>
+                <a href="security-guards.html" class="portal-card"><div class="portal-icon">💂‍♂️</div><div class="portal-meta"><h3>5. Security Services</h3><p>Guard Deployments & Patrols</p></div></a>
+                <a href="air-conditioning.html" class="portal-card"><div class="portal-icon">❄️</div><div class="portal-meta"><h3>6. Air Conditioning</h3><p>HVAC & Chiller Maintenance</p></div></a>
+                <a href="elevators.html" class="portal-card"><div class="portal-icon">🛗</div><div class="portal-meta"><h3>7. Elevators & Lifts</h3><p>Safety Audits & Mechanicals</p></div></a>
+                <a href="fire-system.html" class="portal-card"><div class="portal-icon">🔥</div><div class="portal-meta"><h3>8. Fire System</h3><p>Alarms, Sprinklers & Extinguishers</p></div></a>
+                <a href="security-systems.html" class="portal-card"><div class="portal-icon">🛡️</div><div class="portal-meta"><h3>9. Security Systems</h3><p>CCTV Network & Access Barriers</p></div></a>
+                <a href="audio-visual.html" class="portal-card"><div class="portal-icon">🔊</div><div class="portal-meta"><h3>10. Audio & Visual</h3><p>Comms Rigging & Audio Arrays</p></div></a>
+                <a href="medicalwaste.html" class="portal-card"><div class="portal-icon">🏥</div><div class="portal-meta"><h3>11. Medical Waste</h3><p>Biohazard Transport Protocols</p></div></a>
+                <a href="generalwaste.html" class="portal-card"><div class="portal-icon">🗑️</div><div class="portal-meta"><h3>12. General Waste</h3><p>Refuse Removal & Dump Cycles</p></div></a>
+                <a href="sewage.html" class="portal-card"><div class="portal-icon">🚰</div><div class="portal-meta"><h3>13. Sewage Waste</h3><p>Tanker Clearance Dispatches</p></div></a>
+                <a href="landscaping.html" class="portal-card"><div class="portal-icon">🌳</div><div class="portal-meta"><h3>14. Landscaping</h3><p>Gardening & Irrigation Flow</p></div></a>
+                <a href="flagsupply.html" class="portal-card"><div class="portal-icon">🚩</div><div class="portal-meta"><h3>15. Flag & Pole Supply</h3><p>Masts, Rigging & Textiles</p></div></a>
+                <a href="hr-obligation.html" class="portal-card"><div class="portal-icon">📋</div><div class="portal-meta"><h3>16. HR Obligation</h3><p>Labor Compliance Auditing</p></div></a>
             </div>
 
         </div>
@@ -160,7 +127,18 @@
         import { loadSidebar } from "./sidebar.js";
         import { auth } from "./firebase.js";
 
-        // Call user role verify script wrapper logic
+        // Internal tracking references for analytical rendering routines
+        let chartInstanceSla = null;
+        let chartInstancePpm = null;
+
+        // Static dataset mapping across distinct architectural sectors
+        const locationDatasets = {
+            all: { total: 4120, open: 114, rejected: 32, resolved: 3974, ppm: 512, overdue: 8 },
+            hq: { total: 1840, open: 42, rejected: 12, resolved: 1786, ppm: 190, overdue: 2 },
+            staff: { total: 920, open: 28, rejected: 6, resolved: 886, ppm: 112, overdue: 1 },
+            station: { total: 1360, open: 44, rejected: 14, resolved: 1302, ppm: 210, overdue: 5 }
+        };
+
         checkAccess((role) => {
             if (!role) {
                 role = localStorage.getItem("userRole") || "staff";
@@ -169,17 +147,32 @@
             document.getElementById("userRole").innerText = role;
             loadSidebar(role);
 
-            // Access configuration evaluation condition matrix
             if (role === "admin" || role === "management" || role === "contractor") {
-                document.getElementById("executiveFilters").style.display = "flex";
+                document.getElementById("executiveSummaryStrip").style.display = "grid";
                 document.getElementById("executiveMetrics").style.display = "grid";
                 document.getElementById("executiveCharts").style.display = "grid";
                 document.getElementById("dashTitle").innerText = "Executive Control Hub";
                 
-                // Let DOM process visual frame allocation before creating canvas charts
-                setTimeout(initializeCharts, 100);
+                setTimeout(initializePerformanceCharts, 100);
             } else {
                 document.getElementById("dashTitle").innerText = "Operations Dashboard";
+            }
+        });
+
+        // Event handler for real-time dashboard data updates based on selected sector
+        document.getElementById("headerGlobalLocationFilter").addEventListener("change", (e) => {
+            const scope = e.target.value;
+            if (locationDatasets[scope]) {
+                const data = locationDatasets[scope];
+                document.getElementById("valTotalReq").innerText = data.total.toLocaleString();
+                document.getElementById("valActiveOpen").innerText = data.open.toLocaleString();
+                document.getElementById("valRejectedJobs").innerText = data.rejected.toLocaleString();
+                document.getElementById("valResolvedLogs").innerText = data.resolved.toLocaleString();
+                document.getElementById("valPlannedPpm").innerText = data.ppm.toLocaleString();
+                document.getElementById("valOverdueTasks").innerText = data.overdue.toLocaleString();
+                
+                // Trigger chart rendering adjustments on view scope change
+                updatePerformanceCharts(scope);
             }
         });
 
@@ -193,39 +186,88 @@
             window.location.href = "login.html";
         };
 
-        function initializeCharts() {
+        // Generates clean metric performance ranges using specialized multi-dataset floating configurations
+        function initializePerformanceCharts() {
             try {
-                const labels = ['Civil', 'Pool', 'Cleaning', 'Pest', 'Security', 'HVAC', 'Lifts', 'Fire', 'ELV', 'AV', 'Med', 'Gen', 'Sewage', 'Trees', 'Flags', 'HR'];
-
-                const ctxSla = document.getElementById('chartSla');
+                const labels = ['Civil', 'Pool', 'Cleaning', 'Pest', 'Security', 'HVAC', 'Lifts', 'Fire', 'ELV', 'AV', 'Med', 'Gen', 'Sewage', 'Landscape', 'Flags', 'HR'];
+                
+                const ctxSla = document.getElementById('chartSlaCandle');
                 if (ctxSla) {
-                    new Chart(ctxSla, {
+                    chartInstanceSla = new Chart(ctxSla, {
                         type: 'bar',
                         data: {
                             labels: labels,
-                            datasets: [{ label: 'SLA Delivery %', data: [94, 98, 92, 89, 100, 85, 96, 100, 91, 93, 100, 95, 88, 94, 99, 100], backgroundColor: '#2563eb' }]
+                            datasets: [
+                                {
+                                    label: 'Contractual Operational Variance Target vs Actual',
+                                    data: [[90, 94], [95, 98], [88, 92], [85, 89], [95, 100], [80, 85], [92, 96], [98, 100], [87, 91], [88, 93], [95, 100], [90, 95], [84, 88], [90, 94], [95, 99], [98, 100]],
+                                    backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                                    borderColor: '#1e3a8a',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    borderSkipped: false
+                                }
+                            ]
                         },
-                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 70, max: 100 } } }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: true, position: 'top' } },
+                            scales: { y: { min: 70, max: 105, title: { display: true, text: 'SLA Performance Bounds (%)' } } }
+                        }
                     });
                 }
 
-                const ctxDist = document.getElementById('chartTypeDistribution');
-                if (ctxDist) {
-                    new Chart(ctxDist, {
-                        type: 'line',
+                const ctxPpm = document.getElementById('chartPpmCandle');
+                if (ctxPpm) {
+                    chartInstancePpm = new Chart(ctxPpm, {
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [
-                                { label: 'Planned PPM', data: [40, 30, 150, 60, 20, 110, 45, 90, 35, 15, 52, 60, 48, 40, 12, 8], borderColor: '#10b981', fill: false, tension: 0.1 },
-                                { label: 'On-Request Jobs', data: [15, 8, 45, 22, 5, 64, 12, 4, 19, 9, 3, 14, 29, 6, 2, 0], borderColor: '#ea580c', fill: false, tension: 0.1 }
+                                {
+                                    label: 'PPM Task Load Target vs Actual Capacity',
+                                    data: [[10, 40], [5, 30], [40, 150], [15, 60], [5, 20], [30, 110], [10, 45], [20, 90], [10, 35], [5, 15], [15, 52], [20, 60], [12, 48], [10, 40], [2, 12], [1, 8]],
+                                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                    borderColor: '#065f46',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    borderSkipped: false
+                                }
                             ]
                         },
-                        options: { responsive: true, maintainAspectRatio: false }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: true, position: 'top' } },
+                            scales: { y: { min: 0, max: 180, title: { display: true, text: 'Volume Range Limits' } } }
+                        }
                     });
                 }
-            } catch (e) {
-                console.error("Chart generation error contextual log:", e);
+            } catch (err) {
+                console.error("Analytical chart visualization mounting routine failure:", err);
             }
+        }
+
+        function updatePerformanceCharts(scope) {
+            if (!chartInstanceSla || !chartInstancePpm) return;
+            
+            // Adjust visualization matrices dynamically based on user context properties selection
+            let slaMultiplier = 1.0;
+            let ppmMultiplier = 1.0;
+            
+            if (scope === 'hq') { slaMultiplier = 1.02; ppmMultiplier = 0.5; }
+            else if (scope === 'staff') { slaMultiplier = 0.97; ppmMultiplier = 0.3; }
+            else if (scope === 'station') { slaMultiplier = 0.95; ppmMultiplier = 0.4; }
+
+            const baseSla = [[90, 94], [95, 98], [88, 92], [85, 89], [95, 100], [80, 85], [92, 96], [98, 100], [87, 91], [88, 93], [95, 100], [90, 95], [84, 88], [90, 94], [95, 99], [98, 100]];
+            const basePpm = [[10, 40], [5, 30], [40, 150], [15, 60], [5, 20], [30, 110], [10, 45], [20, 90], [10, 35], [5, 15], [15, 52], [20, 60], [12, 48], [10, 40], [2, 12], [1, 8]];
+
+            chartInstanceSla.data.datasets[0].data = baseSla.map(range => [Math.max(70, Math.min(100, range[0] * slaMultiplier)), Math.max(70, Math.min(100, range[1] * slaMultiplier))]);
+            chartInstancePpm.data.datasets[0].data = basePpm.map(range => [Math.round(range[0] * ppmMultiplier), Math.round(range[1] * ppmMultiplier)]);
+
+            chartInstanceSla.update();
+            chartInstancePpm.update();
         }
     </script>
 </body>
