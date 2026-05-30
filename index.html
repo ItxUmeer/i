@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCAS Facilities CMMS - Login</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .public-portal-link-wrapper {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+            text-align: center;
+        }
+        .public-portal-link-wrapper p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .btn-public-link {
+            display: inline-block;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .btn-public-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body class="login-page">
 
@@ -31,6 +56,11 @@
             </button>
             <div id="loginError" style="color: red; font-size: 13px; margin-top: 10px; font-weight: 600; text-align: center;"></div>
         </form>
+
+        <div class="public-portal-link-wrapper">
+            <p>General staff member or public station operator?</p>
+            <a href="reports.html" class="btn-public-link">📢 Raise Reactive Maintenance Issue Publicly</a>
+        </div>
     </div>
 </div>
 
@@ -59,7 +89,7 @@
             localStorage.setItem("uid", sessionProfile.uid);
             localStorage.setItem("email", sessionProfile.email);
             
-            // 🔥 FIXED: Set both storage properties explicitly to keep roleguard.js completely synchronized
+            // Set both storage properties explicitly to keep roleguard.js completely synchronized
             localStorage.setItem("role", sessionProfile.role);
             localStorage.setItem("userRole", sessionProfile.role);
 
