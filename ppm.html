@@ -1,46 +1,3 @@
-/**
- * DCAS CMMS Enterprise Access Routing Shield
- * Protects frontend routes against unauthenticated and unauthorized account access vectors.
- */
-export function checkAccess(onVerifiedCallback) {
-    const sessionUid = localStorage.getItem("uid");
-    const sessionRole = localStorage.getItem("role");
-    
-    // 1. Force eject if no session data is active
-    if (!sessionUid || !sessionRole) {
-        localStorage.clear();
-        window.location.href = "index.html";
-        return;
-    }
-
-    // 2. Extract current filename execution string
-    const currentPathFile = window.location.pathname.split("/").pop();
-
-    // 3. Structural Access Allocation Map matrix (Configure your route rules here)
-    const accessMatrixRules = {
-        "dashboard.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "tickets.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "assets.html": ["admin", "planner"], // Block contractors and viewers out of asset editing
-        "ppm.html": ["admin", "planner", "supervisor_viewer"] // Block contractors out of scheduling plans
-    };
-
-    const permittedRolesForRoute = accessMatrixRules[currentPathFile];
-
-    if (permittedRolesForRoute) {
-        if (permittedRolesForRoute.includes(sessionRole)) {
-            // Authorized! Pass control back to the layout file
-            if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-        } else {
-            // Eject if authorized role token mismatch is captured
-            alert("Security Alert: Your access classification level does not permit entrance to this zone.");
-            window.location.href = "dashboard.html"; // Safely bounce back to center home
-        }
-    } else {
-        // Fallback for general unlocked layout frames
-        if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-    }
-}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,7 +35,7 @@ export function checkAccess(onVerifiedCallback) {
     <div class="dashboard-container">
         
         <div class="asset-action-row">
-            <h2 class="page-title">Preventive Service Trackers</h2>
+            <h2 class="page-title" id="ppmPageContextTitle">Preventive Service Trackers</h2>
             <button class="btn-primary" id="openPpmModalBtn" style="display:none;">📅 Schedule New PPM Task Sequence</button>
         </div>
 
@@ -170,24 +127,50 @@ export function checkAccess(onVerifiedCallback) {
     let localPpmCacheArray = [];
     let runtimeValidatedRole = "";
 
+    // 🛡️ Trigger the Role Access Shield Matrix
     checkAccess((userRole) => {
         runtimeValidatedRole = userRole;
         document.getElementById("userRole").innerText = userRole.toUpperCase();
         loadSidebar(userRole);
 
+        // Limit action buttons if role doesn't match admin or planner authorization
         if (userRole === "admin" || userRole === "planner") {
             document.getElementById("openPpmModalBtn").style.display = "block";
         }
+        
+        if (userRole.startsWith("contractor_")) {
+            document.getElementById("ppmPageContextTitle").innerText = "Assigned Preventive Service Trackers";
+        }
+
         streamPlannedSchedulesRegistry();
     });
 
-    document.getElementById("logoutBtn").onclick = () => { localStorage.clear(); window.location.href = "index.html"; };
+    document.getElementById("logoutBtn").onclick = () => { 
+        localStorage.clear(); 
+        window.location.href = "index.html"; 
+    };
 
     async function streamPlannedSchedulesRegistry() {
         try {
             const snap = await getDocs(collection(db, "ppm_schedules"));
-            localPpmCacheArray = [];
-            snap.forEach(docSnap => localPpmCacheArray.push(docSnap.data()));
+            let rawDataArray = [];
+            snap.forEach(docSnap => rawDataArray.push(docSnap.data()));
+            
+            // ==========================================================================
+            // 🔒 REVENUE ENGINE DATA PARTITION MATRIX FOR ACTIVE SERVICE CONTRACTORS
+            // ==========================================================================
+            if (runtimeValidatedRole.startsWith("contractor_")) {
+                let targetCategoryFilter = "";
+                if (runtimeValidatedRole === "contractor_hvac") targetCategoryFilter = "air-conditioning";
+                if (runtimeValidatedRole === "contractor_civil") targetCategoryFilter = "building-maintenance";
+                if (runtimeValidatedRole === "contractor_fire") targetCategoryFilter = "fire-system";
+
+                localPpmCacheArray = rawDataArray.filter(p => p.amcCategory === targetCategoryFilter);
+            } else {
+                // Internal staff parse everything globally
+                localPpmCacheArray = rawDataArray;
+            }
+
             renderPpmTable(localPpmCacheArray);
         } catch (err) {
             console.error("Firestore Core Connection Interrupt: ", err);
@@ -197,7 +180,7 @@ export function checkAccess(onVerifiedCallback) {
     function renderPpmTable(items) {
         const body = document.getElementById("ppmTableBody");
         if(items.length === 0) {
-            body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--muted);">No scheduled maintenance logs mapped to this criteria view.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--muted); padding: 30px;">No scheduled maintenance logs mapped to this criteria view.</td></tr>`;
             return;
         }
 
@@ -250,6 +233,7 @@ export function checkAccess(onVerifiedCallback) {
         }
     };
 
+    // Reflect dynamic filter pipeline on user updates
     function processLiveFilters() {
         const queryVal = document.getElementById("ppmSearchInput").value.toLowerCase();
         const locScope = document.getElementById("ppmLocationFilter").value;
