@@ -107,10 +107,22 @@
                 <label>Maintenance Discipline Category</label>
                 <select id="issueCategory" required>
                     <option value="" disabled selected>Select service group...</option>
-                    <option value="air-conditioning">1. Air Conditioning (HVAC)</option>
-                    <option value="building-maintenance">2. Building Maintenance Civil</option>
-                    <option value="fire-system">3. Fire & Safety Systems</option>
-                    <option value="elevators">4. Elevators & Lifts</option>
+                    <option value="air-conditioning">1. Air Conditioning & HVAC</option>
+                    <option value="civil-works">2. Building Maintenance & Civil Works</option>
+                    <option value="fire-systems">3. Fire & Safety Systems</option>
+                    <option value="elevators-lifts">4. Elevators & Vertical Transport Lifts</option>
+                    <option value="electrical-distribution">5. Electrical & Power Distribution</option>
+                    <option value="plumbing-sanitary">6. Plumbing, Drainage & Sanitary</option>
+                    <option value="access-control-cctv">7. Access Control, Gate Barriers & CCTV Systems</option>
+                    <option value="ups-batteries">8. UPS Systems & Emergency Batteries</option>
+                    <option value="diesel-generators">9. Backup Diesel Generators</option>
+                    <option value="water-tanks-pumps">10. Domestic Water Tanks & Transfer Pumps</option>
+                    <option value="cladding-facade">11. Exterior Cladding & Glass Facade Cleaning</option>
+                    <option value="carpentry-joinery">12. Furniture, Carpentry & Joinery Works</option>
+                    <option value="painting-decoration">13. Painting & Wall Decoration Fixes</option>
+                    <option value="pest-control">14. Pest Control Services</option>
+                    <option value="signage-branding">15. Station Signage & Internal Branding</option>
+                    <option value="landscape-irrigation">16. Landscaping & Irrigation Systems</option>
                 </select>
             </div>
 
@@ -173,7 +185,7 @@
         try {
             await addDoc(collection(db, "maintenance_tickets"), ticketPayload);
             document.getElementById("publicIssueForm").style.display = "none";
-            document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style="color:#1e3a8a;">${referenceId}</b>`;
+            document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style=\"color:#1e3a8a;\">${referenceId}</b>`;
             document.getElementById("successState").style.display = "block";
         } catch (error) {
             alert("Submission error: " + error.message);
