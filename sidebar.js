@@ -1,63 +1,62 @@
-export function loadSidebar(role) {
-    const menu = document.getElementById("sidebarMenu");
-    if (!menu) return;
-    
-    let items = [];
+/**
+ * DCAS CMMS Navigation Drawer Engine
+ * Dynamically renders links based on active user profiles
+ */
+export function loadSidebar(currentUserRole) {
+    const sidebarContainer = document.getElementById("sidebarMenu");
+    if (!sidebarContainer) return;
 
-    switch(role) {
-        case "staff":
-            items = [
-                ["🏠 Operations View", "dashboard.html"],
-                ["📝 Raise Request", "requests.html"],
-                ["📋 My Requests", "myrequests.html"]
-            ];
-            break;
+    // Get current active file name to apply high-contrast active styling tags
+    const currentPath = window.location.pathname.split("/").pop() || "dashboard.html";
 
-        case "fsu":
-        case "supervisor":
-            items = [
-                ["🏠 Operations View", "dashboard.html"],
-                ["✅ Approvals Hub", "approvals.html"],
-                ["📝 Requests", "requests.html"],
-                ["🔧 Work Orders", "workorders.html"],
-                ["📅 PPM Schedules", "ppm.html"]
-            ];
-            break;
+    // Complete Global Sidebar Workspace Registry
+    const navigationLinksRegistry = [
+        {
+            name: "Executive Hub",
+            file: "dashboard.html",
+            icon: "📊",
+            allowedRoles: ["admin", "planner"]
+        },
+        {
+            name: "Work Orders Triage",
+            file: "tickets.html",
+            icon: "🔧",
+            allowedRoles: ["admin", "contractor_hvac", "contractor_civil", "contractor_fire"]
+        },
+        {
+            name: "Assets Registry",
+            file: "assets.html",
+            icon: "🏢",
+            allowedRoles: ["admin", "planner"]
+        },
+        {
+            name: "PPM Schedules",
+            file: "ppm.html",
+            icon: "📅",
+            allowedRoles: ["admin", "planner", "supervisor_viewer"]
+        },
+        {
+            name: "Raise Issue Portal",
+            file: "reports.html",
+            icon: "⚠️",
+            allowedRoles: ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"]
+        }
+    ];
 
-        case "contractor":
-            items = [
-                ["🏠 Executive Hub", "dashboard.html"],
-                ["🔧 Work Orders", "workorders.html"],
-                ["📅 PPM Scheduling", "ppm.html"],
-                ["🏭 Assets Control", "assets.html"],
-                ["📦 Inventory Engine", "inventory.html"]
-            ];
-            break;
+    // Compile markup matching permitted roles
+    let sidebarMarkupHtml = "";
 
-        case "management":
-        case "admin":
-            items = [
-                ["🏠 Executive Hub", "dashboard.html"],
-                ["📝 Requests Registry", "requests.html"],
-                ["✅ Operations Approvals", "approvals.html"],
-                ["🔧 Work Orders Tracking", "workorders.html"],
-                ["🏭 Assets Registry", "assets.html"],
-                ["📅 PPM Schedules", "ppm.html"],
-                ["📦 Material Stockroom", "inventory.html"]
-            ];
-            break;
-    }
-
-    menu.innerHTML = "";
-    items.forEach(item => {
-        // Evaluate active route mapping match
-        const currentPath = window.location.pathname;
-        const isActive = currentPath.includes(item[1]) ? "active" : "";
-        
-        menu.innerHTML += `
-            <a href="${item[1]}" class="menu-item ${isActive}">
-                ${item[0]}
-            </a>
-        `;
+    navigationLinksRegistry.forEach(item => {
+        if (item.allowedRoles.includes(currentUserRole)) {
+            const isActiveClass = (currentPath === item.file) ? "active" : "";
+            sidebarMarkupHtml += `
+                <a href="${item.file}" class="menu-item ${isActiveClass}">
+                    <span>${item.icon}</span>
+                    <span>${item.name}</span>
+                </a>
+            `;
+        }
     });
+
+    sidebarContainer.innerHTML = sidebarMarkupHtml;
 }
