@@ -7,6 +7,76 @@
 <title>DCAS Facilities CMMS</title>
 
 <link rel="stylesheet" href="style.css">
+
+<style>
+/* Quick working style so page is NOT blank */
+body.login-page {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.login-logo h1 {
+    margin: 0;
+    color: #1e3a8a;
+}
+
+.login-logo p {
+    margin: 5px 0 20px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #2563eb;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+#loginError {
+    margin-top: 10px;
+    color: red;
+    font-size: 14px;
+}
+</style>
+
 </head>
 
 <body class="login-page">
@@ -22,19 +92,9 @@
 
         <form id="loginForm">
 
-            <input
-                type="email"
-                id="email"
-                placeholder="Email Address"
-                required
-            >
+            <input type="email" id="email" placeholder="Email Address" required>
 
-            <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                required
-            >
+            <input type="password" id="password" placeholder="Password" required>
 
             <button type="submit" class="btn-primary">
                 Login
@@ -53,35 +113,30 @@
 import { login } from "./auth.js";
 
 document.getElementById("loginForm")
-.addEventListener("submit", async(e)=>{
+.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    const email =
-        document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
-    const password =
-        document.getElementById("password").value;
+    const errorBox = document.getElementById("loginError");
+    errorBox.innerText = "";
 
-    try{
+    try {
 
-        const user =
-            await login(email,password);
+        const user = await login(email, password);
 
-        localStorage.setItem(
-            "userRole",
-            user.role
-        );
+        if (!user || !user.role) {
+            throw new Error("Invalid login response");
+        }
 
-        window.location.href =
-            "dashboard.html";
+        localStorage.setItem("userRole", user.role);
 
-    }catch(error){
+        window.location.href = "dashboard.html";
 
-        document.getElementById(
-            "loginError"
-        ).innerText =
-            error.message;
+    } catch (error) {
+        errorBox.innerText = error.message || "Login failed";
     }
 
 });
