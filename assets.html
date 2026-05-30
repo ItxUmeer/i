@@ -79,10 +79,22 @@
             <div class="form-input-container">
                 <label>Service Contract Category Group</label>
                 <select id="formAmcCategory" required>
-                    <option value="air-conditioning">Air Conditioning Systems (HVAC)</option>
-                    <option value="building-maintenance">Building Maintenance Civil</option>
-                    <option value="fire-system">Fire Alarm & Fighting Systems</option>
-                    <option value="cleaning-janitorial">Cleaning & Janitorial Services</option>
+                    <option value="building-maintenance">1. Building Maintenance Services</option>
+                    <option value="swimming-pool">2. Swimming Pool Maintenance Services</option>
+                    <option value="cleaning-services">3. Internal & External Cleaning Services</option>
+                    <option value="pest-control">4. Pest Control Services</option>
+                    <option value="security-safety-lifeguard">5. Security, Safety, and Lifeguard Services</option>
+                    <option value="elevator-maintenance">6. Elevator Maintenance Services</option>
+                    <option value="air-conditioning">7. Air Conditioning Equipment Maintenance Services</option>
+                    <option value="fire-systems">8. Fire Systems Maintenance Services</option>
+                    <option value="security-systems">9. Security Systems Maintenance Services</option>
+                    <option value="audio-visual">10. Audio-Visual Maintenance Services</option>
+                    <option value="sewage-pumping">11. Sewage Pumping Services</option>
+                    <option value="medical-waste">12. Medical Waste Transportation Services</option>
+                    <option value="general-waste">13. General Waste Transportation Services</option>
+                    <option value="landscaping">14. Internal & External Landscaping Maintenance</option>
+                    <option value="flagpole-maintenance">15. Flagpole Maintenance & Flag Replacement</option>
+                    <option value="human-resources">16. Human Resources Obligations</option>
                 </select>
             </div>
             <div class="form-input-container">
@@ -155,7 +167,7 @@
                 let targetCategory = "";
                 if (applicationUserRole === "contractor_hvac") targetCategory = "air-conditioning";
                 if (applicationUserRole === "contractor_civil") targetCategory = "building-maintenance";
-                if (applicationUserRole === "contractor_fire") targetCategory = "fire-system";
+                if (applicationUserRole === "contractor_fire") targetCategory = "fire-systems";
 
                 localAssetsCacheArray = baseAssets.filter(asset => asset.amcCategory === targetCategory);
             } else {
