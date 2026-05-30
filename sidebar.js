@@ -1,62 +1,52 @@
 /**
- * DCAS CMMS Navigation Drawer Engine
- * Dynamically renders links based on active user profiles
+ * DCAS CMMS Role-Based Access Control Guard (RBAC)
+ * Protects frontend pages from unauthorized URL direct-entry.
  */
-export function loadSidebar(currentUserRole) {
-    const sidebarContainer = document.getElementById("sidebarMenu");
-    if (!sidebarContainer) return;
 
-    // Get current active file name to apply high-contrast active styling tags
-    const currentPath = window.location.pathname.split("/").pop() || "dashboard.html";
+// Define which roles are allowed to view which filenames
+const PAGE_ACCESS_RULES = {
+    "dashboard.html": ["admin", "planner"],
+    "assets.html": ["admin", "planner"],
+    "ppm.html": ["admin", "planner", "supervisor_viewer"],
+    "tickets.html": ["admin", "contractor_hvac", "contractor_civil", "contractor_fire"]
+};
 
-    // Complete Global Sidebar Workspace Registry
-    const navigationLinksRegistry = [
-        {
-            name: "Executive Hub",
-            file: "dashboard.html",
-            icon: "📊",
-            allowedRoles: ["admin", "planner"]
-        },
-        {
-            name: "Work Orders Triage",
-            file: "tickets.html",
-            icon: "🔧",
-            allowedRoles: ["admin", "contractor_hvac", "contractor_civil", "contractor_fire"]
-        },
-        {
-            name: "Assets Registry",
-            file: "assets.html",
-            icon: "🏢",
-            allowedRoles: ["admin", "planner"]
-        },
-        {
-            name: "PPM Schedules",
-            file: "ppm.html",
-            icon: "📅",
-            allowedRoles: ["admin", "planner", "supervisor_viewer"]
-        },
-        {
-            name: "Raise Issue Portal",
-            file: "reports.html",
-            icon: "⚠️",
-            allowedRoles: ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"]
+/**
+ * Checks the current session role and enforces access restrictions
+ * @param {Function} successCallback - Runs if the user passes the role check
+ */
+export function checkAccess(successCallback) {
+    const sessionRole = localStorage.getItem("userRole");
+    const currentFile = window.location.pathname.split("/").pop() || "dashboard.html";
+
+    // 1. If no role exists, they aren't logged in
+    if (!sessionRole) {
+        alert("Access Denied: Please log in to verify your identity.");
+        window.location.href = "index.html"; // Redirects straight to your new login root
+        return;
+    }
+
+    // 2. Check if the current page has restrictions defined
+    if (PAGE_ACCESS_RULES[currentFile]) {
+        const isAllowed = PAGE_ACCESS_RULES[currentFile].includes(sessionRole);
+        
+        if (!isAllowed) {
+            alert(`Unauthorized Access: Your role [${sessionRole.toUpperCase()}] does not have permission to view this console.`);
+            
+            // Smart routing: redirect them to a page they actually have access to
+            if (sessionRole.startsWith("contractor")) {
+                window.location.href = "tickets.html";
+            } else if (sessionRole === "supervisor_viewer") {
+                window.location.href = "ppm.html";
+            } else {
+                window.location.href = "index.html";
+            }
+            return;
         }
-    ];
+    }
 
-    // Compile markup matching permitted roles
-    let sidebarMarkupHtml = "";
-
-    navigationLinksRegistry.forEach(item => {
-        if (item.allowedRoles.includes(currentUserRole)) {
-            const isActiveClass = (currentPath === item.file) ? "active" : "";
-            sidebarMarkupHtml += `
-                <a href="${item.file}" class="menu-item ${isActiveClass}">
-                    <span>${item.icon}</span>
-                    <span>${item.name}</span>
-                </a>
-            `;
-        }
-    });
-
-    sidebarContainer.innerHTML = sidebarMarkupHtml;
+    // 3. If everything passes, let the page load its data
+    if (successCallback) {
+        successCallback(sessionRole);
+    }
 }
