@@ -3,202 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - Work Order Dispatch</title>
+    <title>DCAS CMMS - Work Orders Triage</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .badge-pending_approval { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        .badge-active { background: rgba(37, 99, 235, 0.15); color: var(--primary); }
-        .badge-resolved { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .action-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight:600; outline:none; }
-        .action-btn { padding: 6px 12px; background: var(--primary); color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:12px; }
-    </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-left">
-            <button id="menuBtn">☰</button>
-            <span class="header-title">DCAS CMMS</span>
-        </div>
-        <div class="header-search-location-bar">
-            <span class="location-scope-icon">🔧</span>
-            <select id="ticketScopeFilter" class="header-location-selector" style="border:none;">
-                <option value="all">All Ticket Archives</option>
-                <option value="pending_approval">Pending Triage Review</option>
-                <option value="active">Active Operations</option>
-                <option value="resolved">Resolved Closures</option>
-            </select>
-            <input type="text" id="ticketSearch" class="header-global-input-search" placeholder="Filter by Ticket Code, Description or Zone Detail...">
-        </div>
-        <div class="user-box">
-            <span id="userRole">...</span>
-            <button id="logoutBtn">Logout</button>
-        </div>
-    </header>
+<div class="header">
+    <div class="header-left">
+        <button id="menuBtn">☰</button>
+        <span class="header-title">Work Orders Triage</span>
+    </div>
+    
+    <div class="header-search-location-bar">
+        <span class="location-scope-icon">📍</span>
+        <select id="globalLocationFilter" class="header-location-selector">
+            <option value="all">All 3 Property Scopes</option>
+            <option value="hq">Headquarters Building</option>
+            <option value="staff">Staff Accommodation</option>
+            <option value="station">Outside Station Network</option>
+        </select>
+        <input type="text" id="tableGlobalSearch" class="header-global-input-search" placeholder="Search by Ticket ID, asset descriptor, or category...">
+    </div>
 
-    <aside class="sidebar" id="sidebar">
-        <div id="sidebarMenu"></div>
-    </aside>
+    <div class="user-box">
+        <span id="userRole">Loading Matrix...</span>
+        <button id="logoutBtn">Logout</button>
+    </div>
+</div>
 
-    <main class="main-content">
-        <div class="dashboard-container">
-            <div class="page-title">Work Order Triage Dispatch</div>
+<div class="sidebar" id="sidebarMenu">
+    </div>
 
-            <div class="data-table-wrapper">
-                <table class="enterprise-table">
-                    <thead>
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Scope / Zone Location</th>
-                            <th>Discipline Service</th>
-                            <th>Issue Breakdown Summary</th>
-                            <th>Priority</th>
-                            <th>Status Matrix</th>
-                            <th>Triage Action Control</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ticketsTableBody">
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">
-                                Streaming dispatch ledger...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+<div class="main-content">
+    <div class="dashboard-container">
+        
+        <div class="asset-action-row">
+            <h2 class="page-title">Reactive Maintenance Registry</h2>
+            <button class="btn-success" id="openCreateTicketPanelBtn" style="display: none;">
+                ➕ Create Internal Work Order
+            </button>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="enterprise-table">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Property Scope</th>
+                        <th>Specific Location</th>
+                        <th>Service Group</th>
+                        <th>Issue Details</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Reported Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTableBody">
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--muted);">
+                            Connecting securely to Firestore cluster streams...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="ticketActionDrawer">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h2 id="drawerTicketIdTitle">Review Ticket</h2>
+            <button class="close-modal-btn" id="closeDrawerBtn">×</button>
+        </div>
+        
+        <form id="drawerActionForm" class="modal-form">
+            <input type="hidden" id="targetDocumentFirestoreId">
+            
+            <div class="form-input-container">
+                <label>Issue Summary</label>
+                <textarea id="drawerIssueDescription" readonly style="background: #f8fafc; border-color: var(--border); font-weight: 500;"></textarea>
             </div>
-        </div>
-    </main>
 
-    <script type="module">
-        import { db } from "./firebase.js";
-        import { collection, onSnapshot, query, doc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-        import { checkAccess } from "./roleguard.js";
-        import { loadSidebar } from "./sidebar.js";
+            <div id="adminRoutingControls" style="display: none; flex-direction: column; gap: 14px;">
+                <div class="form-input-container">
+                    <label>Assign Specialized Service Contractor</label>
+                    <select id="drawerContractorAssignment" required>
+                        <option value="" disabled selected>Select execution contractor...</option>
+                        <option value="contractor_hvac">Al-Futtaim (HVAC Team)</option>
+                        <option value="contractor_civil">Imdaad (Civil & Structural)</option>
+                        <option value="contractor_fire">Naffco (Fire & Safety Systems)</option>
+                    </select>
+                </div>
 
-        const tableBody = document.getElementById("ticketsTableBody");
-        let masterTicketsArray = [];
-        let systemCurrentUserRole = "";
+                <div class="form-input-container">
+                    <label>Update Status Classification</label>
+                    <select id="drawerStatusUpdate" required>
+                        <option value="pending_approval">Pending Triage Approval</option>
+                        <option value="active">Active (Dispatched to Field)</option>
+                        <option value="resolved">Resolved (Task Completed)</option>
+                    </select>
+                </div>
+            </div>
 
-        checkAccess((role) => {
-            systemCurrentUserRole = role || localStorage.getItem("userRole") || "staff";
-            document.getElementById("userRole").innerText = systemCurrentUserRole;
-            loadSidebar(systemCurrentUserRole);
-            initializeTicketStream();
+            <div id="contractorFeedbackControls" style="display: none;" class="form-input-container">
+                <label>Field Technician Diagnostic Resolution Notes</label>
+                <textarea id="drawerTechnicianNotes" placeholder="Describe components replaced, metrics monitored, or steps taken..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 16px;">Save Operational Updates</button>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+    import { db } from "./firebase.js";
+    import { checkAccess } from "./roleguard.js";
+    import { loadSidebar } from "./sidebar.js";
+    import { collection, getDocs, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    let globalActiveTicketsCache = [];
+    let authenticatedUserRole = "";
+
+    // Secure Entry Control Guard Initialization
+    checkAccess((sessionValidatedRole) => {
+        authenticatedUserRole = sessionValidatedRole;
+        document.getElementById("userRole").innerText = sessionValidatedRole.toUpperCase();
+        loadSidebar(sessionValidatedRole);
+        
+        // Expose configuration rules dynamically based on role matrix
+        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
+            document.getElementById("openCreateTicketPanelBtn").style.display = "flex";
+            document.getElementById("adminRoutingControls").style.display = "flex";
+        } else if (authenticatedUserRole.startsWith("contractor")) {
+            document.getElementById("contractorFeedbackControls").style.display = "flex";
+        }
+        
+        fetchTicketsDataPipeline();
+    });
+
+    // Logout Handler Entry Point
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "index.html";
+    });
+
+    // Stream Tickets from Cloud Firestore Collection
+    async function fetchTicketsDataPipeline() {
+        try {
+            const ticketsRef = collection(db, "maintenance_tickets");
+            // Fetch tickets ordered by reporting date newest first
+            const q = query(ticketsRef, orderBy("reportedDate", "desc"));
+            const querySnapshot = await getDocs(q);
+            
+            globalActiveTicketsCache = [];
+            querySnapshot.forEach((docSnap) => {
+                globalActiveTicketsCache.push({
+                    docId: docSnap.id,
+                    ...docSnap.data()
+                });
+            });
+
+            renderTableInterface(globalActiveTicketsCache);
+        } catch (error) {
+            console.error("Critical Stream Interruption Error: ", error);
+            document.getElementById("ticketsTableBody").innerHTML = `
+                <tr><td colspan="9" style="text-align:center; color:var(--danger); font-weight:700; padding:30px;">
+                    Authentication Data Pipeline Fault: Please ensure Firestore rules match completely.
+                </td></tr>`;
+        }
+    }
+
+    // Render Data Array to Interface Table Engine
+    function renderTableInterface(dataItems) {
+        const tbody = document.getElementById("ticketsTableBody");
+        if (dataItems.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:var(--muted);">No matching records logged on system data nodes.</td></tr>`;
+            return;
+        }
+
+        let compiledRowsMarkup = "";
+        dataItems.forEach((ticket) => {
+            // Apply structural filters for contractors so they only see their assigned disciplines
+            if (authenticatedUserRole.startsWith("contractor") && 
+                ticket.assignedContractorUid !== authenticatedUserRole) {
+                return; // Skips rendering unassigned contractor tickets completely
+            }
+
+            compiledRowsMarkup += `
+                <tr>
+                    <td style="font-weight:700; color:#1e3a8a;">${ticket.ticketId || 'N/A'}</td>
+                    <td style="text-transform:uppercase; font-size:11px; font-weight:600;">📍 ${ticket.locationScope || 'General'}</td>
+                    <td>${ticket.specificLocation || 'N/A'}</td>
+                    <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${ticket.amcCategory || 'N/A'}</code></td>
+                    <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ticket.description || 'N/A'}</td>
+                    <td><span class="badge badge-${ticket.priority || 'medium'}">${ticket.priority || 'medium'}</span></td>
+                    <td><span class="badge badge-${ticket.status || 'pending_approval'}">${ticket.status ? ticket.status.replace('_', ' ') : 'Pending'}</span></td>
+                    <td style="font-size:12px; color:var(--muted);">${ticket.reportedDate ? ticket.reportedDate.substring(0,10) : 'N/A'}</td>
+                    <td>
+                        <button class="btn-primary" style="height:30px; padding:0 12px; font-size:12px; width:auto;" onclick="openTriageDrawer('${ticket.docId}')">
+                            Manage
+                        </button>
+                    </td>
+                </tr>
+            `;
         });
 
-        function initializeTicketStream() {
-            const q = query(collection(db, "maintenance_tickets"), orderBy("reportedDate", "desc"));
+        tbody.innerHTML = compiledRowsMarkup || `<tr><td colspan="9" style="text-align:center; padding:40px; color:var(--muted);">No assigned operational work orders found for your profile access scope.</td></tr>`;
+    }
+
+    // Interactive Drawer Overlay Actions Opening Management Mapping Engine
+    window.openTriageDrawer = function(documentReferenceId) {
+        const targetData = globalActiveTicketsCache.find(t => t.docId === documentReferenceId);
+        if (!targetData) return;
+
+        document.getElementById("targetDocumentFirestoreId").value = documentReferenceId;
+        document.getElementById("drawerTicketIdTitle").innerText = `Manage: ${targetData.ticketId}`;
+        document.getElementById("drawerIssueDescription").value = targetData.description;
+        
+        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
+            document.getElementById("drawerContractorAssignment").value = targetData.assignedContractorUid || "";
+            document.getElementById("drawerStatusUpdate").value = targetData.status || "pending_approval";
+        } else if (authenticatedUserRole.startsWith("contractor")) {
+            document.getElementById("drawerTechnicianNotes").value = targetData.technicianNotes || "";
+        }
+
+        document.getElementById("ticketActionDrawer").classList.add("active");
+    }
+
+    // Modal Closing Bindings
+    document.getElementById("closeDrawerBtn").addEventListener("click", () => {
+        document.getElementById("ticketActionDrawer").classList.remove("active");
+    });
+
+    // Process Form Updates and Save Directly Back to Cloud Firestore Document Reference
+    document.getElementById("drawerActionForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const firestoreDocId = document.getElementById("targetDocumentFirestoreId").value;
+        const targetDocRef = doc(db, "maintenance_tickets", firestoreDocId);
+        
+        let updatePayload = {};
+
+        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
+            updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
+            updatePayload.status = document.getElementById("drawerStatusUpdate").value;
+        } else if (authenticatedUserRole.startsWith("contractor")) {
+            updatePayload.technicianNotes = document.getElementById("drawerTechnicianNotes").value.trim();
+            // Automatically flip tracking parameter to resolved when contractor logs completion notes
+            if(updatePayload.technicianNotes.length > 5) {
+                updatePayload.status = "resolved";
+                updatePayload.resolvedDate = new Date().toISOString();
+            }
+        }
+
+        try {
+            await updateDoc(targetDocRef, updatePayload);
+            document.getElementById("ticketActionDrawer").classList.remove("active");
+            fetchTicketsDataPipeline(); // Dynamically updates lists instantly without reloading the browser page
+        } catch (error) {
+            alert("Operational Write Exception Error: " + error.message);
+        }
+    });
+
+    // Real-time Frontend Filtering Infrastructure Logic Engines (Location Selector + Search Bar Input)
+    function executeLiveSearchAndFiltersPipeline() {
+        const searchKeyword = document.getElementById("tableGlobalSearch").value.toLowerCase().trim();
+        const selectedLocation = document.getElementById("globalLocationFilter").value;
+
+        const filteredArray = globalActiveTicketsCache.filter(item => {
+            const matchesLocation = (selectedLocation === "all") || (item.locationScope === selectedLocation);
             
-            onSnapshot(q, (snapshot) => {
-                masterTicketsArray = [];
-                snapshot.forEach((docSnap) => {
-                    masterTicketsArray.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                renderTicketsTable();
-            });
-        }
+            const matchesSearch = !searchKeyword || 
+                (item.ticketId && item.ticketId.toLowerCase().includes(searchKeyword)) ||
+                (item.amcCategory && item.amcCategory.toLowerCase().includes(searchKeyword)) ||
+                (item.description && item.description.toLowerCase().includes(searchKeyword)) ||
+                (item.specificLocation && item.specificLocation.toLowerCase().includes(searchKeyword));
 
-        function renderTicketsTable() {
-            const scopeFilter = document.getElementById("ticketScopeFilter").value;
-            const searchKeyword = document.getElementById("ticketSearch").value.toLowerCase().trim();
+            return matchesLocation && matchesSearch;
+        });
 
-            let results = masterTicketsArray;
+        renderTableInterface(filteredArray);
+    }
 
-            // 1. Apply status filtration structures
-            if (scopeFilter !== "all") {
-                results = results.filter(t => t.status === scopeFilter);
-            }
+    document.getElementById("tableGlobalSearch").addEventListener("input", executeLiveSearchAndFiltersPipeline);
+    document.getElementById("globalLocationFilter").addEventListener("change", executeLiveSearchAndFiltersPipeline);
+</script>
 
-            // 2. Filter data arrays based on user search queries
-            if (searchKeyword !== "") {
-                results = results.filter(t => 
-                    t.ticketId.toLowerCase().includes(searchKeyword) ||
-                    t.description.toLowerCase().includes(searchKeyword) ||
-                    t.specificLocation.toLowerCase().includes(searchKeyword)
-                );
-            }
-
-            tableBody.innerHTML = "";
-
-            if (results.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);">No matching maintenance records found within this workspace segment.</td></tr>`;
-                return;
-            }
-
-            results.forEach((ticket) => {
-                const tr = document.createElement("tr");
-                
-                // Set custom operational badge text layouts
-                let actionInterfaceMarkup = `<span style="color:var(--muted); font-size:12px;">No Actions Pending</span>`;
-                
-                if (ticket.status === "pending_approval" && systemCurrentUserRole === "admin") {
-                    actionInterfaceMarkup = `
-                        <select id="assign-${ticket.id}" class="action-select">
-                            <option value="contractor_hvac">Al-Futtaim HVAC Team</option>
-                            <option value="contractor_civil">Imdaad Civil Support</option>
-                            <option value="contractor_fire">Khansaheb Fire Safety</option>
-                        </select>
-                        <button class="action-btn" onclick="approveAndRouteTicket('${ticket.id}')">Route</button>
-                    `;
-                } else if (ticket.status === "active" && systemCurrentUserRole.startsWith("contractor")) {
-                    actionInterfaceMarkup = `
-                        <button class="action-btn" style="background:var(--success);" onclick="resolveTicket('${ticket.id}')">Mark Resolved</button>
-                    `;
-                }
-
-                tr.innerHTML = `
-                    <td style="font-weight:700; color:#1e3a8a;">${ticket.ticketId}</td>
-                    <td><b>${ticket.locationScope.toUpperCase()}</b><br><span style="font-size:12px; color:var(--muted);">${escapeHtml(ticket.specificLocation)}</span></td>
-                    <td style="text-transform:capitalize; font-size:13px;">${ticket.amcCategory.replace("-", " ")}</td>
-                    <td style="max-width:250px; font-size:13px; line-height:1.4;">${escapeHtml(ticket.description)}</td>
-                    <td><span style="font-weight:700; font-size:12px; text-transform:uppercase; color:${ticket.priority === 'critical' ? 'var(--danger)' : 'inherit'}">${ticket.priority}</span></td>
-                    <td><span class="badge badge-${ticket.status}">${ticket.status.replace("_", " ")}</span></td>
-                    <td>${actionInterfaceMarkup}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        // Expose function parameters to window context scope variables
-        window.approveAndRouteTicket = async function(docId) {
-            const selectElement = document.getElementById(`assign-${docId}`);
-            const assignedContractor = selectElement.value;
-            
-            const docRef = doc(db, "maintenance_tickets", docId);
-            try {
-                await updateDoc(docRef, {
-                    status: "active",
-                    assignedContractorUid: assignedContractor
-                });
-            } catch (err) {
-                alert("Routing update rejected: " + err.message);
-            }
-        };
-
-        window.resolveTicket = async function(docId) {
-            const docRef = doc(db, "maintenance_tickets", docId);
-            try {
-                await updateDoc(docRef, {
-                    status: "resolved",
-                    resolvedDate: new Date().toISOString()
-                });
-            } catch (err) {
-                alert("Resolution status write failure: " + err.message);
-            }
-        };
-
-        document.getElementById("ticketScopeFilter").onchange = () => renderTicketsTable();
-        document.getElementById("ticketSearch").oninput = () => renderTicketsTable();
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        document.getElementById("logoutBtn").onclick = () => {
-            localStorage.clear();
-            window.location.href = "login.html";
-        };
-    </script>
 </body>
 </html>
