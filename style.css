@@ -1,3 +1,6 @@
+Here is the updated CSS code for `style.css`. Section **5 (`THE 16 CORE AMC SERVICES SERVICES TILES COMPONENT GRID`)** has been fully updated to list out clean, explicit styling properties mapping to each of the 16 real operational services outlined in your contract agreement document.
+
+```css
 /* ==========================================================================
    1. CORE FABRIC & DESIGN THEME VARIABLES
    ========================================================================== */
@@ -415,6 +418,24 @@ body {
     font-weight: 500;
 }
 
+/* Dynamic structural data handles targeting all 16 contract scopes explicitly */
+.service-card-item[data-service="building-maintenance"]::before { content: "01"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="hvac-maintenance"]::before { content: "02"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="electrical-substation"]::before { content: "03"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="generator-maintenance"]::before { content: "04"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="ups-maintenance"]::before { content: "05"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="fire-systems"]::before { content: "06"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="lift-escalator"]::before { content: "07"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="water-treatment"]::before { content: "08"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="cctv-security"]::before { content: "09"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="gate-barrier"]::before { content: "10"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="swimming-pool"]::before { content: "11"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="cleaning-janitorial"]::before { content: "12"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="waste-management"]::before { content: "13"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="pest-control"]::before { content: "14"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="landscaping-indoor-plants"]::before { content: "15"; font-size: 10px; color: var(--primary); font-weight: 700; }
+.service-card-item[data-service="flagpole-maintenance"]::before { content: "16"; font-size: 10px; color: var(--primary); font-weight: 700; }
+
 /* ==========================================================================
    6. INTERACTIVE SLIDE-OUT OVERLAY DRAWER PANEL SYSTEMS
    ========================================================================== */
@@ -492,3 +513,5 @@ body {
 @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .services-main-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 1024px) { .location-summary-strip { grid-template-columns: 1fr; } }
 @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .services-main-grid { grid-template-columns: 1fr; } .sidebar { left: -260px; } .main-content { margin-left: 0; padding: 16px; } }
+
+```
