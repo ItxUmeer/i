@@ -1,27 +1,81 @@
-export function renderSidebar(role) {
+export function loadSidebar(role){
 
-  const menu = document.getElementById("menu");
+const menu = document.getElementById("sidebarMenu");
 
-  let html = `<a href="dashboard.html">Dashboard</a>`;
+let items = [];
 
-  if (role === "admin") {
-    html += `<a href="workorders.html">Work Orders</a>`;
-    html += `<a href="assets.html">Assets</a>`;
-    html += `<a href="ppm.html">PPM</a>`;
-  }
+switch(role){
 
-  if (role === "facilities_supervisor") {
-    html += `<a href="workorders.html">Approve Work Orders</a>`;
-    html += `<a href="ppm.html">PPM</a>`;
-  }
+case "staff":
 
-  if (role === "assets_officer") {
-    html += `<a href="assets.html">Assets</a>`;
-  }
+items = [
+["Dashboard","dashboard.html"],
+["Raise Request","requests.html"],
+["My Requests","myrequests.html"]
+];
 
-  if (role === "maintenance") {
-    html += `<a href="workorders.html">My Work Orders</a>`;
-  }
+break;
 
-  menu.innerHTML = html;
+case "fsu":
+
+items = [
+["Dashboard","dashboard.html"],
+["Approvals","approvals.html"],
+["Requests","requests.html"],
+["Work Orders","workorders.html"],
+["Reports","reports.html"]
+];
+
+break;
+
+case "contractor":
+
+items = [
+["Dashboard","dashboard.html"],
+["Work Orders","workorders.html"],
+["PPM","ppm.html"],
+["Assets","assets.html"]
+];
+
+break;
+
+case "management":
+
+items = [
+["Dashboard","dashboard.html"],
+["KPIs","kpi.html"],
+["Reports","reports.html"],
+["Analytics","analytics.html"]
+];
+
+break;
+
+case "admin":
+
+items = [
+["Dashboard","dashboard.html"],
+["Requests","requests.html"],
+["Work Orders","workorders.html"],
+["Assets","assets.html"],
+["PPM","ppm.html"],
+["Inventory","inventory.html"],
+["Reports","reports.html"]
+];
+
+break;
+
+}
+
+menu.innerHTML = "";
+
+items.forEach(item=>{
+
+menu.innerHTML += `
+<a href="${item[1]}" class="menu-item">
+${item[0]}
+</a>
+`;
+
+});
+
 }
