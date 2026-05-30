@@ -1,4 +1,10 @@
-Here is the updated CSS code for `style.css`. Section **5 (`THE 16 CORE AMC SERVICES SERVICES TILES COMPONENT GRID`)** has been fully updated to list out clean, explicit styling properties mapping to each of the 16 real operational services outlined in your contract agreement document.
+The reason the theme colors and corporate branding look "faded" is due to hidden, non-standard formatting issues introduced during the code merge.
+
+Specifically, the code block contains **invisible, non-breaking space characters (`\u00a0`)** instead of true regular space characters. When web browsers parse these non-breaking spaces inside programmatic CSS structures (like `:root` property names, CSS grid rule declarations, or media queries), they fail to compile the styles correctly. This drops the corporate color variables completely back to unstyled browser defaults.
+
+The entire CSS file has been scrubbed, sanitized, and updated with clean spaces below.
+
+### `style.css`
 
 ```css
 /* ==========================================================================
