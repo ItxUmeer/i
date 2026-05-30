@@ -3,241 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - Informational Gateway</title>
-    <style>
-        /* ==========================================================================
-           ROOT ARCHITECTURE VARIABLES & RESET
-           ========================================================================== */
-        :root {
-            --bg-fallback: #0f172a;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --card-glass: rgba(255, 255, 255, 0.94);
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border-line: rgba(226, 232, 240, 0.8);
-            --radius-premium: 24px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(30, 58, 138, 0.7)), url("bg.jpg") no-repeat center center fixed;
-            background-size: cover;
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* ==========================================================================
-           MAIN CONTENT OVERLAY FRAMEWORK
-           ========================================================================== */
-        .landing-container {
-            width: 100%;
-            max-width: 780px;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-        }
-
-        /* Premium Brand Header Block */
-        .landing-header {
-            background: var(--card-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 20px 35px;
-            border-radius: var(--radius-premium);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border-line);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-
-        .landing-header img {
-            height: 65px;
-            max-width: 45%;
-            object-fit: contain;
-        }
-
-        /* System Headline Platform Context Box */
-        .landing-title-card {
-            background: var(--card-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 30px;
-            border-radius: var(--radius-premium);
-            text-align: center;
-            border: 1px solid var(--border-line);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-
-        .landing-title-card h1 {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1e3a8a;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-        }
-
-        .landing-title-card p {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* System Informational Core Details Sheet */
-        .landing-info-card {
-            background: var(--card-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 40px;
-            border-radius: var(--radius-premium);
-            border: 1px solid var(--border-line);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-        }
-
-        .landing-info-card h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e3a8a;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            border-bottom: 2px solid rgba(37, 99, 235, 0.1);
-            padding-bottom: 6px;
-        }
-
-        .landing-info-card p {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #334155;
-            margin-bottom: 24px;
-        }
-
-        /* Custom Structured Data Component Blocks */
-        .landing-info-card ul {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-
-        .landing-info-card li {
-            font-size: 14px;
-            color: #334155;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(241, 245, 249, 0.6);
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(226, 232, 240, 0.5);
-        }
-
-        .landing-info-card li b {
-            color: var(--text-main);
-        }
-
-        /* Action Component Elements */
-        .action-container {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .btn-navigation {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px 40px;
-            background: var(--primary);
-            color: #ffffff;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
-            transition: all 0.2s ease-in-out;
-        }
-
-        .btn-navigation:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.4);
-        }
-
-        /* ==========================================================================
-           RESPONSIVE RE-ALIGNMENT CONFIGURATIONS
-           ========================================================================== */
-        @media (max-width: 768px) {
-            .landing-container { gap: 20px; padding: 20px 14px; }
-            .landing-header { padding: 15px 20px; }
-            .landing-header img { height: 50px; }
-            .landing-title-card h1 { font-size: 24px; }
-            .landing-info-card { padding: 25px; }
-            .landing-info-card ul { grid-template-columns: 1fr; gap: 8px; }
-        }
-    </style>
+    <title>DCAS Facilities CMMS</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="index-landing-page">
 
-<div class="landing-container">
+<div class="index-wrapper">
+    <div class="index-card">
 
-    <header class="landing-header">
-        <img src="logo-left.png" alt="Dubai Government">
-        <img src="logo-right.png" alt="DCAS Ambulance">
-    </header>
-
-    <div class="landing-title-card">
-        <h1>PPM SYSTEM - DCAS</h1>
-        <p>Preventive Maintenance Management System</p>
-    </div>
-
-    <div class="landing-info-card">
-
-        <h3>System Purpose</h3>
-        <p>
-            This operational core environment is dedicated exclusively to processing <b>Preventive Maintenance (PPM)</b> protocols. It provides complete tracking functionality across lifecycle controls, automated diagnostics, scheduling windows, and compliance verification matrix records across all asset types deployed in Dubai Corporation for Ambulance Service facilities.
-        </p>
-
-        <h3>Core Operations Modules</h3>
-        <ul>
-            <li>🔹 <span><b>Assets Register</b> – Full Profile Lifecycle Logs</span></li>
-            <li>🔹 <span><b>PPM Schedules</b> – Automated Interval Planners</span></li>
-            <li>🔹 <span><b>PPM Records</b> – Immutable Task Verification History</span></li>
-            <li>🔹 <span><b>Compliance Engine</b> – SLA Status Tracking & Analysis</span></li>
-        </ul>
-
-        <h3>Enterprise Access Levels</h3>
-        <style> .role-list li { background: rgba(37, 99, 235, 0.05) !important; border-left: 4px solid var(--primary) !important; } </style>
-        <ul class="role-list">
-            <li><span>👤 <b>System Administrator</b> – Master Control Layer</span></li>
-            <li><span>👤 <b>DCAS Maintenance Planner</b> – Scheduling Engineer</span></li>
-            <li><span>👤 <b>Facilities Supervisor</b> – Operational Inspector View</span></li>
-        </ul>
-
-        <div class="action-container">
-            <button class="btn-navigation" onclick="location.href='login.html'">
-                Initialize Secure Session Control →
-            </button>
+        <div class="brand-identity-row">
+            <img src="logo-left.png" alt="Dubai Government Logo" class="brand-logo-frame">
+            <img src="logo-right.png" alt="DCAS Ambulance Logo" class="brand-logo-frame">
         </div>
 
-    </div>
+        <div class="system-headline-group" style="margin-bottom: 35px;">
+            <h1>PPM SYSTEM - DCAS</h1>
+            <p>Preventive Maintenance Management System</p>
+        </div>
 
+        <button class="btn-primary" onclick="location.href='login.html'">
+            Enter PPM System →
+        </button>
+
+    </div>
 </div>
 
 </body>
