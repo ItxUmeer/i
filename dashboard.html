@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - KPI Dashboard</title>
+    <title>DCAS Facilities CMMS - Hub Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* UI overrides to specifically match the premium enterprise dashboard layout */
+        /* Enterprise Layout Overrides for multi-service mapping */
         .dashboard-container {
             display: flex;
             flex-direction: column;
@@ -16,8 +16,8 @@
         .filter-bar {
             background: #ffffff;
             padding: 15px 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,.05);
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
@@ -33,15 +33,18 @@
             font-weight: 600;
             color: var(--muted);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .filter-group select {
-            height: 35px;
-            padding: 0 10px;
+            height: 38px;
+            padding: 0 12px;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            min-width: 140px;
+            border-radius: 8px;
+            min-width: 160px;
             font-size: 13px;
             background: #f8fafc;
+            color: #0f172a;
+            outline: none;
         }
         .metrics-grid-6 {
             display: grid;
@@ -50,85 +53,117 @@
         }
         .metric-mini {
             background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
+            border: 1px solid rgba(0,0,0,.05);
+            border-radius: 12px;
+            padding: 18px 15px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
         }
         .metric-mini h4 {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--muted);
             margin-bottom: 8px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         .metric-mini p {
-            font-size: 26px;
-            font-weight: 700;
-        }
-        .financial-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        .fin-card {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-        .fin-card h4 {
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-        .fin-card p {
             font-size: 28px;
             font-weight: 700;
         }
         .charts-row-split {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.3fr;
             gap: 20px;
         }
         .chart-box-card {
             background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,.05);
+            border-radius: 12px;
             padding: 20px;
-            min-height: 340px;
+            min-height: 360px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.02);
         }
         .chart-box-card h3 {
             font-size: 14px;
             color: #0f172a;
             margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #f1f5f9;
             padding-bottom: 10px;
+            font-weight: 700;
         }
         .gauge-wrapper {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            height: 80%;
+            height: calc(100% - 40px);
         }
         .gauge-item {
             text-align: center;
             position: relative;
-            width: 150px;
+            width: 140px;
         }
         .gauge-label-center {
             position: absolute;
-            top: 55%;
-            left: 50%;
+            top: 52%;
+            left: 50+%;
             transform: translate(-50%, -50%);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
         }
+        .fin-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,.02);
+        }
+        .fin-card h4 {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .fin-card p {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .schedule-grid-box {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .schedule-table th, .schedule-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .schedule-table th {
+            background: #f8fafc;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .pill-planned { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .pill-urgent { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
         @media(max-width: 1024px) {
-            .charts-row-split {
-                grid-template-columns: 1fr;
-            }
+            .charts-row-split { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -137,7 +172,7 @@
     <header class="header">
         <div class="header-left">
             <button class="menu-btn" id="menuBtn">☰</button>
-            <span class="header-title">DCAS Facilities CMMS</span>
+            <span class="header-title">DCAS Facilities Hub</span>
         </div>
         <div class="user-box">
             <span class="role-badge" id="userRole">Checking...</span>
@@ -152,88 +187,90 @@
     <main class="main-content">
         <div class="dashboard-container">
             
-            <div class="page-title" style="margin-bottom:0;">KPI Dashboard</div>
+            <div class="page-title" style="margin-bottom:0;">Facilities KPI Dashboard</div>
 
             <div class="filter-bar">
                 <div class="filter-group">
-                    <label>Timeline Filter</label>
-                    <select id="filterTimeline"><option>--- Select ---</option><option>Last 12 Months</option></select>
+                    <label>Facility Service Stream</label>
+                    <select id="filterServiceStream">
+                        <option value="all">All Facility Services</option>
+                        <option value="security">🛡️ Security Services</option>
+                        <option value="cleaning">🧹 Cleaning & Janitorial</option>
+                        <option value="maintenance">🔧 MEP Maintenance</option>
+                        <option value="gardening">🌳 Gardening & Landscaping</option>
+                        <option value="medwaste">🏥 Medical Waste Management</option>
+                        <option value="genwaste">🗑️ General Waste Collection</option>
+                        <option value="pest">🪰 Pest Control Services</option>
+                        <option value="sewage">🚰 Sewage & Tanker Collection</option>
+                    </select>
                 </div>
                 <div class="filter-group">
-                    <label>Asset Classification</label>
-                    <select id="filterClass"><option>All</option></select>
+                    <label>Timeline View</label>
+                    <select id="filterTimeline"><option>Last 12 Months</option><option>Current Month</option></select>
                 </div>
                 <div class="filter-group">
-                    <label>Asset Type</label>
-                    <select id="filterAssetType"><option>All</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Work Order Type</label>
-                    <select id="filterWoType"><option>All</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Maintenance Type</label>
-                    <select id="filterMaintType"><option>All</option></select>
+                    <label>Zone / Sector</label>
+                    <select id="filterZone"><option>All DCAS Sectors</option><option>HQ Building</option><option>Sub-Stations</option></select>
                 </div>
             </div>
 
             <div class="metrics-grid-6">
                 <div class="metric-mini" style="border-top: 3px solid #f59e0b;">
-                    <h4>Total Work Requests Raised</h4>
-                    <p style="color: #f59e0b;" id="txtTotal">61,872</p>
+                    <h4>Total Service Requests</h4>
+                    <p style="color: #f59e0b;" id="txtTotal">14,250</p>
                 </div>
                 <div class="metric-mini" style="border-top: 3px solid #2563eb;">
-                    <h4>Open Work Requests</h4>
-                    <p style="color: #2563eb;" id="txtOpen">1,229</p>
+                    <h4>Open Requests</h4>
+                    <p style="color: #2563eb;" id="txtOpen">342</p>
                 </div>
                 <div class="metric-mini" style="border-top: 3px solid #d946ef;">
-                    <h4>Total Work Requests Declined</h4>
-                    <p style="color: #d946ef;" id="txtDeclined">3,581</p>
+                    <h4>Requests Rejected</h4>
+                    <p style="color: #d946ef;" id="txtDeclined">118</p>
                 </div>
                 <div class="metric-mini" style="border-top: 3px solid #10b981;">
-                    <h4>Total Work Requests Resolved</h4>
-                    <p style="color: #10b981;" id="txtResolved">57,062</p>
+                    <h4>Resolved Jobs</h4>
+                    <p style="color: #10b981;" id="txtResolved">13,790</p>
                 </div>
                 <div class="metric-mini" style="border-top: 3px solid #ea580c;">
-                    <h4>Open Work Orders</h4>
-                    <p style="color: #ea580c;" id="txtWoOpen">1,266</p>
+                    <h4>Scheduled PPM Plans</h4>
+                    <p style="color: #ea580c;" id="txtWoOpen">840</p>
                 </div>
                 <div class="metric-mini" style="border-top: 3px solid #ef4444;">
-                    <h4>Work Orders Overdue</h4>
-                    <p style="color: #ef4444;" id="txtOverdue">1,076</p>
+                    <h4>Overdue Activities</h4>
+                    <p style="color: #ef4444;" id="txtOverdue">24</p>
                 </div>
             </div>
 
             <div class="charts-row-split" style="grid-template-columns: 1fr 1.3fr;">
                 <div class="chart-box-card">
-                    <h3>Operational Compliance Backlogs</h3>
+                    <h3>Service Delivery & Compliance</h3>
                     <div class="gauge-wrapper">
                         <div class="gauge-item">
                             <canvas id="gaugeBacklog"></canvas>
-                            <div class="gauge-label-center" style="color:#10b981;">1076</div>
-                            <span style="font-size:12px; font-weight:600; color:var(--muted);">Work Order Backlog</span>
+                            <div class="gauge-label-center" style="color:#10b981; top: 45%;">24</div>
+                            <span style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-top:5px;">Pending Backlog</span>
                         </div>
                         <div class="gauge-item">
                             <canvas id="gaugeCompliance"></canvas>
-                            <div class="gauge-label-center" style="color:#2563eb;">85.0%</div>
-                            <span style="font-size:12px; font-weight:600; color:var(--muted);">Work Order Compliance</span>
+                            <div class="gauge-label-center" style="color:#2563eb; top: 45%;">94.2%</div>
+                            <span style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-top:5px;">SLA Compliance</span>
                         </div>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <div class="fin-card" style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
-                        <h4>Total Maintenance Costs</h4>
-                        <p style="color: #2563eb; font-size: 34px;">$198,055,770.78</p>
+                        <h4>Total Facilities Operational Cost</h4>
+                        <p style="color: #2563eb; font-size: 36px;">AED 4,850,920.00</p>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1;">
                         <div class="fin-card">
-                            <h4>Total Parts Costs</h4>
-                            <p style="color: #06b6d4; font-size: 24px;">$184,262,643.33</p>
+                            <h4>Contracted Service Cost</h4>
+                            <p style="color: #06b6d4; font-size: 22px;">AED 3,120,450</p>
                         </div>
                         <div class="fin-card">
-                            <h4>Total Labor Costs</h4>
-                            <p style="color: #10b981; font-size: 24px;">$13,793,127.45</p>
+                            <h4>Ad-hoc & Emergency Cost</h4>
+                            <p style="color: #10b981; font-size: 22px;">AED 1,730,470</p>
                         </div>
                     </div>
                 </div>
@@ -241,13 +278,58 @@
 
             <div class="charts-row-split">
                 <div class="chart-box-card">
-                    <h3>Planned vs. Unplanned Work Orders</h3>
+                    <h3>Planned Schedules vs Ad-hoc Requests By Service Line</h3>
                     <canvas id="chartPlannedUnplanned"></canvas>
                 </div>
                 <div class="chart-box-card">
-                    <h3>Work Orders By Type Per Month</h3>
+                    <h3>Monthly Request Distribution per Service Category</h3>
                     <canvas id="chartWoTypeMonth"></canvas>
                 </div>
+            </div>
+
+            <div class="schedule-grid-box">
+                <h3 style="font-size:15px; font-weight:700;">Upcoming Facility Schedules & Maintenance Requests</h3>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Scheduled Date</th>
+                            <th>Service Category</th>
+                            <th>Description / Task Requirement</th>
+                            <th>Location / Hub</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>02 June 2026</b></td>
+                            <td>🏥 Medical Waste</td>
+                            <td>Biomedical hazardous waste collection & disposal run</td>
+                            <td>DCAS HQ Sub-station B</td>
+                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>03 June 2026</b></td>
+                            <td>🚰 Sewage Collection</td>
+                            <td>Main holding septic tank clearance & extraction</td>
+                            <td>Al Barsha Station</td>
+                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>04 June 2026</b></td>
+                            <td>🪰 Pest Control</td>
+                            <td>Ad-hoc vector control request (reported insect sighting)</td>
+                            <td>Muhaisnah Hub</td>
+                            <td><span class="status-pill pill-urgent">Maintenance Req</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>05 June 2026</b></td>
+                            <td>🛡️ Security</td>
+                            <td>Access control gate barrier calibration & hardware inspection</td>
+                            <td>Main Fleet Compound</td>
+                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>
@@ -261,7 +343,7 @@
         checkAccess((role) => {
             document.getElementById("userRole").innerText = role;
             loadSidebar(role);
-            initializeDashboardCharts();
+            initializeFacilityCharts();
         });
 
         document.getElementById("menuBtn").onclick = () => {
@@ -274,61 +356,50 @@
             window.location.href = "login.html";
         };
 
-        // Complete Chart.js implementations matching the exact screenshot metrics
-        function initializeDashboardCharts() {
-            const monthsLabels = ['Feb 2025', 'Apr 2025', 'Jun 2025', 'Aug 2025', 'Oct 2025', 'Dec 2025', 'Feb 2026', 'Apr 2026'];
+        function initializeFacilityCharts() {
+            // Service Category mapping array labels
+            const servicesLabels = ['Security', 'Cleaning', 'MEP Maint.', 'Gardening', 'Med Waste', 'Gen Waste', 'Pest Control', 'Sewage'];
 
-            // A. Left Gauge (Backlog Ring)
+            // A. Backlog Half-Doughnut 
             new Chart(document.getElementById('gaugeBacklog'), {
                 type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [1076, 200],
-                        backgroundColor: ['#10b981', '#e2e8f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { rotation: -90, circumference: 180, cutout: '80%', plugins: { legend: { display: false } } }
+                data: { datasets: [{ data: [24, 200], backgroundColor: ['#ef4444', '#f1f5f9'], borderWidth: 0 }] },
+                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } } }
             });
 
-            // B. Right Gauge (Compliance Ring)
+            // B. SLA Compliance Half-Doughnut
             new Chart(document.getElementById('gaugeCompliance'), {
                 type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [85, 15],
-                        backgroundColor: ['#2563eb', '#e2e8f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { rotation: -90, circumference: 180, cutout: '80%', plugins: { legend: { display: false } } }
+                data: { datasets: [{ data: [94.2, 5.8], backgroundColor: ['#2563eb', '#f1f5f9'], borderWidth: 0 }] },
+                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } } }
             });
 
-            // C. Planned vs Unplanned Bar Graph Chart
+            // C. Bar Chart: Planned Schedules vs Ad-hoc Requests 
             new Chart(document.getElementById('chartPlannedUnplanned'), {
                 type: 'bar',
                 data: {
-                    labels: monthsLabels,
+                    labels: servicesLabels,
                     datasets: [
-                        { label: 'Total Unplanned', data: [500, 1200, 2400, 2800, 3100, 3400, 3600, 1852], backgroundColor: '#ea580c' },
-                        { label: 'Total Planned', data: [200, 400, 700, 610, 680, 700, 1209, 800], backgroundColor: '#10b981' }
+                        { label: 'Planned Schedule (PPM)', data: [45, 120, 310, 24, 85, 90, 40, 52], backgroundColor: '#10b981' },
+                        { label: 'Maintenance Request (Ad-hoc)', data: [12, 65, 195, 8, 14, 22, 31, 19], backgroundColor: '#ea580c' }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+                options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // D. Work Orders by Type Stacked Graph Chart
+            // D. Line Chart: Monthly Request Distribution per Category over time
             new Chart(document.getElementById('chartWoTypeMonth'), {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: monthsLabels,
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                     datasets: [
-                        { label: 'Breakdown/Repair', data: [400, 900, 1800, 2200, 2500, 2900, 3100, 1500], backgroundColor: '#2563eb' },
-                        { label: 'Capital Project', data: [100, 200, 400, 300, 400, 500, 600, 200], backgroundColor: '#06b6d4' },
-                        { label: 'Preventive Maint.', data: [50, 100, 200, 150, 180, 200, 400, 152], backgroundColor: '#ec4899' }
+                        { label: 'MEP Maintenance', data: [240, 280, 310, 290, 340, 350], borderColor: '#2563eb', tension: 0.2, fill: false },
+                        { label: 'Waste Streams (Gen/Med)', data: [110, 115, 120, 105, 130, 125], borderColor: '#d946ef', tension: 0.2, fill: false },
+                        { label: 'Cleaning & Janitorial', data: [180, 190, 210, 200, 220, 240], borderColor: '#06b6d4', tension: 0.2, fill: false },
+                        { label: 'Sewage / Tankers', data: [40, 45, 42, 50, 48, 55], borderColor: '#ef4444', tension: 0.2, fill: false }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
     </script>
