@@ -1,123 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Dashboard</title>
-
-<link rel="stylesheet"
-href="style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCAS Facilities CMMS - Command Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header class="header">
+    <!-- Header Block -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" id="menuToggle">☰</button>
+            <img src="logo-right.png" alt="DCAS Logo" class="header-logo">
+            <span class="header-title">DCAS Facilities Center</span>
+        </div>
+        <div class="user-box">
+            <span class="role-badge" id="roleBadge">Loading...</span>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
 
-<button id="menuBtn">
-☰
-</button>
+    <!-- Structural Navigation Sidebar Navigation -->
+    <nav class="sidebar" id="sidebarMenu">
+        <!-- Injected dynamically by sidebar.js based on role permissions -->
+    </nav>
 
-<div class="header-title">
-DCAS Facilities CMMS
-</div>
+    <!-- Core App Viewport Area -->
+    <main class="main-content">
+        <div class="welcome-card">
+            <h1 id="welcomeGreeting">Welcome to DCAS CMMS Portal</h1>
+            <p style="color: var(--muted); margin-top: 5px;">Dubai Corporation for Ambulance Service Facilities Operation Hub</p>
+        </div>
 
-<div class="user-box">
+        <!-- High Level Operational Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+                <h3>Pending Actions</h3>
+                <p id="kpiPending">-</p>
+            </div>
+            <div class="kpi-card" style="border-left: 4px solid var(--warning);">
+                <h3>Active Work Orders</h3>
+                <p id="kpiActive">-</p>
+            </div>
+            <div class="kpi-card" style="border-left: 4px solid var(--success);">
+                <h3>Completed Tasks</h3>
+                <p id="kpiCompleted">-</p>
+            </div>
+        </div>
+    </main>
 
-<span id="userRole"></span>
+    <!-- App Logic Hook script -->
+    <script type="module">
+        import { loadSidebar } from "./sidebar.js";
+        
+        // Mobile Toggle Configuration
+        const menuToggle = document.getElementById("menuToggle");
+        const sidebarMenu = document.getElementById("sidebarMenu");
+        
+        menuToggle.addEventListener("click", () => {
+            sidebarMenu.classList.toggle("mobile-open");
+        });
 
-<button id="logoutBtn">
-Logout
-</button>
+        // Initialize Dynamic Identity Role Guard Layouts
+        document.addEventListener("DOMContentLoaded", () => {
+            const preservedRole = localStorage.getItem("userRole") || "staff";
+            
+            // Set Badge text visually
+            document.getElementById("roleBadge").innerText = preservedRole;
+            
+            // Trigger script template logic to construct your tailored sidebar layout links
+            loadSidebar(preservedRole);
+        });
 
-</div>
-
-</header>
-
-<aside class="sidebar"
-id="sidebar">
-
-<div id="sidebarMenu"></div>
-
-</aside>
-
-<main class="main-content">
-
-<div class="page-title">
-Dashboard
-</div>
-
-<div class="kpi-grid">
-
-<div class="kpi-card">
-<h3>Open Requests</h3>
-<p>0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Pending Approval</h3>
-<p>0</p>
-</div>
-
-<div class="kpi-card">
-<h3>Open Work Orders</h3>
-<p>0</p>
-</div>
-
-<div class="kpi-card">
-<h3>PPM Due</h3>
-<p>0</p>
-</div>
-
-</div>
-
-</main>
-
-<script type="module">
-
-import { checkAccess }
-from "./roleguard.js";
-
-import { loadSidebar }
-from "./sidebar.js";
-
-const role =
-checkAccess();
-
-document.getElementById(
-"userRole"
-).innerText = role;
-
-loadSidebar(role);
-
-document.getElementById(
-"menuBtn"
-).onclick = ()=>{
-
-document.getElementById(
-"sidebar"
-).classList.toggle(
-"mobile-open"
-);
-
-};
-
-document.getElementById(
-"logoutBtn"
-).onclick = ()=>{
-
-localStorage.clear();
-
-window.location.href =
-"login.html";
-
-};
-
-</script>
-
+        // Simple mock handle to clear local identity tokens on logout
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            localStorage.clear();
+            window.location.href = "login.html";
+        });
+    </script>
 </body>
 </html>
