@@ -3,30 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS</title>
+    <title>DCAS Facilities CMMS - Login</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: url("bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
 </head>
-<body class="index-landing-page">
+<body class="login-page">
 
-<div class="index-wrapper">
-    <div class="index-card">
+<div class="login-wrapper">
+    <div class="login-card">
 
-        <div class="brand-identity-row">
-            <img src="logo-left.png" alt="Dubai Government Logo" class="brand-logo-frame">
-            <img src="logo-right.png" alt="DCAS Ambulance Logo" class="brand-logo-frame">
+        <div class="login-header">
+            <img src="logo-left.png" alt="Dubai Government" class="login-logo">
+            <img src="logo-right.png" alt="DCAS Ambulance" class="login-logo">
         </div>
 
-        <div class="system-headline-group" style="margin-bottom: 35px;">
-            <h1>CMMS SYSTEM - DCAS</h1>
-            <p>Compturized Maintenance Management System</p>
+        <div class="system-title">
+            <h1>Facilities CMMS</h1>
+            <p>Dubai Corporation for Ambulance Service</p>
         </div>
 
-        <button class="btn-primary" onclick="location.href='login.html'">
-            Enter CMMS System →
-        </button>
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Enterprise Email</label>
+                <input type="email" id="email" placeholder="name@dcas.gov.ae" required>
+            </div>
 
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">Login</button>
+        </form>
+
+        <div id="loginError"></div>
+        
+        <div style="text-align: center; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px;">
+            <a href="reports.html" style="font-size: 13px; color: var(--primary); font-weight: 700; text-decoration: none;">
+                ⚠️ Raise a Public Maintenance Issue →
+            </a>
+        </div>
     </div>
 </div>
+
+<script type="module">
+import { login } from "./auth.js";
+
+// Optional: If user is already authenticated session-wise, forward straight past login
+if (localStorage.getItem("userRole")) {
+    window.location.href = "dashboard.html";
+}
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const errorBox = document.getElementById("loginError");
+    const submitBtn = document.getElementById("submitBtn");
+
+    errorBox.innerText = "";
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Verifying Identity...";
+
+    try {
+        const user = await login(email, password);
+
+        if (!user || !user.role) {
+            throw new Error("User profile configuration mismatch.");
+        }
+
+        localStorage.setItem("userRole", user.role);
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Login";
+        errorBox.innerText = error.message || "Authentication failed";
+    }
+});
+</script>
 
 </body>
 </html>
