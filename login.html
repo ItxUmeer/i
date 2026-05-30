@@ -1,147 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>DCAS Facilities CMMS</title>
-
-<link rel="stylesheet" href="style.css">
-
-<style>
-/* Quick working style so page is NOT blank */
-body.login-page {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.login-wrapper {
-    width: 100%;
-    max-width: 420px;
-}
-
-.login-card {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.login-logo h1 {
-    margin: 0;
-    color: #1e3a8a;
-}
-
-.login-logo p {
-    margin: 5px 0 20px;
-    color: #64748b;
-    font-size: 14px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    outline: none;
-}
-
-input:focus {
-    border-color: #2563eb;
-}
-
-.btn-primary {
-    width: 100%;
-    padding: 12px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.btn-primary:hover {
-    background: #1d4ed8;
-}
-
-#loginError {
-    margin-top: 10px;
-    color: red;
-    font-size: 14px;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DCAS Facilities CMMS - Portal Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body class="login-page">
 
-<div class="login-wrapper">
+    <div class="login-wrapper">
+        <div class="login-card">
+            
+            <!-- Branding Header Area -->
+            <div class="login-header">
+                <img src="logo-left.png" alt="Dubai Government Logo" class="login-logo">
+                <img src="logo-right.png" alt="DCAS Ambulance Logo" class="login-logo">
+            </div>
 
-    <div class="login-card">
+            <!-- Title -->
+            <div class="system-title">
+                <h1>Facilities CMMS</h1>
+                <p>Dubai Corporation for Ambulance Service</p>
+            </div>
 
-        <div class="login-logo">
-            <h1>DCAS</h1>
-            <p>Facilities Management CMMS</p>
+            <!-- Interactive Form -->
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Enterprise Email Address</label>
+                    <input type="email" id="email" autocomplete="username" placeholder="name@dcas.gov.ae" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Security Password</label>
+                    <input type="password" id="password" autocomplete="current-password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">Sign In securely</button>
+            </form>
+
+            <div id="loginError"></div>
         </div>
-
-        <form id="loginForm">
-
-            <input type="email" id="email" placeholder="Email Address" required>
-
-            <input type="password" id="password" placeholder="Password" required>
-
-            <button type="submit" class="btn-primary">
-                Login
-            </button>
-
-        </form>
-
-        <div id="loginError"></div>
-
     </div>
 
-</div>
+    <!-- Firebase System Hook -->
+    <script type="module">
+        import { login } from "./auth.js";
 
-<script type="module">
+        const loginForm = document.getElementById("loginForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const errorDiv = document.getElementById("loginError");
 
-import { login } from "./auth.js";
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            // Visual feedback loop
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Authenticating identity...";
+            errorDiv.innerText = "";
 
-document.getElementById("loginForm")
-.addEventListener("submit", async (e) => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    const errorBox = document.getElementById("loginError");
-    errorBox.innerText = "";
-
-    try {
-
-        const user = await login(email, password);
-
-        if (!user || !user.role) {
-            throw new Error("Invalid login response");
-        }
-
-        localStorage.setItem("userRole", user.role);
-
-        window.location.href = "dashboard.html";
-
-    } catch (error) {
-        errorBox.innerText = error.message || "Login failed";
-    }
-
-});
-
-</script>
-
+            try {
+                const user = await login(email, password);
+                localStorage.setItem("userRole", user.role);
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Sign In securely";
+                errorDiv.innerText = error.message;
+            }
+        });
+    </script>
 </body>
 </html>
