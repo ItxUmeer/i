@@ -1,46 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DCAS Facilities CMMS</title>
+
 <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="login-page">
 
-<div class="login-container">
-  <div class="login-box">
+<div class="login-wrapper">
 
-    <div style="display:flex;justify-content:space-between">
-      <img src="logo-left.png" height="60">
-      <img src="logo-right.png" height="60">
+    <div class="login-card">
+
+        <div class="login-logo">
+            <h1>DCAS</h1>
+            <p>Facilities Management CMMS</p>
+        </div>
+
+        <form id="loginForm">
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email Address"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Password"
+                required
+            >
+
+            <button type="submit" class="btn-primary">
+                Login
+            </button>
+
+        </form>
+
+        <div id="loginError"></div>
+
     </div>
 
-    <h2>Login</h2>
-
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button id="loginBtn">Login</button>
-    <p id="msg"></p>
-
-  </div>
 </div>
 
 <script type="module">
+
 import { login } from "./auth.js";
 
-loginBtn.onclick = async ()=>{
-  try{
-    const role = await login(email.value,password.value);
+document.getElementById("loginForm")
+.addEventListener("submit", async(e)=>{
 
-    if(role==="admin") location="dashboard.html";
-    else if(role==="assets_officer") location="assets.html";
-    else location="supervisor.html";
+    e.preventDefault();
 
-  }catch(e){
-    msg.innerText = e.message;
-  }
-};
+    const email =
+        document.getElementById("email").value;
+
+    const password =
+        document.getElementById("password").value;
+
+    try{
+
+        const user =
+            await login(email,password);
+
+        localStorage.setItem(
+            "userRole",
+            user.role
+        );
+
+        window.location.href =
+            "dashboard.html";
+
+    }catch(error){
+
+        document.getElementById(
+            "loginError"
+        ).innerText =
+            error.message;
+    }
+
+});
+
 </script>
 
 </body>
