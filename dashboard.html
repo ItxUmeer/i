@@ -3,272 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - Hub Dashboard</title>
+    <title>DCAS Facilities CMMS - Executive Hub</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Framework Shortcuts Top bar styling */
+        .framework-shortcuts-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .shortcut-link-card {
+            background: #ffffff;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .shortcut-link-card:hover {
+            transform: translateY(-2px);
+            background: #f8fafc;
+        }
+        .shortcut-icon {
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-left">
-            <button id="menuBtn">☰</button>
-            <span class="header-title">DCAS CMMS</span>
+<div class="header">
+    <div class="header-left">
+        <button id="menuBtn">☰</button>
+        <span class="header-title">DCAS CMMS Dashboard</span>
+    </div>
+    
+    <div class="user-box">
+        <span id="userRole">Validating...</span>
+        <button id="logoutBtn">Logout</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebarMenu"></div>
+
+<div class="main-content">
+    <div class="dashboard-container">
+        
+        <div class="framework-shortcuts-bar">
+            <a href="ppm.html" class="shortcut-link-card">
+                <span>📅 PPM Maintenance Engine Plan</span>
+                <span class="shortcut-icon">→</span>
+            </a>
+            <a href="assets.html" class="shortcut-link-card">
+                <span>🏭 Asset Control Infrastructure Registers</span>
+                <span class="shortcut-icon">→</span>
+            </a>
+            <a href="#" class="shortcut-link-card" style="border-left-color: var(--muted); opacity: 0.7; cursor: not-allowed;">
+                <span>📦 Materials Inventory Stockhouse (Coming Soon)</span>
+                <span class="shortcut-icon">🔒</span>
+            </a>
         </div>
 
-        <div class="header-search-location-bar">
-            <span class="location-scope-icon">📍</span>
-            <select id="headerGlobalLocationFilter" class="header-location-selector">
-                <option value="all">All 3 Property Scopes</option>
-                <option value="hq">Headquarters Building</option>
-                <option value="staff">Staff Accommodation</option>
-                <option value="station">Outside Station Network</option>
-            </select>
-            <input type="text" id="headerGlobalSearch" class="header-global-input-search" placeholder="Search tasks, assets, or AMC numbers globally...">
+        <h2 class="page-title">Executive Control Analytics</h2>
+
+        <div class="location-summary-strip">
+            <div class="summary-segment-box">
+                <h4>🏢 Headquarters Building</h4>
+                <div class="segment-metrics-row">
+                    <div class="segment-datapoint"><span>Total Logs</span><val id="hq-total">0</val></div>
+                    <div class="segment-datapoint"><span>Active Jobs</span><val id="hq-active" style="color:var(--primary);">0</val></div>
+                    <div class="segment-datapoint"><span>PPM Due</span><val id="hq-ppm" style="color:var(--warning);">0</val></div>
+                </div>
+            </div>
+            <div class="summary-segment-box">
+                <h4>🏠 Staff Accommodation</h4>
+                <div class="segment-metrics-row">
+                    <div class="segment-datapoint"><span>Total Logs</span><val id="staff-total">0</val></div>
+                    <div class="segment-datapoint"><span>Active Jobs</span><val id="staff-active" style="color:var(--primary);">0</val></div>
+                    <div class="segment-datapoint"><span>PPM Due</span><val id="staff-ppm" style="color:var(--warning);">0</val></div>
+                </div>
+            </div>
+            <div class="summary-segment-box">
+                <h4>🚑 Outside Station Network</h4>
+                <div class="segment-metrics-row">
+                    <div class="segment-datapoint"><span>Total Logs</span><val id="station-total">0</val></div>
+                    <div class="segment-datapoint"><span>Active Jobs</span><val id="station-active" style="color:var(--primary);">0</val></div>
+                    <div class="segment-datapoint"><span>PPM Due</span><val id="station-ppm" style="color:var(--warning);">0</val></div>
+                </div>
+            </div>
         </div>
 
-        <div class="user-box">
-            <span id="userRole">Checking Credentials...</span>
-            <button id="logoutBtn">Logout</button>
+        <div class="kpi-grid">
+            <div class="kpi-card"><h3>Total Requests</h3><p id="global-requests">0</p></div>
+            <div class="kpi-card"><h3>Active Open</h3><p id="global-active" style="color: var(--primary);">0</p></div>
+            <div class="kpi-card"><h3>Rejected Jobs</h3><p id="global-rejected" style="color: var(--danger);">0</p></div>
+            <div class="kpi-card"><h3>Resolved Logs</h3><p id="global-resolved" style="color: var(--success);">0</p></div>
+            <div class="kpi-card"><h3>Planned PPM</h3><p id="global-ppm-total">0</p></div>
+            <div class="kpi-card"><h3>Overdue Tasks</h3><p id="global-ppm-overdue" style="color: var(--warning);">0</p></div>
         </div>
-    </header>
 
-    <aside class="sidebar" id="sidebar">
-        <div id="sidebarMenu"></div>
-    </aside>
-
-    <main class="main-content">
-        <div class="dashboard-container">
-            
-            <div class="page-title" id="dashTitle">Facilities Hub Dashboard</div>
-
-            <div class="location-summary-strip restricted-executive-view" id="executiveSummaryStrip">
-                
-                <div class="summary-segment-box" style="border-left: 4px solid #2563eb;">
-                    <h4>🏢 Headquarters Building</h4>
-                    <div class="segment-metrics-row">
-                        <div class="segment-datapoint"><span>Total Logs</span><val>1,840</val></div>
-                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">42</val></div>
-                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">11</val></div>
-                    </div>
+        <div class="services-section-wrapper">
+            <h3>16 Contractual AMC Core Services</h3>
+            <div class="services-main-grid" id="amcServicesCardsGridContainer">
                 </div>
-
-                <div class="summary-segment-box" style="border-left: 4px solid #10b981;">
-                    <h4>🏠 Staff Accommodation</h4>
-                    <div class="segment-metrics-row">
-                        <div class="segment-datapoint"><span>Total Logs</span><val>920</val></div>
-                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">28</val></div>
-                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">06</val></div>
-                    </div>
-                </div>
-
-                <div class="summary-segment-box" style="border-left: 4px solid #f59e0b;">
-                    <h4>🚑 Outside Station Network</h4>
-                    <div class="segment-metrics-row">
-                        <div class="segment-datapoint"><span>Total Logs</span><val>1,360</val></div>
-                        <div class="segment-datapoint"><span>Active Jobs</span><val style="color:#2563eb;">44</val></div>
-                        <div class="segment-datapoint"><span>PPM Due</span><val style="color:#ea580c;">15</val></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="kpi-grid restricted-executive-view" id="executiveMetrics">
-                <div class="kpi-card" style="border-top: 3px solid #f59e0b;"><h3>Total Requests</h3><p style="color:#f59e0b;" id="valTotalReq">4,120</p></div>
-                <div class="kpi-card" style="border-top: 3px solid #2563eb;"><h3>Active Open</h3><p style="color:#2563eb;" id="valActiveOpen">114</p></div>
-                <div class="kpi-card" style="border-top: 3px solid #d946ef;"><h3>Rejected Jobs</h3><p style="color:#d946ef;" id="valRejectedJobs">32</p></div>
-                <div class="kpi-card" style="border-top: 3px solid #10b981;"><h3>Resolved Logs</h3><p style="color:#10b981;" id="valResolvedLogs">3,974</p></div>
-                <div class="kpi-card" style="border-top: 3px solid #ea580c;"><h3>Planned PPM</h3><p style="color:#ea580c;" id="valPlannedPpm">512</p></div>
-                <div class="kpi-card" style="border-top: 3px solid #ef4444;"><h3>Overdue Tasks</h3><p style="color:#ef4444;" id="valOverdueTasks">8</p></div>
-            </div>
-
-            <div class="charts-row-split restricted-executive-view" id="executiveCharts">
-                <div class="chart-box-card">
-                    <h3>Service AMC Target vs Realized Delivery Rate (SLA %)</h3>
-                    <div class="chart-canvas-wrapper"><canvas id="chartSlaCandle"></canvas></div>
-                </div>
-                <div class="chart-box-card">
-                    <h3>PPM Operations Execution Bounds (Task Capacity Boundaries)</h3>
-                    <div class="chart-canvas-wrapper"><canvas id="chartPpmCandle"></canvas></div>
-                </div>
-            </div>
-
-            <div class="section-headline">System Core Framework Engines</div>
-            <div class="core-sys-grid">
-                <a href="ppm.html" class="sys-card"><h3>📅 PPM Maintenance Engine Plan</h3> <span>→</span></a>
-                <a href="assets.html" class="sys-card"><h3>🏭 Asset Control Infrastructure Registers</h3> <span>→</span></a>
-                <a href="inventory.html" class="sys-card"><h3>📦 Materials Inventory Stockhouse</h3> <span>→</span></a>
-            </div>
-
-            <div class="section-headline">16 Contractual AMC Core Services</div>
-            <div class="services-portal-grid">
-                <a href="building-maintenance.html" class="portal-card"><div class="portal-icon">🏢</div><div class="portal-meta"><h3>1. Building Maintenance</h3><p>Civil & Structural Repairs</p></div></a>
-                <a href="swimming-pool.html" class="portal-card"><div class="portal-icon">🏊‍♂️</div><div class="portal-meta"><h3>2. Swimming Pool</h3><p>Filtration & Chemical Pumps</p></div></a>
-                <a href="cleaning.html" class="portal-card"><div class="portal-icon">🧹</div><div class="portal-meta"><h3>3. Cleaning & Janitorial</h3><p>Sanitation & Housekeeping</p></div></a>
-                <a href="pestcontrol.html" class="portal-card"><div class="portal-icon">🪰</div><div class="portal-meta"><h3>4. Pest Control</h3><p>Vector Spray Disinfection</p></div></a>
-                <a href="security-guards.html" class="portal-card"><div class="portal-icon">💂‍♂️</div><div class="portal-meta"><h3>5. Security Services</h3><p>Guard Deployments & Patrols</p></div></a>
-                <a href="air-conditioning.html" class="portal-card"><div class="portal-icon">❄️</div><div class="portal-meta"><h3>6. Air Conditioning</h3><p>HVAC & Chiller Maintenance</p></div></a>
-                <a href="elevators.html" class="portal-card"><div class="portal-icon">🛗</div><div class="portal-meta"><h3>7. Elevators & Lifts</h3><p>Safety Audits & Mechanicals</p></div></a>
-                <a href="fire-system.html" class="portal-card"><div class="portal-icon">🔥</div><div class="portal-meta"><h3>8. Fire System</h3><p>Alarms, Sprinklers & Extinguishers</p></div></a>
-                <a href="security-systems.html" class="portal-card"><div class="portal-icon">🛡️</div><div class="portal-meta"><h3>9. Security Systems</h3><p>CCTV Network & Access Barriers</p></div></a>
-                <a href="audio-visual.html" class="portal-card"><div class="portal-icon">🔊</div><div class="portal-meta"><h3>10. Audio & Visual</h3><p>Comms Rigging & Audio Arrays</p></div></a>
-                <a href="medicalwaste.html" class="portal-card"><div class="portal-icon">🏥</div><div class="portal-meta"><h3>11. Medical Waste</h3><p>Biohazard Transport Protocols</p></div></a>
-                <a href="generalwaste.html" class="portal-card"><div class="portal-icon">🗑️</div><div class="portal-meta"><h3>12. General Waste</h3><p>Refuse Removal & Dump Cycles</p></div></a>
-                <a href="sewage.html" class="portal-card"><div class="portal-icon">🚰</div><div class="portal-meta"><h3>13. Sewage Waste</h3><p>Tanker Clearance Dispatches</p></div></a>
-                <a href="landscaping.html" class="portal-card"><div class="portal-icon">🌳</div><div class="portal-meta"><h3>14. Landscaping</h3><p>Gardening & Irrigation Flow</p></div></a>
-                <a href="flagsupply.html" class="portal-card"><div class="portal-icon">🚩</div><div class="portal-meta"><h3>15. Flag & Pole Supply</h3><p>Masts, Rigging & Textiles</p></div></a>
-                <a href="hr-obligation.html" class="portal-card"><div class="portal-icon">📋</div><div class="portal-meta"><h3>16. HR Obligation</h3><p>Labor Compliance Auditing</p></div></a>
-            </div>
-
         </div>
-    </main>
 
-    <script type="module">
-        import { checkAccess } from "./roleguard.js";
-        import { loadSidebar } from "./sidebar.js";
-        import { auth } from "./firebase.js";
+    </div>
+</div>
 
-        // Internal tracking references for analytical rendering routines
-        let chartInstanceSla = null;
-        let chartInstancePpm = null;
+<script type="module">
+    import { db } from "./firebase.js";
+    import { checkAccess } from "./roleguard.js";
+    import { loadSidebar } from "./sidebar.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-        // Static dataset mapping across distinct architectural sectors
-        const locationDatasets = {
-            all: { total: 4120, open: 114, rejected: 32, resolved: 3974, ppm: 512, overdue: 8 },
-            hq: { total: 1840, open: 42, rejected: 12, resolved: 1786, ppm: 190, overdue: 2 },
-            staff: { total: 920, open: 28, rejected: 6, resolved: 886, ppm: 112, overdue: 1 },
-            station: { total: 1360, open: 44, rejected: 14, resolved: 1302, ppm: 210, overdue: 5 }
-        };
+    // Data definitions mapping your system's core 16 contractual AMC components
+    const BASELINE_AMC_SERVICES_DEFINITIONS = [
+        { id: "building-maintenance", num: "1", title: "Building Maintenance Civil", scope: "Civil & Structural Fixes" },
+        { id: "swimming-pool", num: "2", title: "Swimming Pool Maintenance", scope: "Filtration & Water Testing" },
+        { id: "cleaning-janitorial", num: "3", title: "Cleaning & Janitorial Services", scope: "Hygiene & Housekeeping Management" },
+        { id: "pest-control", num: "4", title: "Pest Control Management", scope: "Treatment & Periodic Inspections" },
+        { id: "air-conditioning", num: "5", title: "Air Conditioning Systems (HVAC)", scope: "Chillers, FCUs & AHUs Servicing" },
+        { id: "fire-system", num: "6", title: "Fire Alarm & Fighting Systems", scope: "Naffco Safety Compliance Controls" },
+        { id: "elevators", num: "7", title: "Elevators & Lifts Machinery", scope: "Vertical Transport Safety Tests" },
+        { id: "diesel-generators", num: "8", title: "Diesel Generators Backup Supply", scope: "Emergency Standby Load Calibration" },
+        { id: "ups-systems", num: "9", title: "Uninterruptible Power Supplies (UPS)", scope: "Continuous Server Room Power backups" },
+        { id: "cctv-access", num: "10", title: "CCTV & Security Access Control", scope: "Surveillance Storage & Biometric Guards" },
+        { id: "water-tanks", num: "11", title: "Water Tanks Cleaning & Sanitation", scope: "Sterilization Audits & Pipeline Purging" },
+        { id: "gate-barriers", num: "12", title: "Automatic Gate Barriers Systems", scope: "Access Gates Servicing" },
+        { id: "bm-systems", num: "13", title: "Building Management Systems (BMS)", scope: "Automation Control Infrastructure Sensors" },
+        { id: "waste-management", num: "14", title: "Medical & General Waste Controls", scope: "Hazardous Bio-waste Disposals Tracking" },
+        { id: "landscaping", num: "15", title: "Landscaping & Irrigation Irrigation", scope: "Greenery Watering Systems Network Control" },
+        { id: "cradle-suspension", num: "16", title: "Facade Cradle Suspension Machinery", scope: "External Window Washing Cranes Inspections" }
+    ];
 
-        checkAccess((role) => {
-            if (!role) {
-                role = localStorage.getItem("userRole") || "staff";
-            }
-            
-            document.getElementById("userRole").innerText = role;
-            loadSidebar(role);
+    // Page Authentication Verification Shield
+    checkAccess((validatedUserRole) => {
+        document.getElementById("userRole").innerText = validatedUserRole.toUpperCase();
+        loadSidebar(validatedUserRole);
+        executeLiveMetricsStreamingAggregationPipeline();
+    });
 
-            if (role === "admin" || role === "management" || role === "contractor") {
-                document.getElementById("executiveSummaryStrip").style.display = "grid";
-                document.getElementById("executiveMetrics").style.display = "grid";
-                document.getElementById("executiveCharts").style.display = "grid";
-                document.getElementById("dashTitle").innerText = "Executive Control Hub";
-                
-                setTimeout(initializePerformanceCharts, 100);
-            } else {
-                document.getElementById("dashTitle").innerText = "Operations Dashboard";
-            }
-        });
+    document.getElementById("logoutBtn").onclick = () => {
+        localStorage.clear();
+        window.location.href = "index.html";
+    };
 
-        // Event handler for real-time dashboard data updates based on selected sector
-        document.getElementById("headerGlobalLocationFilter").addEventListener("change", (e) => {
-            const scope = e.target.value;
-            if (locationDatasets[scope]) {
-                const data = locationDatasets[scope];
-                document.getElementById("valTotalReq").innerText = data.total.toLocaleString();
-                document.getElementById("valActiveOpen").innerText = data.open.toLocaleString();
-                document.getElementById("valRejectedJobs").innerText = data.rejected.toLocaleString();
-                document.getElementById("valResolvedLogs").innerText = data.resolved.toLocaleString();
-                document.getElementById("valPlannedPpm").innerText = data.ppm.toLocaleString();
-                document.getElementById("valOverdueTasks").innerText = data.overdue.toLocaleString();
-                
-                // Trigger chart rendering adjustments on view scope change
-                updatePerformanceCharts(scope);
-            }
-        });
+    async function executeLiveMetricsStreamingAggregationPipeline() {
+        try {
+            // 1. Read live ticket documents array matrix data blocks from Cloud Firestore
+            const ticketsSnapshot = await getDocs(collection(db, "maintenance_tickets"));
+            let processedTicketsList = [];
+            ticketsSnapshot.forEach(doc => processedTicketsList.push(doc.data()));
 
-        document.getElementById("menuBtn").onclick = () => {
-            document.getElementById("sidebar").classList.toggle("mobile-open");
-        };
+            // 2. Read live PPM schedule documents array matrix data blocks from Cloud Firestore
+            const ppmSnapshot = await getDocs(collection(db, "ppm_schedules"));
+            let processedPpmList = [];
+            ppmSnapshot.forEach(doc => processedPpmList.push(doc.data()));
 
-        document.getElementById("logoutBtn").onclick = async () => {
-            localStorage.clear();
-            await auth.signOut();
-            window.location.href = "login.html";
-        };
+            // Compute scope-specific metrics counters
+            const metricsCounters = {
+                hq: { total: 0, active: 0, ppm: 0 },
+                staff: { total: 0, active: 0, ppm: 0 },
+                station: { total: 0, active: 0, ppm: 0 },
+                global: { requests: 0, active: 0, rejected: 0, resolved: 0, ppmTotal: 0, ppmOverdue: 0 }
+            };
 
-        // Generates clean metric performance ranges using specialized multi-dataset floating configurations
-        function initializePerformanceCharts() {
-            try {
-                const labels = ['Civil', 'Pool', 'Cleaning', 'Pest', 'Security', 'HVAC', 'Lifts', 'Fire', 'ELV', 'AV', 'Med', 'Gen', 'Sewage', 'Landscape', 'Flags', 'HR'];
-                
-                const ctxSla = document.getElementById('chartSlaCandle');
-                if (ctxSla) {
-                    chartInstanceSla = new Chart(ctxSla, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Contractual Operational Variance Target vs Actual',
-                                    data: [[90, 94], [95, 98], [88, 92], [85, 89], [95, 100], [80, 85], [92, 96], [98, 100], [87, 91], [88, 93], [95, 100], [90, 95], [84, 88], [90, 94], [95, 99], [98, 100]],
-                                    backgroundColor: 'rgba(37, 99, 235, 0.85)',
-                                    borderColor: '#1e3a8a',
-                                    borderWidth: 1,
-                                    borderRadius: 4,
-                                    borderSkipped: false
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: true, position: 'top' } },
-                            scales: { y: { min: 70, max: 105, title: { display: true, text: 'SLA Performance Bounds (%)' } } }
-                        }
-                    });
+            // Process dynamic work orders data loop arrays
+            processedTicketsList.forEach(ticket => {
+                const scope = ticket.locationScope; // Expects values matching 'hq', 'staff', 'station'
+                metricsCounters.global.requests++;
+
+                if (ticket.status === "active" || ticket.status === "pending_approval") {
+                    metricsCounters.global.active++;
+                    if (metricsCounters[scope]) metricsCounters[scope].active++;
+                } else if (ticket.status === "resolved") {
+                    metricsCounters.global.resolved++;
+                } else if (ticket.status === "rejected") {
+                    metricsCounters.global.rejected++;
                 }
 
-                const ctxPpm = document.getElementById('chartPpmCandle');
-                if (ctxPpm) {
-                    chartInstancePpm = new Chart(ctxPpm, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'PPM Task Load Target vs Actual Capacity',
-                                    data: [[10, 40], [5, 30], [40, 150], [15, 60], [5, 20], [30, 110], [10, 45], [20, 90], [10, 35], [5, 15], [15, 52], [20, 60], [12, 48], [10, 40], [2, 12], [1, 8]],
-                                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
-                                    borderColor: '#065f46',
-                                    borderWidth: 1,
-                                    borderRadius: 4,
-                                    borderSkipped: false
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: true, position: 'top' } },
-                            scales: { y: { min: 0, max: 180, title: { display: true, text: 'Volume Range Limits' } } }
-                        }
-                    });
+                if (metricsCounters[scope]) {
+                    metricsCounters[scope].total++;
                 }
-            } catch (err) {
-                console.error("Analytical chart visualization mounting routine failure:", err);
-            }
+            });
+
+            // Process dynamic PPM schedules data loop arrays
+            processedPpmList.forEach(ppm => {
+                const scope = ppm.locationScope; // Expects values matching 'hq', 'staff', 'station'
+                metricsCounters.global.ppmTotal++;
+
+                if (ppm.status === "overdue" || ppm.status === "pending") {
+                    metricsCounters.global.ppmOverdue++;
+                    if (metricsCounters[scope]) metricsCounters[scope].ppm++;
+                }
+            });
+
+            // Update scope metrics fields in user viewport interface elements
+            document.getElementById("hq-total").innerText = metricsCounters.hq.total.toLocaleString();
+            document.getElementById("hq-active").innerText = metricsCounters.hq.active.toLocaleString();
+            document.getElementById("hq-ppm").innerText = metricsCounters.hq.ppm.toLocaleString();
+
+            document.getElementById("staff-total").innerText = metricsCounters.staff.total.toLocaleString();
+            document.getElementById("staff-active").innerText = metricsCounters.staff.active.toLocaleString();
+            document.getElementById("staff-ppm").innerText = metricsCounters.staff.ppm.toLocaleString();
+
+            document.getElementById("station-total").innerText = metricsCounters.station.total.toLocaleString();
+            document.getElementById("station-active").innerText = metricsCounters.station.active.toLocaleString();
+            document.getElementById("station-ppm").innerText = metricsCounters.station.ppm.toLocaleString();
+
+            // Update main performance KPIs counters cards widgets
+            document.getElementById("global-requests").innerText = metricsCounters.global.requests.toLocaleString();
+            document.getElementById("global-active").innerText = metricsCounters.global.active.toLocaleString();
+            document.getElementById("global-rejected").innerText = metricsCounters.global.rejected.toLocaleString();
+            document.getElementById("global-resolved").innerText = metricsCounters.global.resolved.toLocaleString();
+            document.getElementById("global-ppm-total").innerText = metricsCounters.global.ppmTotal.toLocaleString();
+            document.getElementById("global-ppm-overdue").innerText = metricsCounters.global.ppmOverdue.toLocaleString();
+
+            // Render the 16 Contractual Services Cards layout elements grid block
+            renderContractServicesMatrixCardsGrid(processedTicketsList);
+
+        } catch (error) {
+            console.error("Aggregation Stream Exception Error: ", error);
         }
+    }
 
-        function updatePerformanceCharts(scope) {
-            if (!chartInstanceSla || !chartInstancePpm) return;
-            
-            // Adjust visualization matrices dynamically based on user context properties selection
-            let slaMultiplier = 1.0;
-            let ppmMultiplier = 1.0;
-            
-            if (scope === 'hq') { slaMultiplier = 1.02; ppmMultiplier = 0.5; }
-            else if (scope === 'staff') { slaMultiplier = 0.97; ppmMultiplier = 0.3; }
-            else if (scope === 'station') { slaMultiplier = 0.95; ppmMultiplier = 0.4; }
+    function renderContractServicesMatrixCardsGrid(ticketsArray) {
+        const gridContainer = document.getElementById("amcServicesCardsGridContainer");
+        gridContainer.innerHTML = "";
 
-            const baseSla = [[90, 94], [95, 98], [88, 92], [85, 89], [95, 100], [80, 85], [92, 96], [98, 100], [87, 91], [88, 93], [95, 100], [90, 95], [84, 88], [90, 94], [95, 99], [98, 100]];
-            const basePpm = [[10, 40], [5, 30], [40, 150], [15, 60], [5, 20], [30, 110], [10, 45], [20, 90], [10, 35], [5, 15], [15, 52], [20, 60], [12, 48], [10, 40], [2, 12], [1, 8]];
+        BASELINE_AMC_SERVICES_DEFINITIONS.forEach(service => {
+            // Calculate active breakdowns specific to this service group
+            const serviceBreakdownsCount = ticketsArray.filter(t => 
+                t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval")
+            ).length;
 
-            chartInstanceSla.data.datasets[0].data = baseSla.map(range => [Math.max(70, Math.min(100, range[0] * slaMultiplier)), Math.max(70, Math.min(100, range[1] * slaMultiplier))]);
-            chartInstancePpm.data.datasets[0].data = basePpm.map(range => [Math.round(range[0] * ppmMultiplier), Math.round(range[1] * ppmMultiplier)]);
+            const badgeClassificationClass = (serviceBreakdownsCount > 0) ? "badge-breakdown" : "badge-operational";
+            const badgeLabelText = (serviceBreakdownsCount > 0) ? `${serviceBreakdownsCount} Breakdowns` : "Operational";
 
-            chartInstanceSla.update();
-            chartInstancePpm.update();
-        }
-    </script>
+            const cardElementMarkup = `
+                <div class="service-card-item">
+                    <h4>${service.num}. ${service.title}</h4>
+                    <p style="margin-top:4px;"><span>Scope:</span> ${service.scope}</p>
+                    <p style="margin-top:auto; padding-top:8px; border-top:1px dashed var(--border);">
+                        <span>Status Matrix:</span> 
+                        <span class="badge ${badgeClassificationClass}">${badgeLabelText}</span>
+                    </p>
+                </div>
+            `;
+            gridContainer.insertAdjacentHTML("beforeend", cardElementMarkup);
+        });
+    }
+</script>
+
 </body>
 </html>
