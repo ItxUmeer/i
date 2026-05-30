@@ -1,46 +1,3 @@
-/**
- * DCAS CMMS Enterprise Access Routing Shield
- * Protects frontend routes against unauthenticated and unauthorized account access vectors.
- */
-export function checkAccess(onVerifiedCallback) {
-    const sessionUid = localStorage.getItem("uid");
-    const sessionRole = localStorage.getItem("role");
-    
-    // 1. Force eject if no session data is active
-    if (!sessionUid || !sessionRole) {
-        localStorage.clear();
-        window.location.href = "index.html";
-        return;
-    }
-
-    // 2. Extract current filename execution string
-    const currentPathFile = window.location.pathname.split("/").pop();
-
-    // 3. Structural Access Allocation Map matrix (Configure your route rules here)
-    const accessMatrixRules = {
-        "dashboard.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "tickets.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
-        "assets.html": ["admin", "planner"], // Block contractors and viewers out of asset editing
-        "ppm.html": ["admin", "planner", "supervisor_viewer"] // Block contractors out of scheduling plans
-    };
-
-    const permittedRolesForRoute = accessMatrixRules[currentPathFile];
-
-    if (permittedRolesForRoute) {
-        if (permittedRolesForRoute.includes(sessionRole)) {
-            // Authorized! Pass control back to the layout file
-            if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-        } else {
-            // Eject if authorized role token mismatch is captured
-            alert("Security Alert: Your access classification level does not permit entrance to this zone.");
-            window.location.href = "dashboard.html"; // Safely bounce back to center home
-        }
-    } else {
-        // Fallback for general unlocked layout frames
-        if (onVerifiedCallback) onVerifiedCallback(sessionRole);
-    }
-}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,14 +31,13 @@ export function checkAccess(onVerifiedCallback) {
     </div>
 </div>
 
-<div class="sidebar" id="sidebarMenu">
-    </div>
+<div class="sidebar" id="sidebarMenu"></div>
 
 <div class="main-content">
     <div class="dashboard-container">
         
         <div class="asset-action-row">
-            <h2 class="page-title">Reactive Maintenance Registry</h2>
+            <h2 class="page-title" id="ticketsPageTitleContext">Reactive Maintenance Registry</h2>
             <button class="btn-success" id="openCreateTicketPanelBtn" style="display: none;">
                 ➕ Create Internal Work Order
             </button>
@@ -127,7 +83,7 @@ export function checkAccess(onVerifiedCallback) {
             
             <div class="form-input-container">
                 <label>Issue Summary</label>
-                <textarea id="drawerIssueDescription" readonly style="background: #f8fafc; border-color: var(--border); font-weight: 500;"></textarea>
+                <textarea id="drawerIssueDescription" readonly style="background: #f8fafc; border-color: var(--border); font-weight: 500; min-height: 80px; resize: none;"></textarea>
             </div>
 
             <div id="adminRoutingControls" style="display: none; flex-direction: column; gap: 14px;">
@@ -180,8 +136,12 @@ export function checkAccess(onVerifiedCallback) {
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
             document.getElementById("openCreateTicketPanelBtn").style.display = "flex";
             document.getElementById("adminRoutingControls").style.display = "flex";
+            document.getElementById("contractorFeedbackControls").style.display = "none";
         } else if (authenticatedUserRole.startsWith("contractor")) {
+            document.getElementById("openCreateTicketPanelBtn").style.display = "none";
+            document.getElementById("adminRoutingControls").style.display = "none";
             document.getElementById("contractorFeedbackControls").style.display = "flex";
+            document.getElementById("ticketsPageTitleContext").innerText = "Assigned Field Work Orders";
         }
         
         fetchTicketsDataPipeline();
@@ -197,17 +157,27 @@ export function checkAccess(onVerifiedCallback) {
     async function fetchTicketsDataPipeline() {
         try {
             const ticketsRef = collection(db, "maintenance_tickets");
-            // Fetch tickets ordered by reporting date newest first
             const q = query(ticketsRef, orderBy("reportedDate", "desc"));
             const querySnapshot = await getDocs(q);
             
-            globalActiveTicketsCache = [];
+            let rawCloudRecords = [];
             querySnapshot.forEach((docSnap) => {
-                globalActiveTicketsCache.push({
+                rawCloudRecords.push({
                     docId: docSnap.id,
                     ...docSnap.data()
                 });
             });
+
+            // ==========================================================================
+            // 🔒 REVENUE ENGINE DATA PARTITION MATRIX FOR ACTIVE SERVICE CONTRACTORS
+            // ==========================================================================
+            if (authenticatedUserRole.startsWith("contractor")) {
+                globalActiveTicketsCache = rawCloudRecords.filter(ticket => 
+                    ticket.assignedContractorUid === authenticatedUserRole
+                );
+            } else {
+                globalActiveTicketsCache = rawCloudRecords;
+            }
 
             renderTableInterface(globalActiveTicketsCache);
         } catch (error) {
@@ -223,17 +193,15 @@ export function checkAccess(onVerifiedCallback) {
     function renderTableInterface(dataItems) {
         const tbody = document.getElementById("ticketsTableBody");
         if (dataItems.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:var(--muted);">No matching records logged on system data nodes.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:var(--muted);">No matching operational records mapped to your profile scope.</td></tr>`;
             return;
         }
 
         let compiledRowsMarkup = "";
         dataItems.forEach((ticket) => {
-            // Apply structural filters for contractors so they only see their assigned disciplines
-            if (authenticatedUserRole.startsWith("contractor") && 
-                ticket.assignedContractorUid !== authenticatedUserRole) {
-                return; // Skips rendering unassigned contractor tickets completely
-            }
+            let statusText = ticket.status ? ticket.status.replace('_', ' ') : 'Pending';
+            let priorityVal = ticket.priority || 'medium';
+            let statusVal = ticket.status || 'pending_approval';
 
             compiledRowsMarkup += `
                 <tr>
@@ -241,9 +209,9 @@ export function checkAccess(onVerifiedCallback) {
                     <td style="text-transform:uppercase; font-size:11px; font-weight:600;">📍 ${ticket.locationScope || 'General'}</td>
                     <td>${ticket.specificLocation || 'N/A'}</td>
                     <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${ticket.amcCategory || 'N/A'}</code></td>
-                    <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ticket.description || 'N/A'}</td>
-                    <td><span class="badge badge-${ticket.priority || 'medium'}">${ticket.priority || 'medium'}</span></td>
-                    <td><span class="badge badge-${ticket.status || 'pending_approval'}">${ticket.status ? ticket.status.replace('_', ' ') : 'Pending'}</span></td>
+                    <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${ticket.description || ''}">${ticket.description || 'N/A'}</td>
+                    <td><span class="badge badge-${priorityVal}">${priorityVal}</span></td>
+                    <td><span class="badge badge-${statusVal}">${statusText}</span></td>
                     <td style="font-size:12px; color:var(--muted);">${ticket.reportedDate ? ticket.reportedDate.substring(0,10) : 'N/A'}</td>
                     <td>
                         <button class="btn-primary" style="height:30px; padding:0 12px; font-size:12px; width:auto;" onclick="openTriageDrawer('${ticket.docId}')">
@@ -254,7 +222,7 @@ export function checkAccess(onVerifiedCallback) {
             `;
         });
 
-        tbody.innerHTML = compiledRowsMarkup || `<tr><td colspan="9" style="text-align:center; padding:40px; color:var(--muted);">No assigned operational work orders found for your profile access scope.</td></tr>`;
+        tbody.innerHTML = compiledRowsMarkup;
     }
 
     // Interactive Drawer Overlay Actions Opening Management Mapping Engine
@@ -293,9 +261,11 @@ export function checkAccess(onVerifiedCallback) {
             updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
             updatePayload.status = document.getElementById("drawerStatusUpdate").value;
         } else if (authenticatedUserRole.startsWith("contractor")) {
-            updatePayload.technicianNotes = document.getElementById("drawerTechnicianNotes").value.trim();
+            const techNotes = document.getElementById("drawerTechnicianNotes").value.trim();
+            updatePayload.technicianNotes = techNotes;
+            
             // Automatically flip tracking parameter to resolved when contractor logs completion notes
-            if(updatePayload.technicianNotes.length > 5) {
+            if(techNotes.length > 5) {
                 updatePayload.status = "resolved";
                 updatePayload.resolvedDate = new Date().toISOString();
             }
