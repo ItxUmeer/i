@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - Security Gateway</title>
+    <title>DCAS Facilities CMMS - Portal Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="login-page">
@@ -11,28 +11,28 @@
 <div class="login-wrapper">
     <div class="login-card">
 
-        <div class="login-header">
-            <img src="logo-left.png" alt="Dubai Government Emblem" class="login-logo">
-            <img src="logo-right.png" alt="DCAS Ambulance Emblem" class="login-logo">
+        <div class="brand-identity-row">
+            <img src="logo-left.png" alt="Dubai Government Emblem" class="brand-logo-frame">
+            <img src="logo-right.png" alt="DCAS Ambulance Emblem" class="brand-logo-frame">
         </div>
 
-        <div class="system-title">
+        <div class="system-headline-group">
             <h1>Facilities CMMS</h1>
             <p>Dubai Corporation for Ambulance Service</p>
         </div>
 
         <form id="loginForm">
-            <div class="input-group">
+            <div class="form-input-container">
                 <label>Enterprise Email Address</label>
                 <input type="email" id="email" placeholder="username@dcas.gov.ae" autocomplete="email" required>
             </div>
 
-            <div class="input-group">
+            <div class="form-input-container">
                 <label>Security Password</label>
                 <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
             </div>
 
-            <button type="submit" class="btn-primary" id="submitBtn">Verify Identity & Enter</button>
+            <button type="submit" class="btn-primary" id="submitBtn">Sign In</button>
         </form>
 
         <div id="loginError"></div>
@@ -50,30 +50,23 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const errorBox = document.getElementById("loginError");
     const submitBtn = document.getElementById("submitBtn");
 
-    // Reset standard layout diagnostics indicators
     errorBox.innerText = "";
     submitBtn.disabled = true;
-    submitBtn.style.opacity = "0.7";
-    submitBtn.innerText = "Authorizing Access Token...";
+    submitBtn.innerText = "Verifying Identity...";
 
     try {
         const user = await login(email, password);
 
         if (!user || !user.role) {
-            throw new Error("Identity record found but structural profile role mapping is unassigned.");
+            throw new Error("Authentication response valid, but user profile role structure is unassigned.");
         }
 
-        // Lock session claims parameters within local client context
         localStorage.setItem("userRole", user.role);
         window.location.href = "dashboard.html";
 
     } catch (error) {
-        // Revert action controllers to structural rest status on execution crash
         submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-        submitBtn.innerText = "Verify Identity & Enter";
-        
-        // Output contextual translation log cleanly to user viewport
+        submitBtn.innerText = "Sign In";
         errorBox.innerText = error.message || "Authentication checkpoint failed. Verify your inputs.";
     }
 });
