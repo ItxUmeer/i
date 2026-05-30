@@ -3,81 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS Facilities CMMS - Command Dashboard</title>
+    <title>DCAS CMMS - Control Hub</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Header Block -->
     <header class="header">
         <div class="header-left">
-            <button class="menu-btn" id="menuToggle">☰</button>
-            <img src="logo-right.png" alt="DCAS Logo" class="header-logo">
-            <span class="header-title">DCAS Facilities Center</span>
+            <button class="menu-btn" id="menuBtn">☰</button>
+            <span class="header-title">DCAS Facilities CMMS</span>
         </div>
+
         <div class="user-box">
-            <span class="role-badge" id="roleBadge">Loading...</span>
+            <span class="role-badge" id="userRole">Checking...</span>
             <button class="logout-btn" id="logoutBtn">Logout</button>
         </div>
     </header>
 
-    <!-- Structural Navigation Sidebar Navigation -->
-    <nav class="sidebar" id="sidebarMenu">
-        <!-- Injected dynamically by sidebar.js based on role permissions -->
-    </nav>
+    <aside class="sidebar" id="sidebar">
+        <div id="sidebarMenu"></div>
+    </aside>
 
-    <!-- Core App Viewport Area -->
     <main class="main-content">
-        <div class="welcome-card">
-            <h1 id="welcomeGreeting">Welcome to DCAS CMMS Portal</h1>
-            <p style="color: var(--muted); margin-top: 5px;">Dubai Corporation for Ambulance Service Facilities Operation Hub</p>
-        </div>
+        <div class="page-title" id="welcomeMessage">Control Dashboard</div>
 
-        <!-- High Level Operational Cards -->
         <div class="kpi-grid">
-            <div class="kpi-card" style="border-left: 4px solid var(--primary);">
-                <h3>Pending Actions</h3>
-                <p id="kpiPending">-</p>
+            <div class="kpi-card" style="border-top: 4px solid var(--primary);">
+                <h3>Open Requests</h3>
+                <p id="countRequests">0</p>
             </div>
-            <div class="kpi-card" style="border-left: 4px solid var(--warning);">
-                <h3>Active Work Orders</h3>
-                <p id="kpiActive">-</p>
+
+            <div class="kpi-card" style="border-top: 4px solid var(--warning);">
+                <h3>Pending Approval</h3>
+                <p id="countApprovals">0</p>
             </div>
-            <div class="kpi-card" style="border-left: 4px solid var(--success);">
-                <h3>Completed Tasks</h3>
-                <p id="kpiCompleted">-</p>
+
+            <div class="kpi-card" style="border-top: 4px solid var(--success);">
+                <h3>Open Work Orders</h3>
+                <p id="countWorkorders">0</p>
+            </div>
+
+            <div class="kpi-card" style="border-top: 4px solid var(--danger);">
+                <h3>PPM Due</h3>
+                <p id="countPPM">0</p>
             </div>
         </div>
     </main>
 
-    <!-- App Logic Hook script -->
     <script type="module">
+        import { checkAccess } from "./roleguard.js";
         import { loadSidebar } from "./sidebar.js";
-        
-        // Mobile Toggle Configuration
-        const menuToggle = document.getElementById("menuToggle");
-        const sidebarMenu = document.getElementById("sidebarMenu");
-        
-        menuToggle.addEventListener("click", () => {
-            sidebarMenu.classList.toggle("mobile-open");
+        import { auth } from "./firebase.js";
+
+        // Execute asynchronous checks safely via functional callbacks
+        checkAccess((role) => {
+            // 1. Output verified role status inside upper UI Badge
+            document.getElementById("userRole").innerText = role;
+            
+            // 2. Adjust core header welcome title dynamically
+            document.getElementById("welcomeMessage").innerText = `${role.toUpperCase()} Control Hub`;
+            
+            // 3. Mount tailored navigational systems programmatically
+            loadSidebar(role);
         });
 
-        // Initialize Dynamic Identity Role Guard Layouts
-        document.addEventListener("DOMContentLoaded", () => {
-            const preservedRole = localStorage.getItem("userRole") || "staff";
-            
-            // Set Badge text visually
-            document.getElementById("roleBadge").innerText = preservedRole;
-            
-            // Trigger script template logic to construct your tailored sidebar layout links
-            loadSidebar(preservedRole);
-        });
+        // Handle Responsive Mobile View Sidebar Drawer State toggles
+        document.getElementById("menuBtn").onclick = () => {
+            document.getElementById("sidebar").classList.toggle("mobile-open");
+        };
 
-        // Simple mock handle to clear local identity tokens on logout
-        document.getElementById("logoutBtn").addEventListener("click", () => {
+        // Terminate and purge session tokens safely on clear intent
+        document.getElementById("logoutBtn").onclick = async () => {
             localStorage.clear();
+            await auth.signOut();
             window.location.href = "login.html";
-        });
+        };
     </script>
 </body>
 </html>
