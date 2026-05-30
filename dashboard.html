@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Enterprise Layout Overrides for multi-service mapping */
+        /* Strict screen preservation constraints to prevent infinite stretching */
         .dashboard-container {
             display: flex;
             flex-direction: column;
@@ -81,22 +81,29 @@
             border: 1px solid rgba(0,0,0,.05);
             border-radius: 12px;
             padding: 20px;
-            min-height: 360px;
+            height: 340px; /* Fixed height constraint stops infinite expanding */
             box-shadow: 0 4px 15px rgba(0,0,0,.02);
+            position: relative;
         }
         .chart-box-card h3 {
             font-size: 14px;
             color: #0f172a;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 10px;
             font-weight: 700;
+        }
+        /* Explicit sizing container wrapper for dynamic canvas instances */
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 250px; 
+            width: 100%;
         }
         .gauge-wrapper {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            height: calc(100% - 40px);
+            height: 250px;
         }
         .gauge-item {
             text-align: center;
@@ -105,8 +112,8 @@
         }
         .gauge-label-center {
             position: absolute;
-            top: 52%;
-            left: 50+%;
+            top: 42%;
+            left: 50%;
             transform: translate(-50%, -50%);
             font-size: 18px;
             font-weight: 700;
@@ -129,39 +136,71 @@
             font-size: 32px;
             font-weight: 700;
         }
-        .schedule-grid-box {
+
+        /* =====================================
+           ENTERPRISE MODULE MANAGEMENT GRID
+           ===================================== */
+        .modules-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .management-modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .module-card {
             background: #ffffff;
-            border: 1px solid rgba(0,0,0,.05);
+            border: 1px solid rgba(0,0,0,.06);
             border-radius: 12px;
             padding: 20px;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
         }
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .module-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(37,99,235,0.1);
+        }
+        .module-icon {
+            font-size: 24px;
+            width: 45px;
+            height: 45px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+        .module-card:hover .module-icon {
+            background: rgba(37, 99, 235, 0.1);
+        }
+        .module-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .module-info h3 {
             font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
         }
-        .schedule-table th, .schedule-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .schedule-table th {
-            background: #f8fafc;
+        .module-info p {
+            font-size: 12px;
             color: var(--muted);
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
+            margin-top: 2px;
         }
-        .status-pill {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .pill-planned { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
-        .pill-urgent { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
         @media(max-width: 1024px) {
             .charts-row-split { grid-template-columns: 1fr; }
         }
@@ -214,6 +253,98 @@
                 </div>
             </div>
 
+            <div class="modules-section-title">Core Management Portals</div>
+            <div class="management-modules-grid">
+                
+                <a href="workorders.html" class="module-card">
+                    <div class="module-icon">🔧</div>
+                    <div class="module-info">
+                        <h3>Work Orders</h3>
+                        <p>Track Actions & Fixes</p>
+                    </div>
+                </a>
+
+                <a href="assets.html" class="module-card">
+                    <div class="module-icon">🏭</div>
+                    <div class="module-info">
+                        <h3>Assets Management</h3>
+                        <p>Excel / CSV Inventory</p>
+                    </div>
+                </a>
+
+                <a href="ppm.html" class="module-card">
+                    <div class="module-icon">📅</div>
+                    <div class="module-info">
+                        <h3>PPM Management</h3>
+                        <p>Planned Schedules</p>
+                    </div>
+                </a>
+
+                <a href="inventory.html" class="module-card">
+                    <div class="module-icon">📦</div>
+                    <div class="module-info">
+                        <h3>Inventory Hub</h3>
+                        <p>DCAS & Contractor Stock</p>
+                    </div>
+                </a>
+
+                <a href="security.html" class="module-card">
+                    <div class="module-icon">🛡️</div>
+                    <div class="module-info">
+                        <h3>Security Systems</h3>
+                        <p>Guards & Access Logs</p>
+                    </div>
+                </a>
+
+                <a href="sewage.html" class="module-card">
+                    <div class="module-icon">🚰</div>
+                    <div class="module-info">
+                        <h3>Sewage Collection</h3>
+                        <p>Tanker Dispatches</p>
+                    </div>
+                </a>
+
+                <a href="medicalwaste.html" class="module-card">
+                    <div class="module-icon">🏥</div>
+                    <div class="module-info">
+                        <h3>Medical Waste</h3>
+                        <p>Hazardous Disposal Runs</p>
+                    </div>
+                </a>
+
+                <a href="pestcontrol.html" class="module-card">
+                    <div class="module-icon">🪰</div>
+                    <div class="module-info">
+                        <h3>Pest Control</h3>
+                        <p>Vector Disinfections</p>
+                    </div>
+                </a>
+
+                <a href="cleaning.html" class="module-card">
+                    <div class="module-icon">🧹</div>
+                    <div class="module-info">
+                        <h3>Cleaning & Janitorial</h3>
+                        <p>Sanitation Rotations</p>
+                    </div>
+                </a>
+
+                <a href="flagsupply.html" class="module-card">
+                    <div class="module-icon">🚩</div>
+                    <div class="module-info">
+                        <h3>Flag Supply</h3>
+                        <p>Logistics & Inventory</p>
+                    </div>
+                </a>
+
+                <a href="lifeguard.html" class="module-card">
+                    <div class="module-icon">🏊‍♂️</div>
+                    <div class="module-info">
+                        <h3>Lifeguard Controls</h3>
+                        <p>Station Safety Deployment</p>
+                    </div>
+                </a>
+            </div>
+
             <div class="metrics-grid-6">
                 <div class="metric-mini" style="border-top: 3px solid #f59e0b;">
                     <h4>Total Service Requests</h4>
@@ -247,12 +378,12 @@
                     <div class="gauge-wrapper">
                         <div class="gauge-item">
                             <canvas id="gaugeBacklog"></canvas>
-                            <div class="gauge-label-center" style="color:#10b981; top: 45%;">24</div>
+                            <div class="gauge-label-center" style="color:#ef4444;">24</div>
                             <span style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-top:5px;">Pending Backlog</span>
                         </div>
                         <div class="gauge-item">
                             <canvas id="gaugeCompliance"></canvas>
-                            <div class="gauge-label-center" style="color:#2563eb; top: 45%;">94.2%</div>
+                            <div class="gauge-label-center" style="color:#2563eb;">94.2%</div>
                             <span style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-top:5px;">SLA Compliance</span>
                         </div>
                     </div>
@@ -261,16 +392,16 @@
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <div class="fin-card" style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
                         <h4>Total Facilities Operational Cost</h4>
-                        <p style="color: #2563eb; font-size: 36px;">AED 4,850,920.00</p>
+                        <p style="color: #2563eb; font-size: 34px;">AED 4,850,920.00</p>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1;">
                         <div class="fin-card">
                             <h4>Contracted Service Cost</h4>
-                            <p style="color: #06b6d4; font-size: 22px;">AED 3,120,450</p>
+                            <p style="color: #06b6d4; font-size: 20px;">AED 3,120,450</p>
                         </div>
                         <div class="fin-card">
                             <h4>Ad-hoc & Emergency Cost</h4>
-                            <p style="color: #10b981; font-size: 22px;">AED 1,730,470</p>
+                            <p style="color: #10b981; font-size: 20px;">AED 1,730,470</p>
                         </div>
                     </div>
                 </div>
@@ -278,58 +409,17 @@
 
             <div class="charts-row-split">
                 <div class="chart-box-card">
-                    <h3>Planned Schedules vs Ad-hoc Requests By Service Line</h3>
-                    <canvas id="chartPlannedUnplanned"></canvas>
+                    <h3>Schedules vs Ad-hoc Requests By Service</h3>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="chartPlannedUnplanned"></canvas>
+                    </div>
                 </div>
                 <div class="chart-box-card">
-                    <h3>Monthly Request Distribution per Service Category</h3>
-                    <canvas id="chartWoTypeMonth"></canvas>
+                    <h3>Monthly Request Distribution per Service</h3>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="chartWoTypeMonth"></canvas>
+                    </div>
                 </div>
-            </div>
-
-            <div class="schedule-grid-box">
-                <h3 style="font-size:15px; font-weight:700;">Upcoming Facility Schedules & Maintenance Requests</h3>
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th>Scheduled Date</th>
-                            <th>Service Category</th>
-                            <th>Description / Task Requirement</th>
-                            <th>Location / Hub</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><b>02 June 2026</b></td>
-                            <td>🏥 Medical Waste</td>
-                            <td>Biomedical hazardous waste collection & disposal run</td>
-                            <td>DCAS HQ Sub-station B</td>
-                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
-                        </tr>
-                        <tr>
-                            <td><b>03 June 2026</b></td>
-                            <td>🚰 Sewage Collection</td>
-                            <td>Main holding septic tank clearance & extraction</td>
-                            <td>Al Barsha Station</td>
-                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
-                        </tr>
-                        <tr>
-                            <td><b>04 June 2026</b></td>
-                            <td>🪰 Pest Control</td>
-                            <td>Ad-hoc vector control request (reported insect sighting)</td>
-                            <td>Muhaisnah Hub</td>
-                            <td><span class="status-pill pill-urgent">Maintenance Req</span></td>
-                        </tr>
-                        <tr>
-                            <td><b>05 June 2026</b></td>
-                            <td>🛡️ Security</td>
-                            <td>Access control gate barrier calibration & hardware inspection</td>
-                            <td>Main Fleet Compound</td>
-                            <td><span class="status-pill pill-planned">Planned PPM</span></td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
 
         </div>
@@ -357,24 +447,23 @@
         };
 
         function initializeFacilityCharts() {
-            // Service Category mapping array labels
             const servicesLabels = ['Security', 'Cleaning', 'MEP Maint.', 'Gardening', 'Med Waste', 'Gen Waste', 'Pest Control', 'Sewage'];
 
-            // A. Backlog Half-Doughnut 
+            // A. Backlog Gauge
             new Chart(document.getElementById('gaugeBacklog'), {
                 type: 'doughnut',
                 data: { datasets: [{ data: [24, 200], backgroundColor: ['#ef4444', '#f1f5f9'], borderWidth: 0 }] },
-                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } } }
+                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
             });
 
-            // B. SLA Compliance Half-Doughnut
+            // B. SLA Compliance Gauge
             new Chart(document.getElementById('gaugeCompliance'), {
                 type: 'doughnut',
                 data: { datasets: [{ data: [94.2, 5.8], backgroundColor: ['#2563eb', '#f1f5f9'], borderWidth: 0 }] },
-                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } } }
+                options: { rotation: -90, circumference: 180, cutout: '82%', plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
             });
 
-            // C. Bar Chart: Planned Schedules vs Ad-hoc Requests 
+            // C. Planned vs Ad-Hoc Chart
             new Chart(document.getElementById('chartPlannedUnplanned'), {
                 type: 'bar',
                 data: {
@@ -387,15 +476,15 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // D. Line Chart: Monthly Request Distribution per Category over time
+            // D. Line Chart: Monthly Distribution
             new Chart(document.getElementById('chartWoTypeMonth'), {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                     datasets: [
                         { label: 'MEP Maintenance', data: [240, 280, 310, 290, 340, 350], borderColor: '#2563eb', tension: 0.2, fill: false },
-                        { label: 'Waste Streams (Gen/Med)', data: [110, 115, 120, 105, 130, 125], borderColor: '#d946ef', tension: 0.2, fill: false },
-                        { label: 'Cleaning & Janitorial', data: [180, 190, 210, 200, 220, 240], borderColor: '#06b6d4', tension: 0.2, fill: false },
+                        { label: 'Waste Streams', data: [110, 115, 120, 105, 130, 125], borderColor: '#d946ef', tension: 0.2, fill: false },
+                        { label: 'Cleaning', data: [180, 190, 210, 200, 220, 240], borderColor: '#06b6d4', tension: 0.2, fill: false },
                         { label: 'Sewage / Tankers', data: [40, 45, 42, 50, 48, 55], borderColor: '#ef4444', tension: 0.2, fill: false }
                     ]
                 },
