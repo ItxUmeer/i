@@ -3,6 +3,9 @@
  * Protects frontend pages from unauthorized URL direct-entry.
  */
 
+// Define pages that are allowed to skip authentication checkpoints entirely
+const PUBLIC_PAGES = ["index.html", "login.html", "reports.html"];
+
 // Define which roles are allowed to view which filenames
 const PAGE_ACCESS_RULES = {
     "dashboard.html": ["admin", "planner"],
@@ -16,11 +19,18 @@ const PAGE_ACCESS_RULES = {
  * @param {Function} successCallback - Runs if the user passes the role check
  */
 export function checkAccess(successCallback) {
-    // FIX: Look for both possible token names to remain bulletproof
-    let sessionRole = localStorage.getItem("role") || localStorage.getItem("userRole");
     const currentFile = window.location.pathname.split("/").pop() || "dashboard.html";
+    let sessionRole = localStorage.getItem("role") || localStorage.getItem("userRole");
 
-    // 1. If no role exists, they aren't logged in
+    // 🌟 FIX: If the target destination is a public page, bypass the guard completely
+    if (PUBLIC_PAGES.includes(currentFile)) {
+        if (successCallback && sessionRole) {
+            successCallback(sessionRole.toLowerCase().trim());
+        }
+        return;
+    }
+
+    // 1. If no role exists and page is restricted, they aren't logged in
     if (!sessionRole) {
         console.warn("Access Denied: Stale or missing local storage identity token.");
         alert("Access Denied: Please log in to verify your identity.");
@@ -38,7 +48,7 @@ export function checkAccess(successCallback) {
         if (!isAllowed) {
             alert(`Unauthorized Access: Your role [${sessionRole.toUpperCase()}] does not have permission to view this console.`);
             
-            // Smart routing: redirect them to a page they actually have access to
+            // Smart routing based on role access depth
             if (sessionRole.startsWith("contractor")) {
                 window.location.href = "tickets.html";
             } else if (sessionRole === "supervisor_viewer") {
