@@ -5,90 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCAS Facilities CMMS - Login</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
-            background: url("bg.jpg") no-repeat center center fixed;
-            background-size: cover;
-        }
-    </style>
 </head>
 <body class="login-page">
 
 <div class="login-wrapper">
     <div class="login-card">
-
-        <div class="login-header">
-            <img src="logo-left.png" alt="Dubai Government" class="login-logo">
-            <img src="logo-right.png" alt="DCAS Ambulance" class="login-logo">
-        </div>
-
         <div class="system-title">
-            <h1>Facilities CMMS</h1>
-            <p>Dubai Corporation for Ambulance Service</p>
+            <h1>DCAS CMMS Portal</h1>
+            <p>Facilities & Asset Management Control Suite</p>
         </div>
 
-        <form id="loginForm">
+        <form id="loginForm" class="modal-form">
             <div class="input-group">
-                <label>Enterprise Email</label>
-                <input type="email" id="email" placeholder="name@dcas.gov.ae" required>
+                <label>System Email Address</label>
+                <input type="email" id="loginEmail" placeholder="username@dcas.gov.ae" required>
             </div>
 
             <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+                <label>Security Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="btn-primary" id="submitBtn">Login</button>
+            <button type="submit" class="btn-primary" id="loginSubmitBtn" style="margin-top: 10px;">
+                Authenticate Account
+            </button>
+            <div id="loginError"></div>
         </form>
-
-        <div id="loginError"></div>
-        
-        <div style="text-align: center; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px;">
-            <a href="reports.html" style="font-size: 13px; color: var(--primary); font-weight: 700; text-decoration: none;">
-                ⚠️ Raise a Public Maintenance Issue →
-            </a>
-        </div>
     </div>
 </div>
 
 <script type="module">
-import { login } from "./auth.js";
+    import { auth, db } from "./firebase.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-// Optional: If user is already authenticated session-wise, forward straight past login
-if (localStorage.getItem("userRole")) {
-    window.location.href = "dashboard.html";
-}
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("loginSubmitBtn");
+        const errDiv = document.getElementById("loginError");
+        
+        btn.disabled = true;
+        btn.innerText = "Verifying Credentials...";
+        errDiv.innerText = "";
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const errorBox = document.getElementById("loginError");
-    const submitBtn = document.getElementById("submitBtn");
+        try {
+            // 1. Authenticate with Firebase Auth Core
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-    errorBox.innerText = "";
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Verifying Identity...";
+            // 2. Fetch the custom Role configuration document from Firestore
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
 
-    try {
-        const user = await login(email, password);
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                const systemRole = userData.role; // e.g., 'admin', 'planner', 'contractor_hvac'
 
-        if (!user || !user.role) {
-            throw new Error("User profile configuration mismatch.");
+                // 3. Save parameters into local browser session state tokens
+                localStorage.setItem("uid", user.uid);
+                localStorage.setItem("role", systemRole);
+                localStorage.setItem("email", user.email);
+
+                // 4. Dispatch directly to the main workspace control center
+                window.location.href = "dashboard.html";
+            } else {
+                throw new Error("Your user profile configuration token was not found by Firestore.");
+            }
+
+        } catch (error) {
+            console.error("Login Exception:", error);
+            errDiv.innerText = "Authentication Failed: " + error.message;
+            btn.disabled = false;
+            btn.innerText = "Authenticate Account";
         }
-
-        localStorage.setItem("userRole", user.role);
-        window.location.href = "dashboard.html";
-
-    } catch (error) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Login";
-        errorBox.innerText = error.message || "Authentication failed";
-    }
-});
+    });
 </script>
 
 </body>
