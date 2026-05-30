@@ -197,23 +197,24 @@
     import { loadSidebar } from "./sidebar.js";
     import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
+    // 🌟 Standardized 16 Core Services mapping precisely with assets.html register options
     const BASELINE_AMC_SERVICES_DEFINITIONS = [
-        { id: "building-maintenance", num: "1", title: "Building Maintenance Civil", scope: "Civil & Structural Fixes" },
-        { id: "swimming-pool", num: "2", title: "Swimming Pool Maintenance", scope: "Filtration & Water Testing" },
-        { id: "cleaning-janitorial", num: "3", title: "Cleaning & Janitorial Services", scope: "Hygiene & Housekeeping Management" },
-        { id: "pest-control", num: "4", title: "Pest Control Management", scope: "Treatment & Periodic Inspections" },
-        { id: "air-conditioning", num: "5", title: "Air Conditioning Systems (HVAC)", scope: "Chillers, FCUs & AHUs Servicing" },
-        { id: "fire-system", num: "6", title: "Fire Alarm & Fighting Systems", scope: "Naffco Safety Compliance Controls" },
-        { id: "elevators", num: "7", title: "Elevators & Lifts Machinery", scope: "Vertical Transport Safety Tests" },
-        { id: "diesel-generators", num: "8", title: "Diesel Generators Backup Supply", scope: "Emergency Standby Load Calibration" },
-        { id: "ups-systems", num: "9", title: "Uninterruptible Power Supplies (UPS)", scope: "Continuous Server Room Power backups" },
-        { id: "cctv-access", num: "10", title: "CCTV & Security Access Control", scope: "Surveillance Storage & Biometric Guards" },
-        { id: "water-tanks", num: "11", title: "Water Tanks Cleaning & Sanitation", scope: "Sterilization Audits & Pipeline Purging" },
-        { id: "gate-barriers", num: "12", title: "Automatic Gate Barriers Systems", scope: "Access Gates Servicing" },
-        { id: "bm-systems", num: "13", title: "Building Management Systems (BMS)", scope: "Automation Control Infrastructure Sensors" },
-        { id: "waste-management", num: "14", title: "Medical & General Waste Controls", scope: "Hazardous Bio-waste Disposals Tracking" },
-        { id: "landscaping", num: "15", title: "Landscaping & Irrigation Irrigation", scope: "Greenery Watering Systems Network Control" },
-        { id: "cradle-suspension", num: "16", title: "Facade Cradle Suspension Machinery", scope: "External Window Washing Cranes Inspections" }
+        { id: "building-maintenance", num: "1", title: "Building Maintenance Services", scope: "Civil, Structural & Architectural Maintenance" },
+        { id: "swimming-pool", num: "2", title: "Swimming Pool Maintenance Services", scope: "Filtration, Water Chemistry & Periodic Cleaning" },
+        { id: "cleaning-services", num: "3", title: "Internal & External Cleaning Services", scope: "Comprehensive Janitorial & Housekeeping Ops" },
+        { id: "pest-control", num: "4", title: "Pest Control Services", scope: "Insect, Rodent & Public Health Control Treatments" },
+        { id: "security-safety-lifeguard", num: "5", title: "Security, Safety, and Lifeguard Services", scope: "Manpower Deployment & Certified Water Safety" },
+        { id: "elevator-maintenance", num: "6", title: "Elevator Maintenance Services", scope: "Vertical Transportation & Emergency Lift Controls" },
+        { id: "air-conditioning", num: "7", title: "Air Conditioning Equipment Maintenance", scope: "Chillers, FCUs, AHUs & Fresh Air Plant Handlers" },
+        { id: "fire-systems", num: "8", title: "Fire Systems Maintenance Services", scope: "Alarms, Suppression Networks & Safety Compliance" },
+        { id: "security-systems", num: "9", title: "Security Systems Maintenance Services", scope: "CCTV Networks, Access Barriers & Biometric Integration" },
+        { id: "audio-visual", num: "10", title: "Audio-Visual Maintenance Services", scope: "Conference Electronics, Sound Systems & Displays" },
+        { id: "sewage-pumping", num: "11", title: "Sewage Pumping Services", scope: "Sump Station Networks & Submersible Pump Controls" },
+        { id: "medical-waste", num: "12", title: "Medical Waste Transportation Services", scope: "Hazardous Bio-waste Tracking, Collection & Log Control" },
+        { id: "general-waste", num: "13", title: "General Waste Transportation Services", scope: "Municipal Waste Bin Management & Compactor Disposal" },
+        { id: "landscaping", num: "14", title: "Internal & External Landscaping Maintenance", scope: "Flora Care, Softscapes & Automatic Irrigation Networks" },
+        { id: "flagpole-maintenance", num: "15", title: "Flagpole Maintenance & Flag Replacement", scope: "Rigging Hardware Inspection & Protocol Replacement" },
+        { id: "human-resources", num: "16", title: "Human Resources Obligations", scope: "Resource Allocation, Compliance Auditing & Training Profiles" }
     ];
 
     let currentSessionUserRole = "";
@@ -260,7 +261,7 @@
                 let targetCategoryFilter = "";
                 if (currentSessionUserRole === "contractor_hvac") targetCategoryFilter = "air-conditioning";
                 if (currentSessionUserRole === "contractor_civil") targetCategoryFilter = "building-maintenance";
-                if (currentSessionUserRole === "contractor_fire") targetCategoryFilter = "fire-system";
+                if (currentSessionUserRole === "contractor_fire") targetCategoryFilter = "fire-systems";
 
                 processedTicketsList = rawTicketsList.filter(t => t.amcCategory === targetCategoryFilter);
                 processedPpmList = rawPpmList.filter(p => p.amcCategory === targetCategoryFilter);
@@ -342,18 +343,19 @@
         slaContainer.innerHTML = "";
         kpiContainer.innerHTML = "";
 
+        // Selection of dynamic key indicator rows to track on the main layout
         let targetCategories = [
             { id: "air-conditioning", label: "HVAC Systems" },
-            { id: "building-maintenance", label: "Civil / Building" },
-            { id: "fire-system", label: "Fire & Safety" },
-            { id: "cleaning-janitorial", label: "Janitorial Service" }
+            { id: "building-maintenance", label: "Civil / Building Maintenance" },
+            { id: "fire-systems", label: "Fire & Safety Systems" },
+            { id: "cleaning-services", label: "Cleaning & Housekeeping" }
         ];
 
         // Isolate single row charts for contractors to hide unrelated data matrices
         if (currentSessionUserRole.startsWith("contractor_")) {
             if (currentSessionUserRole === "contractor_hvac") targetCategories = [{ id: "air-conditioning", label: "HVAC Systems" }];
-            if (currentSessionUserRole === "contractor_civil") targetCategories = [{ id: "building-maintenance", label: "Civil / Building" }];
-            if (currentSessionUserRole === "contractor_fire") targetCategories = [{ id: "fire-system", label: "Fire & Safety" }];
+            if (currentSessionUserRole === "contractor_civil") targetCategories = [{ id: "building-maintenance", label: "Civil / Building Maintenance" }];
+            if (currentSessionUserRole === "contractor_fire") targetCategories = [{ id: "fire-systems", label: "Fire & Safety Systems" }];
         }
 
         targetCategories.forEach(cat => {
@@ -412,7 +414,7 @@
             let targetCardId = "";
             if (currentSessionUserRole === "contractor_hvac") targetCardId = "air-conditioning";
             if (currentSessionUserRole === "contractor_civil") targetCardId = "building-maintenance";
-            if (currentSessionUserRole === "contractor_fire") targetCardId = "fire-system";
+            if (currentSessionUserRole === "contractor_fire") targetCardId = "fire-systems";
             
             visibleServices = BASELINE_AMC_SERVICES_DEFINITIONS.filter(s => s.id === targetCardId);
         }
