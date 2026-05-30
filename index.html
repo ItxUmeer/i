@@ -47,7 +47,7 @@
         btn.innerText = "Verifying Credentials...";
         errDiv.innerText = "";
 
-        const email = document.getElementById("loginEmail").value;
+        const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
 
         try {
@@ -57,8 +57,11 @@
             // 🧼 Flush old session state data tokens from browser cache memory
             localStorage.clear();
             localStorage.setItem("uid", sessionProfile.uid);
-            localStorage.setItem("role", sessionProfile.role);
             localStorage.setItem("email", sessionProfile.email);
+            
+            // 🔥 FIXED: Set both storage properties explicitly to keep roleguard.js completely synchronized
+            localStorage.setItem("role", sessionProfile.role);
+            localStorage.setItem("userRole", sessionProfile.role);
 
             // Dispatch user into the live application system space
             window.location.href = "dashboard.html";
