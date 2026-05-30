@@ -1,3 +1,46 @@
+/**
+ * DCAS CMMS Enterprise Access Routing Shield
+ * Protects frontend routes against unauthenticated and unauthorized account access vectors.
+ */
+export function checkAccess(onVerifiedCallback) {
+    const sessionUid = localStorage.getItem("uid");
+    const sessionRole = localStorage.getItem("role");
+    
+    // 1. Force eject if no session data is active
+    if (!sessionUid || !sessionRole) {
+        localStorage.clear();
+        window.location.href = "index.html";
+        return;
+    }
+
+    // 2. Extract current filename execution string
+    const currentPathFile = window.location.pathname.split("/").pop();
+
+    // 3. Structural Access Allocation Map matrix (Configure your route rules here)
+    const accessMatrixRules = {
+        "dashboard.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
+        "tickets.html": ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"],
+        "assets.html": ["admin", "planner"], // Block contractors and viewers out of asset editing
+        "ppm.html": ["admin", "planner", "supervisor_viewer"] // Block contractors out of scheduling plans
+    };
+
+    const permittedRolesForRoute = accessMatrixRules[currentPathFile];
+
+    if (permittedRolesForRoute) {
+        if (permittedRolesForRoute.includes(sessionRole)) {
+            // Authorized! Pass control back to the layout file
+            if (onVerifiedCallback) onVerifiedCallback(sessionRole);
+        } else {
+            // Eject if authorized role token mismatch is captured
+            alert("Security Alert: Your access classification level does not permit entrance to this zone.");
+            window.location.href = "dashboard.html"; // Safely bounce back to center home
+        }
+    } else {
+        // Fallback for general unlocked layout frames
+        if (onVerifiedCallback) onVerifiedCallback(sessionRole);
+    }
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
