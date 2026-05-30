@@ -1,81 +1,86 @@
-export function loadSidebar(role){
+export function loadSidebar(role) {
 
-const menu = document.getElementById("sidebarMenu");
+    const menu = document.getElementById("sidebarMenu");
 
-let items = [];
+    let items = [];
 
-switch(role){
+    switch(role){
 
-case "staff":
+        case "staff":
 
-items = [
-["Dashboard","dashboard.html"],
-["Raise Request","requests.html"],
-["My Requests","myrequests.html"]
-];
+            items = [
+                ["🏠 Dashboard","dashboard.html"],
+                ["📝 Raise Request","requests.html"],
+                ["📋 My Requests","myrequests.html"]
+            ];
 
-break;
+        break;
 
-case "fsu":
+        case "fsu":
 
-items = [
-["Dashboard","dashboard.html"],
-["Approvals","approvals.html"],
-["Requests","requests.html"],
-["Work Orders","workorders.html"],
-["Reports","reports.html"]
-];
+            items = [
+                ["🏠 Dashboard","dashboard.html"],
+                ["✅ Approvals","approvals.html"],
+                ["📝 Requests","requests.html"],
+                ["🔧 Work Orders","workorders.html"],
+                ["🏭 Assets","assets.html"],
+                ["📅 PPM","ppm.html"],
+                ["📊 Reports","reports.html"]
+            ];
 
-break;
+        break;
 
-case "contractor":
+        case "contractor":
 
-items = [
-["Dashboard","dashboard.html"],
-["Work Orders","workorders.html"],
-["PPM","ppm.html"],
-["Assets","assets.html"]
-];
+            items = [
+                ["🏠 Dashboard","dashboard.html"],
+                ["🔧 Work Orders","workorders.html"],
+                ["📅 PPM","ppm.html"],
+                ["🏭 Assets","assets.html"],
+                ["📦 Inventory","inventory.html"]
+            ];
 
-break;
+        break;
 
-case "management":
+        case "management":
 
-items = [
-["Dashboard","dashboard.html"],
-["KPIs","kpi.html"],
-["Reports","reports.html"],
-["Analytics","analytics.html"]
-];
+            items = [
+                ["🏠 Dashboard","dashboard.html"],
+                ["📈 KPI Dashboard","kpi.html"],
+                ["📊 Reports","reports.html"],
+                ["📉 Analytics","analytics.html"]
+            ];
 
-break;
+        break;
 
-case "admin":
+        case "admin":
 
-items = [
-["Dashboard","dashboard.html"],
-["Requests","requests.html"],
-["Work Orders","workorders.html"],
-["Assets","assets.html"],
-["PPM","ppm.html"],
-["Inventory","inventory.html"],
-["Reports","reports.html"]
-];
+            items = [
+                ["🏠 Dashboard","dashboard.html"],
+                ["📝 Requests","requests.html"],
+                ["✅ Approvals","approvals.html"],
+                ["🔧 Work Orders","workorders.html"],
+                ["🏭 Assets","assets.html"],
+                ["📅 PPM","ppm.html"],
+                ["📦 Inventory","inventory.html"],
+                ["📊 Reports","reports.html"],
+                ["⚙️ Settings","settings.html"]
+            ];
 
-break;
+        break;
 
-}
+    }
 
-menu.innerHTML = "";
+    menu.innerHTML = "";
 
-items.forEach(item=>{
+    items.forEach(item => {
 
-menu.innerHTML += `
-<a href="${item[1]}" class="menu-item">
-${item[0]}
-</a>
-`;
+        menu.innerHTML += `
+            <a href="${item[1]}" class="menu-item">
+                ${item[0]}
+            </a>
+        `;
 
-});
+    });
 
 }
