@@ -3,8 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCAS CMMS - Control Hub</title>
+    <title>DCAS Facilities CMMS - KPI Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* UI overrides to specifically match the premium enterprise dashboard layout */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .filter-bar {
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .filter-group select {
+            height: 35px;
+            padding: 0 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            min-width: 140px;
+            font-size: 13px;
+            background: #f8fafc;
+        }
+        .metrics-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        .metric-mini {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .metric-mini h4 {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .metric-mini p {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .financial-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .fin-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .fin-card h4 {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .fin-card p {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .charts-row-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .chart-box-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 340px;
+        }
+        .chart-box-card h3 {
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .gauge-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 80%;
+        }
+        .gauge-item {
+            text-align: center;
+            position: relative;
+            width: 150px;
+        }
+        .gauge-label-center {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+        }
+        @media(max-width: 1024px) {
+            .charts-row-split {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -13,7 +139,6 @@
             <button class="menu-btn" id="menuBtn">☰</button>
             <span class="header-title">DCAS Facilities CMMS</span>
         </div>
-
         <div class="user-box">
             <span class="role-badge" id="userRole">Checking...</span>
             <button class="logout-btn" id="logoutBtn">Logout</button>
@@ -25,28 +150,106 @@
     </aside>
 
     <main class="main-content">
-        <div class="page-title" id="welcomeMessage">Control Dashboard</div>
+        <div class="dashboard-container">
+            
+            <div class="page-title" style="margin-bottom:0;">KPI Dashboard</div>
 
-        <div class="kpi-grid">
-            <div class="kpi-card" style="border-top: 4px solid var(--primary);">
-                <h3>Open Requests</h3>
-                <p id="countRequests">0</p>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Timeline Filter</label>
+                    <select id="filterTimeline"><option>--- Select ---</option><option>Last 12 Months</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Asset Classification</label>
+                    <select id="filterClass"><option>All</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Asset Type</label>
+                    <select id="filterAssetType"><option>All</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Work Order Type</label>
+                    <select id="filterWoType"><option>All</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Maintenance Type</label>
+                    <select id="filterMaintType"><option>All</option></select>
+                </div>
             </div>
 
-            <div class="kpi-card" style="border-top: 4px solid var(--warning);">
-                <h3>Pending Approval</h3>
-                <p id="countApprovals">0</p>
+            <div class="metrics-grid-6">
+                <div class="metric-mini" style="border-top: 3px solid #f59e0b;">
+                    <h4>Total Work Requests Raised</h4>
+                    <p style="color: #f59e0b;" id="txtTotal">61,872</p>
+                </div>
+                <div class="metric-mini" style="border-top: 3px solid #2563eb;">
+                    <h4>Open Work Requests</h4>
+                    <p style="color: #2563eb;" id="txtOpen">1,229</p>
+                </div>
+                <div class="metric-mini" style="border-top: 3px solid #d946ef;">
+                    <h4>Total Work Requests Declined</h4>
+                    <p style="color: #d946ef;" id="txtDeclined">3,581</p>
+                </div>
+                <div class="metric-mini" style="border-top: 3px solid #10b981;">
+                    <h4>Total Work Requests Resolved</h4>
+                    <p style="color: #10b981;" id="txtResolved">57,062</p>
+                </div>
+                <div class="metric-mini" style="border-top: 3px solid #ea580c;">
+                    <h4>Open Work Orders</h4>
+                    <p style="color: #ea580c;" id="txtWoOpen">1,266</p>
+                </div>
+                <div class="metric-mini" style="border-top: 3px solid #ef4444;">
+                    <h4>Work Orders Overdue</h4>
+                    <p style="color: #ef4444;" id="txtOverdue">1,076</p>
+                </div>
             </div>
 
-            <div class="kpi-card" style="border-top: 4px solid var(--success);">
-                <h3>Open Work Orders</h3>
-                <p id="countWorkorders">0</p>
+            <div class="charts-row-split" style="grid-template-columns: 1fr 1.3fr;">
+                <div class="chart-box-card">
+                    <h3>Operational Compliance Backlogs</h3>
+                    <div class="gauge-wrapper">
+                        <div class="gauge-item">
+                            <canvas id="gaugeBacklog"></canvas>
+                            <div class="gauge-label-center" style="color:#10b981;">1076</div>
+                            <span style="font-size:12px; font-weight:600; color:var(--muted);">Work Order Backlog</span>
+                        </div>
+                        <div class="gauge-item">
+                            <canvas id="gaugeCompliance"></canvas>
+                            <div class="gauge-label-center" style="color:#2563eb;">85.0%</div>
+                            <span style="font-size:12px; font-weight:600; color:var(--muted);">Work Order Compliance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="fin-card" style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
+                        <h4>Total Maintenance Costs</h4>
+                        <p style="color: #2563eb; font-size: 34px;">$198,055,770.78</p>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1;">
+                        <div class="fin-card">
+                            <h4>Total Parts Costs</h4>
+                            <p style="color: #06b6d4; font-size: 24px;">$184,262,643.33</p>
+                        </div>
+                        <div class="fin-card">
+                            <h4>Total Labor Costs</h4>
+                            <p style="color: #10b981; font-size: 24px;">$13,793,127.45</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="kpi-card" style="border-top: 4px solid var(--danger);">
-                <h3>PPM Due</h3>
-                <p id="countPPM">0</p>
+            <div class="charts-row-split">
+                <div class="chart-box-card">
+                    <h3>Planned vs. Unplanned Work Orders</h3>
+                    <canvas id="chartPlannedUnplanned"></canvas>
+                </div>
+                <div class="chart-box-card">
+                    <h3>Work Orders By Type Per Month</h3>
+                    <canvas id="chartWoTypeMonth"></canvas>
+                </div>
             </div>
+
         </div>
     </main>
 
@@ -55,29 +258,79 @@
         import { loadSidebar } from "./sidebar.js";
         import { auth } from "./firebase.js";
 
-        // Execute asynchronous checks safely via functional callbacks
         checkAccess((role) => {
-            // 1. Output verified role status inside upper UI Badge
             document.getElementById("userRole").innerText = role;
-            
-            // 2. Adjust core header welcome title dynamically
-            document.getElementById("welcomeMessage").innerText = `${role.toUpperCase()} Control Hub`;
-            
-            // 3. Mount tailored navigational systems programmatically
             loadSidebar(role);
+            initializeDashboardCharts();
         });
 
-        // Handle Responsive Mobile View Sidebar Drawer State toggles
         document.getElementById("menuBtn").onclick = () => {
             document.getElementById("sidebar").classList.toggle("mobile-open");
         };
 
-        // Terminate and purge session tokens safely on clear intent
         document.getElementById("logoutBtn").onclick = async () => {
             localStorage.clear();
             await auth.signOut();
             window.location.href = "login.html";
         };
+
+        // Complete Chart.js implementations matching the exact screenshot metrics
+        function initializeDashboardCharts() {
+            const monthsLabels = ['Feb 2025', 'Apr 2025', 'Jun 2025', 'Aug 2025', 'Oct 2025', 'Dec 2025', 'Feb 2026', 'Apr 2026'];
+
+            // A. Left Gauge (Backlog Ring)
+            new Chart(document.getElementById('gaugeBacklog'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [1076, 200],
+                        backgroundColor: ['#10b981', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { rotation: -90, circumference: 180, cutout: '80%', plugins: { legend: { display: false } } }
+            });
+
+            // B. Right Gauge (Compliance Ring)
+            new Chart(document.getElementById('gaugeCompliance'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [85, 15],
+                        backgroundColor: ['#2563eb', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { rotation: -90, circumference: 180, cutout: '80%', plugins: { legend: { display: false } } }
+            });
+
+            // C. Planned vs Unplanned Bar Graph Chart
+            new Chart(document.getElementById('chartPlannedUnplanned'), {
+                type: 'bar',
+                data: {
+                    labels: monthsLabels,
+                    datasets: [
+                        { label: 'Total Unplanned', data: [500, 1200, 2400, 2800, 3100, 3400, 3600, 1852], backgroundColor: '#ea580c' },
+                        { label: 'Total Planned', data: [200, 400, 700, 610, 680, 700, 1209, 800], backgroundColor: '#10b981' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+
+            // D. Work Orders by Type Stacked Graph Chart
+            new Chart(document.getElementById('chartWoTypeMonth'), {
+                type: 'bar',
+                data: {
+                    labels: monthsLabels,
+                    datasets: [
+                        { label: 'Breakdown/Repair', data: [400, 900, 1800, 2200, 2500, 2900, 3100, 1500], backgroundColor: '#2563eb' },
+                        { label: 'Capital Project', data: [100, 200, 400, 300, 400, 500, 600, 200], backgroundColor: '#06b6d4' },
+                        { label: 'Preventive Maint.', data: [50, 100, 200, 150, 180, 200, 400, 152], backgroundColor: '#ec4899' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+        }
     </script>
 </body>
 </html>
