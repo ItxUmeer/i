@@ -84,21 +84,21 @@
                 <label>AMC Category Core Service Group</label>
                 <select id="formPpmAmcCategory" required>
                     <option value="building-maintenance">1. Building Maintenance Services</option>
-                    <option value="hvac-maintenance">2. Air Conditioning (HVAC) Maintenance</option>
-                    <option value="electrical-substation">3. Substation Maintenance & Calibration</option>
-                    <option value="generator-maintenance">4. Standby Generator Set Maintenance</option>
-                    <option value="ups-maintenance">5. Uninterruptible Power Supply (UPS)</option>
-                    <option value="fire-systems">6. Fire Alarm & Fire Fighting Systems</option>
-                    <option value="lift-escalator">7. Lift & Escalator Maintenance</option>
-                    <option value="water-treatment">8. Water Tanks & Drainage System Treatment</option>
-                    <option value="cctv-security">9. CCTV, Access Control & Security Systems</option>
-                    <option value="gate-barrier">10. Automatic Gate & Barrier Systems</option>
-                    <option value="swimming-pool">11. Swimming Pool Maintenance Services</option>
-                    <option value="cleaning-janitorial">12. Comprehensive Cleaning & Janitorial</option>
-                    <option value="waste-management">13. Waste Management & Trash Disposal</option>
-                    <option value="pest-control">14. Pest Control & Public Health Services</option>
-                    <option value="landscaping-indoor-plants">15. Landscaping, Agriculture & Indoor Plants</option>
-                    <option value="flagpole-maintenance">16. Flagpole Maintenance & Replacement</option>
+                    <option value="swimming-pool">2. Swimming Pool Maintenance Services</option>
+                    <option value="cleaning-services">3. Internal & External Cleaning Services</option>
+                    <option value="pest-control">4. Pest Control Services</option>
+                    <option value="security-safety-lifeguard">5. Security, Safety, and Lifeguard Services</option>
+                    <option value="elevator-maintenance">6. Elevator Maintenance Services</option>
+                    <option value="air-conditioning">7. Air Conditioning Equipment Maintenance</option>
+                    <option value="fire-systems">8. Fire Systems Maintenance Services</option>
+                    <option value="security-systems">9. Security Systems Maintenance Services</option>
+                    <option value="audio-visual">10. Audio-Visual Maintenance Services</option>
+                    <option value="sewage-pumping">11. Sewage Pumping Services</option>
+                    <option value="medical-waste">12. Medical Waste Transportation Services</option>
+                    <option value="general-waste">13. General Waste Transportation Services</option>
+                    <option value="landscaping">14. Internal & External Landscaping Maintenance</option>
+                    <option value="flagpole-maintenance">15. Flagpole Maintenance & Flag Replacement</option>
+                    <option value="human-resources">16. Human Resources Obligations</option>
                 </select>
             </div>
             <div class="form-input-container">
@@ -146,15 +146,12 @@
         document.getElementById("userRole").innerText = userRole.toUpperCase();
         loadSidebar(userRole);
 
-        // Limit action buttons if role doesn't match admin or planner authorization
-        if (userRole === "admin" || userRole === "planner") {
+        // Standardized operational staff and managers retain access to schedule new tasks
+        if (userRole === "admin" || userRole === "planner" || userRole === "facilities_manager") {
             document.getElementById("openPpmModalBtn").style.display = "block";
         }
         
-        if (userRole.startsWith("contractor_")) {
-            document.getElementById("ppmPageContextTitle").innerText = "Assigned Preventive Service Trackers";
-        }
-
+        document.getElementById("ppmPageContextTitle").innerText = "Facilities Planned Preventive Maintenance";
         streamPlannedSchedulesRegistry();
     });
 
@@ -170,34 +167,10 @@
             snap.forEach(docSnap => rawDataArray.push(docSnap.data()));
             
             // ==========================================================================
-            // 🔒 REVENUE ENGINE DATA PARTITION MATRIX FOR ACTIVE SERVICE CONTRACTORS
+            // 🔒 UNIFIED ENTERPRISE DATA PIPELINE (FACILITIES MANAGER VIEW)
             // ==========================================================================
-            if (runtimeValidatedRole.startsWith("contractor_")) {
-                let targetCategoryFilter = "";
-                
-                // Contractor Role Scope Evaluation Map matching all 16 core categories
-                if (runtimeValidatedRole === "contractor_civil") targetCategoryFilter = "building-maintenance";
-                else if (runtimeValidatedRole === "contractor_hvac") targetCategoryFilter = "hvac-maintenance";
-                else if (runtimeValidatedRole === "contractor_electrical") targetCategoryFilter = "electrical-substation";
-                else if (runtimeValidatedRole === "contractor_generator") targetCategoryFilter = "generator-maintenance";
-                else if (runtimeValidatedRole === "contractor_ups") targetCategoryFilter = "ups-maintenance";
-                else if (runtimeValidatedRole === "contractor_fire") targetCategoryFilter = "fire-systems";
-                else if (runtimeValidatedRole === "contractor_lift") targetCategoryFilter = "lift-escalator";
-                else if (runtimeValidatedRole === "contractor_water") targetCategoryFilter = "water-treatment";
-                else if (runtimeValidatedRole === "contractor_security") targetCategoryFilter = "cctv-security";
-                else if (runtimeValidatedRole === "contractor_gate") targetCategoryFilter = "gate-barrier";
-                else if (runtimeValidatedRole === "contractor_pool") targetCategoryFilter = "swimming-pool";
-                else if (runtimeValidatedRole === "contractor_cleaning") targetCategoryFilter = "cleaning-janitorial";
-                else if (runtimeValidatedRole === "contractor_waste") targetCategoryFilter = "waste-management";
-                else if (runtimeValidatedRole === "contractor_pest") targetCategoryFilter = "pest-control";
-                else if (runtimeValidatedRole === "contractor_landscaping") targetCategoryFilter = "landscaping-indoor-plants";
-                else if (runtimeValidatedRole === "contractor_flagpole") targetCategoryFilter = "flagpole-maintenance";
-
-                localPpmCacheArray = rawDataArray.filter(p => p.amcCategory === targetCategoryFilter);
-            } else {
-                // Internal staff parse everything globally
-                localPpmCacheArray = rawDataArray;
-            }
+            // Structural manager role retains complete visibility across all matching service streams
+            localPpmCacheArray = rawDataArray;
 
             renderPpmTable(localPpmCacheArray);
         } catch (err) {
@@ -261,7 +234,6 @@
         }
     };
 
-    // Reflect dynamic filter pipeline on user updates
     function processLiveFilters() {
         const queryVal = document.getElementById("ppmSearchInput").value.toLowerCase();
         const locScope = document.getElementById("ppmLocationFilter").value;
