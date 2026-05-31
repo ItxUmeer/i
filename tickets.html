@@ -1,12 +1,10 @@
-Here is your fully updated **`tickets.html`** file.
+The issue with your **"➕ Create Internal Work Order"** button not triggering is happening because the element `openCreateTicketPanelBtn` exists in your HTML markup, but there is no corresponding event listener or function attached to it in your `<script>` logic to handle the click event.
 
-This comprehensive rewrite implements the architecture requirements from your previous modifications:
+Additionally, to ensure a smooth administrative experience, we should also map the new **"Request Riser Details"** field inside this internal creation panel so your administrators can specify who requested the repair when lodging it from the triage panel.
 
-1. **Request Riser Details Integration:** Added a data column to show who reported the maintenance request (`ticket.riserDetails`).
-2. **Master Facilities Manager Controls (`facilities_manager`):** Grants the Facilities Manager complete control visibility. They get access to the administrative assignment options, matching the `admin` or `planner` views, and are explicitly routed to avoid any empty filter matrices.
-3. **Instant Resolution Controls:** The dashboard reads the newly collected fields seamlessly and hooks directly into your global real-time search pipeline cleanly.
+Here is the fully corrected and updated **`tickets.html`** file. It adds a dedicated modal popup overlay structure for creating an internal ticket, sets up the Firebase script actions to handle form submissions, and connects the button click handler.
 
-### Complete Updated `tickets.html` Code
+### Fully Updated `tickets.html` with Working Internal Creator Matrix
 
 ```html
 <!DOCTYPE html>
@@ -59,7 +57,8 @@ This comprehensive rewrite implements the architecture requirements from your pr
                 <thead>
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Request Riser</th> <th>Property Scope</th>
+                        <th>Request Riser</th>
+                        <th>Property Scope</th>
                         <th>Specific Location</th>
                         <th>Service Group</th>
                         <th>Issue Details</th>
@@ -79,6 +78,76 @@ This comprehensive rewrite implements the architecture requirements from your pr
             </table>
         </div>
 
+    </div>
+</div>
+
+<div class="modal-overlay" id="createTicketModal">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h2>Log Internal Maintenance Work Order</h2>
+            <button class="close-modal-btn" id="closeCreateModalBtn">×</button>
+        </div>
+        
+        <form id="internalCreateTicketForm" class="modal-form">
+            <div class="form-input-container">
+                <label>Request Riser Details</label>
+                <input type="text" id="createRiserDetails" placeholder="e.g. Facilities Desk / Operator Name" required>
+            </div>
+
+            <div class="form-input-container">
+                <label>Target Property Scope</label>
+                <select id="createScope" required>
+                    <option value="" disabled selected>Select location group...</option>
+                    <option value="hq">Headquarters Building</option>
+                    <option value="staff">Staff Accommodation</option>
+                    <option value="station">Outside Station Network</option>
+                </select>
+            </div>
+
+            <div class="form-input-container">
+                <label>Specific Location / Zone Detail</label>
+                <input type="text" id="createLocationDetail" placeholder="e.g. HQ Server Room, Block B Roof" required>
+            </div>
+
+            <div class="form-input-container">
+                <label>Maintenance Discipline Category</label>
+                <select id="createCategory" required>
+                    <option value="" disabled selected>Select service group...</option>
+                    <option value="building-maintenance">1. Building Maintenance Services</option>
+                    <option value="swimming-pool">2. Swimming Pool Maintenance Services</option>
+                    <option value="cleaning-services">3. Internal & External Cleaning Services</option>
+                    <option value="pest-control">4. Pest Control Services</option>
+                    <option value="security-safety-lifeguard">5. Security, Safety, and Lifeguard Services</option>
+                    <option value="elevator-maintenance">6. Elevator Maintenance Services</option>
+                    <option value="air-conditioning">7. Air Conditioning Equipment Maintenance Services</option>
+                    <option value="fire-systems">8. Fire Systems Maintenance Services</option>
+                    <option value="security-systems">9. Security Systems Maintenance Services</option>
+                    <option value="audio-visual">10. Audio-Visual Maintenance Services</option>
+                    <option value="sewage-pumping">11. Sewage Pumping Services</option>
+                    <option value="medical-waste">12. Medical Waste Transportation Services</option>
+                    <option value="general-waste">13. General Waste Transportation Services</option>
+                    <option value="landscaping">14. Internal & External Landscaping Maintenance</option>
+                    <option value="flagpole-maintenance">15. Flagpole Maintenance & Flag Replacement</option>
+                </select>
+            </div>
+
+            <div class="form-input-container">
+                <label>Urgency Priority Level</label>
+                <select id="createPriority" required>
+                    <option value="low">Low (Routine Check)</option>
+                    <option value="medium" selected>Medium (Standard Repair)</option>
+                    <option value="high">High (Operational Impact)</option>
+                    <option value="critical">Critical (Emergency Breakdown)</option>
+                </select>
+            </div>
+
+            <div class="form-input-container">
+                <label>Issue Description</label>
+                <textarea id="createDescription" placeholder="Provide breakdown diagnostic analysis notes details..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitInternalTicketBtn" style="margin-top: 16px;">Transmit & Authorize Order</button>
+        </form>
     </div>
 </div>
 
@@ -135,7 +204,7 @@ This comprehensive rewrite implements the architecture requirements from your pr
     import { db } from "./firebase.js";
     import { checkAccess } from "./roleguard.js";
     import { loadSidebar } from "./sidebar.js";
-    import { collection, getDocs, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { collection, getDocs, doc, updateDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     let globalActiveTicketsCache = [];
     let authenticatedUserRole = "";
@@ -146,7 +215,6 @@ This comprehensive rewrite implements the architecture requirements from your pr
         document.getElementById("userRole").innerText = sessionValidatedRole.replace('_', ' ').toUpperCase();
         loadSidebar(sessionValidatedRole);
         
-        // Expose configuration rules dynamically based on role matrix
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
             document.getElementById("openCreateTicketPanelBtn").style.display = "flex";
             document.getElementById("adminRoutingControls").style.display = "flex";
@@ -170,6 +238,55 @@ This comprehensive rewrite implements the architecture requirements from your pr
         window.location.href = "index.html";
     });
 
+    // FIXED / ADDED: Modal Toggle Window Interactivity Events Handler Bindings
+    const createModal = document.getElementById("createTicketModal");
+    document.getElementById("openCreateTicketPanelBtn").addEventListener("click", () => {
+        createModal.classList.add("active");
+    });
+    document.getElementById("closeCreateModalBtn").addEventListener("click", () => {
+        createModal.classList.remove("active");
+    });
+
+    // FIXED / ADDED: Process and Create Internal Ticket Directly to Cloud Firestore Collection
+    document.getElementById("internalCreateTicketForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById("submitInternalTicketBtn");
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Transmitting Data Work Order...";
+
+        const referenceId = "TKT-" + Math.floor(100000 + Math.random() * 900000);
+
+        const internalPayload = {
+            ticketId: referenceId,
+            type: "internal",
+            riserDetails: document.getElementById("createRiserDetails").value.trim(),
+            locationScope: document.getElementById("createScope").value,
+            specificLocation: document.getElementById("createLocationDetail").value.trim(),
+            amcCategory: document.getElementById("createCategory").value,
+            priority: document.getElementById("createPriority").value,
+            description: document.getElementById("createDescription").value.trim(),
+            status: "pending_approval",
+            reportedDate: new Date().toISOString(),
+            assignedContractorUid: null,
+            resolvedDate: null
+        };
+
+        try {
+            await addDoc(collection(db, "maintenance_tickets"), internalPayload);
+            createModal.classList.remove("active");
+            document.getElementById("internalCreateTicketForm").reset();
+            
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Transmit & Authorize Order";
+            
+            fetchTicketsDataPipeline(); // Refresh tracking list immediately
+        } catch (error) {
+            alert("Error creating internal work order: " + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Transmit & Authorize Order";
+        }
+    });
+
     // Stream Tickets from Cloud Firestore Collection
     async function fetchTicketsDataPipeline() {
         try {
@@ -185,7 +302,6 @@ This comprehensive rewrite implements the architecture requirements from your pr
                 });
             });
 
-            // Data segregation rules: contractors see only their own, managers/planners see everything
             if (authenticatedUserRole.startsWith("contractor")) {
                 globalActiveTicketsCache = rawCloudRecords.filter(ticket => 
                     ticket.assignedContractorUid === authenticatedUserRole
@@ -217,8 +333,6 @@ This comprehensive rewrite implements the architecture requirements from your pr
             let statusText = ticket.status ? ticket.status.replace('_', ' ') : 'Pending Approval';
             let priorityVal = ticket.priority || 'medium';
             let statusVal = ticket.status || 'pending_approval';
-            
-            // Safe request riser details resolution extraction
             let riserDetails = ticket.riserDetails ? ticket.riserDetails : "N/A (Public Portal)";
 
             compiledRowsMarkup += `
@@ -286,7 +400,6 @@ This comprehensive rewrite implements the architecture requirements from your pr
             const techNotes = document.getElementById("drawerTechnicianNotes").value.trim();
             updatePayload.technicianNotes = techNotes;
             
-            // Automatically flip tracking parameter to resolved when contractor logs completion notes
             if(techNotes.length > 5) {
                 updatePayload.status = "resolved";
                 updatePayload.resolvedDate = new Date().toISOString();
@@ -296,7 +409,7 @@ This comprehensive rewrite implements the architecture requirements from your pr
         try {
             await updateDoc(targetDocRef, updatePayload);
             document.getElementById("ticketActionDrawer").classList.remove("active");
-            fetchTicketsDataPipeline(); // Dynamic view updates
+            fetchTicketsDataPipeline();
         } catch (error) {
             alert("Operational Write Exception Error: " + error.message);
         }
