@@ -119,6 +119,7 @@
                     <option value="general-waste">13. General Waste Transportation Services</option>
                     <option value="landscaping">14. Internal & External Landscaping Maintenance</option>
                     <option value="flagpole-maintenance">15. Flagpole Maintenance & Flag Replacement</option>
+                    <option value="human-resources">16. Human Resources Obligations</option>
                 </select>
             </div>
 
@@ -162,12 +163,21 @@
                     <label>Assign Specialized Service Contractor</label>
                     <select id="drawerContractorAssignment" required>
                         <option value="" disabled selected>Select execution contractor...</option>
-                        <option value="contractor_hvac">Al Fajer (HVAC Team)</option>
-                        <option value="contractor_civil">Al Fajer (Civil & Structural)</option>
-                        <option value="contractor_civil_pest">Al Fajer (Pest Control Team)</option>
-                        <option value="contractor_civil_landscaping">Al Fajer (Landscaping Team)</option>
-                        <option value="contractor_civil_security">Al Fajer (Security Team)</option>                       
-                        <option value="contractor_fire">Al Fajer (Fire & Safety Systems)</option>
+                        <option value="contractor_civil">Al Fajer (Building & Civil Maintenance)</option>
+                        <option value="contractor_pool">Al Fajer (Swimming Pool Maintenance)</option>
+                        <option value="contractor_cleaning">Al Fajer (Cleaning Services)</option>
+                        <option value="contractor_pest">Al Fajer (Pest Control)</option>
+                        <option value="contractor_security">Al Fajer (Security & Lifeguards)</option>
+                        <option value="contractor_lift">Al Fajer (Elevator Maintenance)</option>
+                        <option value="contractor_hvac">Al Fajer (Air Conditioning HVAC)</option>
+                        <option value="contractor_fire">Al Fajer (Fire Systems)</option>
+                        <option value="contractor_security_systems">Al Fajer (Security Systems Systems)</option>
+                        <option value="contractor_audio_visual">Al Fajer (Audio-Visual Services)</option>
+                        <option value="contractor_sewage">Al Fajer (Sewage Pumping)</option>
+                        <option value="contractor_medical_waste">Al Fajer (Medical Waste Transport)</option>
+                        <option value="contractor_waste">Al Fajer (General Waste Transport)</option>
+                        <option value="contractor_landscaping">Al Fajer (Landscaping Services)</option>
+                        <option value="contractor_flagpole">Al Fajer (Flagpole Maintenance)</option>
                     </select>
                 </div>
 
@@ -229,7 +239,6 @@
         window.location.href = "index.html";
     });
 
-    // FIXED / ADDED: Modal Toggle Window Interactivity Events Handler Bindings
     const createModal = document.getElementById("createTicketModal");
     document.getElementById("openCreateTicketPanelBtn").addEventListener("click", () => {
         createModal.classList.add("active");
@@ -238,7 +247,7 @@
         createModal.classList.remove("active");
     });
 
-    // FIXED / ADDED: Process and Create Internal Ticket Directly to Cloud Firestore Collection
+    // Process and Create Internal Ticket Directly to Cloud Firestore Collection
     document.getElementById("internalCreateTicketForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const submitBtn = document.getElementById("submitInternalTicketBtn");
@@ -368,7 +377,6 @@
         document.getElementById("ticketActionDrawer").classList.add("active");
     }
 
-    // Modal Closing Bindings
     document.getElementById("closeDrawerBtn").addEventListener("click", () => {
         document.getElementById("ticketActionDrawer").classList.remove("active");
     });
