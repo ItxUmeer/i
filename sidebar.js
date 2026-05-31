@@ -9,37 +9,41 @@ export function loadSidebar(currentUserRole) {
     // Get current active file name to apply high-contrast active styling tags
     const currentPath = window.location.pathname.split("/").pop() || "dashboard.html";
 
+    // Normalize input parameter to ensure match integrity
+    const roleToken = (currentUserRole || "").toLowerCase().trim();
+
     // Complete Global Sidebar Workspace Registry
+    // UPDATED: Restructured roles to include facilities_manager and aligned titles to requirements
     const navigationLinksRegistry = [
         {
-            name: "Executive Hub",
+            name: "SLA & KPI Dashboards",
             file: "dashboard.html",
             icon: "📊",
-            allowedRoles: ["admin", "planner"]
+            allowedRoles: ["admin", "planner", "facilities_manager"]
         },
         {
             name: "Work Orders Triage",
             file: "tickets.html",
             icon: "🔧",
-            allowedRoles: ["admin", "contractor_hvac", "contractor_civil", "contractor_fire"]
+            allowedRoles: ["admin", "planner", "facilities_manager"]
         },
         {
             name: "Assets Registry",
             file: "assets.html",
             icon: "🏢",
-            allowedRoles: ["admin", "planner"]
+            allowedRoles: ["admin", "planner", "facilities_manager"]
         },
         {
-            name: "PPM Schedules",
+            name: "PPM Schedules List",
             file: "ppm.html",
             icon: "📅",
-            allowedRoles: ["admin", "planner", "supervisor_viewer"]
+            allowedRoles: ["admin", "planner", "facilities_manager"]
         },
         {
             name: "Raise Issue Portal",
             file: "reports.html",
             icon: "⚠️",
-            allowedRoles: ["admin", "planner", "supervisor_viewer", "contractor_hvac", "contractor_civil", "contractor_fire"]
+            allowedRoles: ["admin", "planner", "facilities_manager"]
         }
     ];
 
@@ -47,7 +51,7 @@ export function loadSidebar(currentUserRole) {
     let sidebarMarkupHtml = "";
 
     navigationLinksRegistry.forEach(item => {
-        if (item.allowedRoles.includes(currentUserRole)) {
+        if (item.allowedRoles.includes(roleToken)) {
             const isActiveClass = (currentPath === item.file) ? "active" : "";
             sidebarMarkupHtml += `
                 <a href="${item.file}" class="menu-item ${isActiveClass}">
