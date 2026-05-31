@@ -61,7 +61,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             throw new Error("Authentication response valid, but user profile role structure is unassigned.");
         }
 
-        localStorage.setItem("userRole", user.role);
+        // Clean database text for smooth matrix parsing matching role rules
+        const assignedRole = user.role.toLowerCase().trim();
+
+        // CHECKPOINT: Block deprecated trades or supervisors from trying to sign in 
+        if (assignedRole.startsWith("contractor_") || assignedRole === "supervisor_viewer") {
+            throw new Error("Access Denied: This legacy contractor/supervisor account structure has been deprecated. Please connect with your CMMS Administrator.");
+        }
+
+        // Store active structural roles globally
+        localStorage.setItem("userRole", assignedRole);
+        localStorage.setItem("role", assignedRole); // Sets duplicate key fallback protection for scripts using both references
+
+        // Reroute straight to unified dashboard hub (Executive Dashboard / SLA KPI Matrix)
         window.location.href = "dashboard.html";
 
     } catch (error) {
