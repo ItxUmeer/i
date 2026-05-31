@@ -99,7 +99,7 @@
                     <option value="" disabled selected>Select location group...</option>
                     <option value="hq">Headquarters Building</option>
                     <option value="staff">Staff Accommodation</option>
-                    <option value="station">Outside Station </option>
+                    <option value="station">Outside Station Network</option>
                 </select>
             </div>
 
@@ -134,7 +134,9 @@
             <div class="form-input-container">
                 <label>Issue Description</label>
                 <textarea id="issueDescription" placeholder="Provide details regarding the breakdown or fault..." required></textarea>
-            </div> <div class="form-input-container">
+            </div> 
+            
+            <div class="form-input-container">
                 <label>Urgency Priority Level</label>
                 <select id="issuePriority" required>
                     <option value="low">Low (Routine Check)</option>
@@ -174,7 +176,7 @@
         const ticketPayload = {
             ticketId: referenceId,
             type: "reactive",
-            riserDetails: document.getElementById("issueRiserDetails").value.trim(), // ADDED: Mapped input field to database payload node
+            riserDetails: document.getElementById("issueRiserDetails").value.trim(),
             locationScope: document.getElementById("issueScope").value,
             specificLocation: document.getElementById("issueLocationDetail").value.trim(),
             amcCategory: document.getElementById("issueCategory").value,
