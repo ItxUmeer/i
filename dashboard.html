@@ -1,3 +1,10 @@
+Here is your completely updated **`dashboard.html`** file.
+
+The deprecated `contractor_` and `supervisor_viewer` fallback tracking statements have been entirely cleaned out. The interface and data pipelines are now built strictly for the unified global system visibility matching your **`facilities_manager`** framework.
+
+### Updated `dashboard.html`
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,7 +136,7 @@
             </a>
         </div>
 
-        <h2 class="page-title" id="dashboardTitleScope">Executive Control Analytics</h2>
+        <h2 class="page-title" id="dashboardTitleScope">Facilities Management Analytics</h2>
 
         <div class="location-summary-strip">
             <div class="summary-segment-box">
@@ -225,14 +232,6 @@
         document.getElementById("userRole").innerText = validatedUserRole.toUpperCase();
         loadSidebar(validatedUserRole);
         
-        // Dynamic Layout Adjustment for Contractors
-        if (validatedUserRole.startsWith("contractor_")) {
-            document.getElementById("dashboardTitleScope").innerText = "Contractor Operations Hub";
-            document.getElementById("shortcutAssetsLink").style.display = "none";
-            document.getElementById("shortcutPpmLink").style.display = "none";
-            document.getElementById("dashboardShortcutsBar").style.gridTemplateColumns = "1fr";
-        }
-        
         executeLiveMetricsStreamingAggregationPipeline();
     });
 
@@ -252,24 +251,11 @@
             ppmSnapshot.forEach(doc => rawPpmList.push(doc.data()));
 
             // ==========================================================================
-            // 🔒 BACKEND DATA ISOLATION PIPELINE BY ACCOUNT SECURITY CATEGORY
+            // 🔒 BACKEND UNIFIED SYSTEM DATA PIPELINE (FACILITIES MANAGER DISPATCH)
             // ==========================================================================
-            let processedTicketsList = [];
-            let processedPpmList = [];
-
-            if (currentSessionUserRole.startsWith("contractor_")) {
-                let targetCategoryFilter = "";
-                if (currentSessionUserRole === "contractor_hvac") targetCategoryFilter = "air-conditioning";
-                if (currentSessionUserRole === "contractor_civil") targetCategoryFilter = "building-maintenance";
-                if (currentSessionUserRole === "contractor_fire") targetCategoryFilter = "fire-systems";
-
-                processedTicketsList = rawTicketsList.filter(t => t.amcCategory === targetCategoryFilter);
-                processedPpmList = rawPpmList.filter(p => p.amcCategory === targetCategoryFilter);
-            } else {
-                // Admins, Planners, and Supervisor Viewers read all matrix tokens globally
-                processedTicketsList = rawTicketsList;
-                processedPpmList = rawPpmList;
-            }
+            // Facilities Manager aggregates all matrix tokens globally across the enterprise
+            let processedTicketsList = rawTicketsList;
+            let processedPpmList = rawPpmList;
 
             const metricsCounters = {
                 hq: { total: 0, active: 0, ppm: 0 },
@@ -334,7 +320,7 @@
     }
 
     // ==========================================================================
-    // 📊 CHART VISUALIZATION DISPATCH ROUTER (ADAPTIVE INTERCEPT)
+    // 📊 CHART VISUALIZATION DISPATCH ROUTER (GLOBAL ENTERPRISE KPI VIEW)
     // ==========================================================================
     function renderSlaAndKpiChartsVisualization(tickets, ppms) {
         const slaContainer = document.getElementById("slaRealtimeBarsContainer");
@@ -350,13 +336,6 @@
             { id: "fire-systems", label: "Fire & Safety Systems" },
             { id: "cleaning-services", label: "Cleaning & Housekeeping" }
         ];
-
-        // Isolate single row charts for contractors to hide unrelated data matrices
-        if (currentSessionUserRole.startsWith("contractor_")) {
-            if (currentSessionUserRole === "contractor_hvac") targetCategories = [{ id: "air-conditioning", label: "HVAC Systems" }];
-            if (currentSessionUserRole === "contractor_civil") targetCategories = [{ id: "building-maintenance", label: "Civil / Building Maintenance" }];
-            if (currentSessionUserRole === "contractor_fire") targetCategories = [{ id: "fire-systems", label: "Fire & Safety Systems" }];
-        }
 
         targetCategories.forEach(cat => {
             // Compute SLA Real-time Delivery Rates
@@ -407,19 +386,8 @@
         const gridContainer = document.getElementById("amcServicesCardsGridContainer");
         gridContainer.innerHTML = "";
 
-        let visibleServices = BASELINE_AMC_SERVICES_DEFINITIONS;
-
-        // Contractors only see their own active operational card row block
-        if (currentSessionUserRole.startsWith("contractor_")) {
-            let targetCardId = "";
-            if (currentSessionUserRole === "contractor_hvac") targetCardId = "air-conditioning";
-            if (currentSessionUserRole === "contractor_civil") targetCardId = "building-maintenance";
-            if (currentSessionUserRole === "contractor_fire") targetCardId = "fire-systems";
-            
-            visibleServices = BASELINE_AMC_SERVICES_DEFINITIONS.filter(s => s.id === targetCardId);
-        }
-
-        visibleServices.forEach(service => {
+        // Facilities Manager retains system-wide visibility into all 16 foundational services
+        BASELINE_AMC_SERVICES_DEFINITIONS.forEach(service => {
             const serviceBreakdownsCount = ticketsArray.filter(t => 
                 t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval")
             ).length;
@@ -444,3 +412,11 @@
 
 </body>
 </html>
+
+```
+
+---
+
+### What to provide next:
+
+Send over your **`ppm.html`** file, and we can strip out the contractor filter restrictions there next to let the Facilities Manager track all scheduled maintenance operations simultaneously!
