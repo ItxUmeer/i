@@ -89,6 +89,11 @@
 
         <form id="publicIssueForm" class="modal-form">
             <div class="form-input-container">
+                <label>Request Riser Details</label>
+                <input type="text" id="issueRiserDetails" placeholder="e.g. John Doe (IT Dept / Ext 445)" required>
+            </div>
+
+            <div class="form-input-container">
                 <label>Target Property Scope</label>
                 <select id="issueScope" required>
                     <option value="" disabled selected>Select location group...</option>
@@ -100,7 +105,7 @@
 
             <div class="form-input-container">
                 <label>Specific Location / Zone Detail</label>
-                <input type="text" id="issueLocationDetail" placeholder="e.g.HQ Workshop, ACC Block C, Hatta, Jabel Ali," required>
+                <input type="text" id="issueLocationDetail" placeholder="e.g. HQ Workshop, ACC Block C, Hatta, Jebel Ali" required>
             </div>
 
             <div class="form-input-container">
@@ -129,7 +134,7 @@
             <div class="form-input-container">
                 <label>Issue Description</label>
                 <textarea id="issueDescription" placeholder="Provide details regarding the breakdown or fault..." required></textarea>
-            <div class="form-input-container">
+            </div> <div class="form-input-container">
                 <label>Urgency Priority Level</label>
                 <select id="issuePriority" required>
                     <option value="low">Low (Routine Check)</option>
@@ -169,6 +174,7 @@
         const ticketPayload = {
             ticketId: referenceId,
             type: "reactive",
+            riserDetails: document.getElementById("issueRiserDetails").value.trim(), // ADDED: Mapped input field to database payload node
             locationScope: document.getElementById("issueScope").value,
             specificLocation: document.getElementById("issueLocationDetail").value.trim(),
             amcCategory: document.getElementById("issueCategory").value,
@@ -183,7 +189,7 @@
         try {
             await addDoc(collection(db, "maintenance_tickets"), ticketPayload);
             document.getElementById("publicIssueForm").style.display = "none";
-            document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style=\"color:#1e3a8a;\">${referenceId}</b>`;
+            document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style="color:#1e3a8a;">${referenceId}</b>`;
             document.getElementById("successState").style.display = "block";
         } catch (error) {
             alert("Submission error: " + error.message);
