@@ -84,8 +84,9 @@
             // Process core authentication and dynamic role extraction safely
             const sessionProfile = await login(email, password);
 
-            // 🧼 Flush old session state data tokens from browser cache memory
+            // 🧼 Flush old stale session tokens FIRST before inserting new profile values
             localStorage.clear();
+            
             localStorage.setItem("uid", sessionProfile.uid);
             localStorage.setItem("email", sessionProfile.email);
             
