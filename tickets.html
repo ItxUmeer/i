@@ -5,6 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DCAS CMMS - Work Orders Triage</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modern visual interface components for image validation and timelines */
+        .timeline-log-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .timeline-item {
+            padding-bottom: 6px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .timeline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .image-preview-thumbnail {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-top: 6px;
+            object-fit: contain;
+        }
+        .media-link {
+            color: #1e3a8a;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .file-upload-input-drawer {
+            padding: 6px 10px !important;
+            border: 1px dashed var(--border);
+            background: #ffffff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
 
@@ -53,6 +100,7 @@
                         <th>Specific Location</th>
                         <th>Service Group</th>
                         <th>Issue Details</th>
+                        <th>Media</th>
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Reported Date</th>
@@ -61,7 +109,7 @@
                 </thead>
                 <tbody id="ticketsTableBody">
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px; color: var(--muted);">
+                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--muted);">
                             Connecting securely to Firestore cluster streams...
                         </td>
                     </tr>
@@ -155,7 +203,18 @@
             
             <div class="form-input-container">
                 <label>Issue Summary</label>
-                <textarea id="drawerIssueDescription" readonly style="background: #f8fafc; border-color: var(--border); font-weight: 500; min-height: 80px; resize: none;"></textarea>
+                <textarea id="drawerIssueDescription" readonly style="background: #f8fafc; border-color: var(--border); font-weight: 500; min-height: 60px; resize: none;"></textarea>
+            </div>
+
+            <div class="form-input-container" id="drawerBeforePhotoWrapper" style="display: none;">
+                <label>Initial Breakdown Reference Photo</label>
+                <div id="drawerBeforePhotoContainer"></div>
+            </div>
+
+            <div class="form-input-container">
+                <label>Operational Communication Logs & Timeline</label>
+                <div id="drawerCommentTimeline" class="timeline-log-box"></div>
+                <input type="text" id="drawerNewCommentInput" placeholder="Add custom operational note or update message...">
             </div>
 
             <div id="adminRoutingControls" style="display: none; flex-direction: column; gap: 14px;">
@@ -196,16 +255,32 @@
                 <textarea id="drawerTechnicianNotes" placeholder="Describe components replaced, metrics monitored, or steps taken..."></textarea>
             </div>
 
-            <button type="submit" class="btn-primary" style="margin-top: 16px;">Save Operational Updates</button>
+            <div id="closureExecutionBlock" style="display: none; border-top: 1px dashed var(--border); padding-top: 14px; margin-top: 10px; flex-direction: column; gap: 14px;">
+                <div class="form-input-container">
+                    <label>Final Closing Sign-off Comments</label>
+                    <textarea id="drawerClosingComments" placeholder="Provide conclusive handover feedback or verification details..."></textarea>
+                </div>
+                <div class="form-input-container">
+                    <label>Upload Handover / After Photo</label>
+                    <input type="file" id="drawerAfterPhotoInput" accept="image/*" class="file-upload-input-drawer">
+                </div>
+                <div id="drawerAfterPhotoPreviewWrapper" style="display: none;">
+                    <label>Handover Reference Photo</label>
+                    <div id="drawerAfterPhotoContainer"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="saveDrawerUpdateBtn" style="margin-top: 16px;">Save Operational Updates</button>
         </form>
     </div>
 </div>
 
 <script type="module">
-    import { db } from "./firebase.js";
+    import { db, storage } from "./firebase.js";
     import { checkAccess } from "./roleguard.js";
     import { loadSidebar } from "./sidebar.js";
     import { collection, getDocs, doc, updateDoc, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
 
     let globalActiveTicketsCache = [];
     let authenticatedUserRole = "";
@@ -215,7 +290,6 @@
         authenticatedUserRole = sessionValidatedRole.toLowerCase().trim();
         document.getElementById("userRole").innerText = sessionValidatedRole.replace('_', ' ').toUpperCase();
         
-        // Load sidebar first to construct the DOM layout elements cleanly
         loadSidebar(sessionValidatedRole);
         
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
@@ -226,14 +300,11 @@
             document.getElementById("optPending").style.display = "block";
             document.getElementById("optActive").style.display = "block";
         } else if (authenticatedUserRole === "facilities_manager") {
-            // Facilities Manager Specific Setup
             document.getElementById("ticketsPageTitleContext").innerText = "Facilities Manager Triage Deck";
-            document.getElementById("openCreateTicketPanelBtn").style.display = "none"; // Hide internal log capability
+            document.getElementById("openCreateTicketPanelBtn").style.display = "none"; 
             document.getElementById("adminRoutingControls").style.display = "flex";
-            document.getElementById("contractorAssignmentContainer").style.display = "none"; // Hide contractor assignment field
+            document.getElementById("contractorAssignmentContainer").style.display = "none"; 
             document.getElementById("contractorFeedbackControls").style.display = "none";
-            
-            // Limit management options to closing active/resolved logs
             document.getElementById("optPending").style.display = "none";
             document.getElementById("optActive").style.display = "block";
             document.getElementById("optResolved").style.display = "block";
@@ -244,10 +315,23 @@
             document.getElementById("ticketsPageTitleContext").innerText = "Assigned Field Work Orders";
         }
         
+        // Watch user updates to display or hide closeout sections in real time
+        setupClosureUIListeners();
         fetchTicketsDataPipeline();
     });
 
-    // Logout Handler Entry Point
+    function setupClosureUIListeners() {
+        const statusDropdown = document.getElementById("drawerStatusUpdate");
+        statusDropdown.addEventListener("change", () => {
+            const closureBlock = document.getElementById("closureExecutionBlock");
+            if (statusDropdown.value === "resolved") {
+                closureBlock.style.display = "flex";
+            } else {
+                closureBlock.style.display = "none";
+            }
+        });
+    }
+
     document.getElementById("logoutBtn").addEventListener("click", () => {
         localStorage.clear();
         window.location.href = "index.html";
@@ -261,7 +345,6 @@
         createModal.classList.remove("active");
     });
 
-    // Process and Create Internal Ticket Directly to Cloud Firestore Collection
     document.getElementById("internalCreateTicketForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const submitBtn = document.getElementById("submitInternalTicketBtn");
@@ -282,18 +365,20 @@
             status: "pending_approval",
             reportedDate: new Date().toISOString(),
             assignedContractorUid: null,
-            resolvedDate: null
+            resolvedDate: null,
+            photoUrlBefore: null,
+            photoUrlAfter: null,
+            closingComments: "",
+            commentsTimeline: []
         };
 
         try {
             await addDoc(collection(db, "maintenance_tickets"), internalPayload);
             createModal.classList.remove("active");
             document.getElementById("internalCreateTicketForm").reset();
-            
             submitBtn.disabled = false;
             submitBtn.innerText = "Transmit & Authorize Order";
-            
-            fetchTicketsDataPipeline(); // Refresh tracking list immediately
+            fetchTicketsDataPipeline();
         } catch (error) {
             alert("Error creating internal work order: " + error.message);
             submitBtn.disabled = false;
@@ -301,14 +386,12 @@
         }
     });
 
-    // Stream Tickets from Cloud Firestore Collection
     async function fetchTicketsDataPipeline() {
         try {
             const ticketsRef = collection(db, "maintenance_tickets");
             let q;
             let clientSideSortRequired = false;
             
-            // 🛡️ Safe query adjustments to follow security criteria without triggering Firestore multi-field Index limitations
             if (authenticatedUserRole === "facilities_manager") {
                 q = query(
                     ticketsRef, 
@@ -320,7 +403,6 @@
             }
             
             const querySnapshot = await getDocs(q);
-            
             let rawCloudRecords = [];
             querySnapshot.forEach((docSnap) => {
                 rawCloudRecords.push({
@@ -329,7 +411,6 @@
                 });
             });
 
-            // Apply safe memory triage sort if backend sorting conflicts with security matrices
             if (clientSideSortRequired) {
                 rawCloudRecords.sort((a, b) => {
                     const dateA = a.reportedDate || "";
@@ -348,19 +429,18 @@
 
             renderTableInterface(globalActiveTicketsCache);
         } catch (error) {
-            console.error("Critical Stream Interruption Error: ", error);
+            console.error(error);
             document.getElementById("ticketsTableBody").innerHTML = `
-                <tr><td colspan="10" style="text-align:center; color:var(--danger); font-weight:700; padding:30px;">
+                <tr><td colspan="11" style="text-align:center; color:var(--danger); font-weight:700; padding:30px;">
                     Authentication Data Pipeline Fault: Please ensure Firestore rules match completely.
                 </td></tr>`;
         }
     }
 
-    // Render Data Array to Interface Table Engine
     function renderTableInterface(dataItems) {
         const tbody = document.getElementById("ticketsTableBody");
         if (dataItems.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:var(--muted);">No matching operational records mapped to your profile scope.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:40px; color:var(--muted);">No matching operational records mapped to your profile scope.</td></tr>`;
             return;
         }
 
@@ -370,6 +450,12 @@
             let priorityVal = ticket.priority || 'medium';
             let statusVal = ticket.status || 'pending_approval';
             let riserDetails = ticket.riserDetails ? ticket.riserDetails : "N/A (Public Portal)";
+            
+            // Render media indicators dynamically based on cloud fields
+            let mediaIndicatorMarkup = `<span style="color:var(--muted); font-size:11px;">No Media</span>`;
+            if (ticket.photoUrlBefore || ticket.photoUrlAfter) {
+                mediaIndicatorMarkup = `<span class="media-link" onclick="openTriageDrawer('${ticket.docId}')">🖼️ View Media</span>`;
+            }
 
             compiledRowsMarkup += `
                 <tr>
@@ -378,7 +464,8 @@
                     <td style="text-transform:uppercase; font-size:11px; font-weight:600;">📍 ${ticket.locationScope || 'General'}</td>
                     <td>${ticket.specificLocation || 'N/A'}</td>
                     <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${ticket.amcCategory || 'N/A'}</code></td>
-                    <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${ticket.description || ''}">${ticket.description || 'N/A'}</td>
+                    <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${ticket.description || ''}">${ticket.description || 'N/A'}</td>
+                    <td>${mediaIndicatorMarkup}</td>
                     <td><span class="badge badge-${priorityVal}">${priorityVal}</span></td>
                     <td><span class="badge badge-${statusVal}">${statusText}</span></td>
                     <td style="font-size:12px; color:var(--muted);">${ticket.reportedDate ? ticket.reportedDate.substring(0,10) : 'N/A'}</td>
@@ -394,7 +481,6 @@
         tbody.innerHTML = compiledRowsMarkup;
     }
 
-    // Interactive Drawer Overlay Actions Opening Management Mapping Engine
     window.openTriageDrawer = function(documentReferenceId) {
         const targetData = globalActiveTicketsCache.find(t => t.docId === documentReferenceId);
         if (!targetData) return;
@@ -403,11 +489,62 @@
         document.getElementById("drawerTicketIdTitle").innerText = `Manage: ${targetData.ticketId}`;
         document.getElementById("drawerIssueDescription").value = targetData.description;
         
+        // Clean out form uploads files memory state cache
+        document.getElementById("drawerAfterPhotoInput").value = "";
+        document.getElementById("drawerNewCommentInput").value = "";
+
+        // Render Initial Fault Photo if available
+        const beforePhotoWrapper = document.getElementById("drawerBeforePhotoWrapper");
+        const beforePhotoBox = document.getElementById("drawerBeforePhotoContainer");
+        if (targetData.photoUrlBefore) {
+            beforePhotoWrapper.style.display = "block";
+            beforePhotoBox.innerHTML = `<img src="${targetData.photoUrlBefore}" class="image-preview-thumbnail" onclick="window.open('${targetData.photoUrlBefore}','_blank')">`;
+        } else {
+            beforePhotoWrapper.style.display = "none";
+        }
+
+        // Render Handover / After Close Photo if already present
+        const afterWrapper = document.getElementById("drawerAfterPhotoPreviewWrapper");
+        const afterPhotoBox = document.getElementById("drawerAfterPhotoContainer");
+        if (targetData.photoUrlAfter) {
+            afterWrapper.style.display = "block";
+            afterPhotoBox.innerHTML = `<img src="${targetData.photoUrlAfter}" class="image-preview-thumbnail" onclick="window.open('${targetData.photoUrlAfter}','_blank')">`;
+        } else {
+            afterWrapper.style.display = "none";
+        }
+
+        // Parse and Render Dynamic Chronological Timeline Communication Loops
+        const timelineBox = document.getElementById("drawerCommentTimeline");
+        timelineBox.innerHTML = "";
+        if (targetData.commentsTimeline && targetData.commentsTimeline.length > 0) {
+            targetData.commentsTimeline.forEach(log => {
+                let displayStamp = log.timestamp ? log.timestamp.substring(11, 16) : "--:--";
+                timelineBox.innerHTML += `
+                    <div class="timeline-item">
+                        <strong>[${log.senderRole.replace('_',' ').toUpperCase()}]</strong> 
+                        <span style="color:var(--muted); font-size:11px;">(${displayStamp})</span>: ${log.text}
+                    </div>`;
+            });
+        } else {
+            timelineBox.innerHTML = `<div style="color:var(--muted); text-align:center; padding:10px 0;">No chronological tracking notes logged yet.</div>`;
+        }
+
+        // Load contextual field matrices values correctly
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
             document.getElementById("drawerContractorAssignment").value = targetData.assignedContractorUid || "";
             document.getElementById("drawerStatusUpdate").value = targetData.status || "pending_approval";
+            document.getElementById("drawerClosingComments").value = targetData.closingComments || "";
+            
+            // Evaluate if closeout input structures should reveal themselves right away
+            if (targetData.status === "resolved") {
+                document.getElementById("closureExecutionBlock").style.display = "flex";
+            } else {
+                document.getElementById("closureExecutionBlock").style.display = "none";
+            }
         } else if (authenticatedUserRole.startsWith("contractor")) {
             document.getElementById("drawerTechnicianNotes").value = targetData.technicianNotes || "";
+            document.getElementById("closureExecutionBlock").style.display = "flex"; // Contractors always fill close data
+            document.getElementById("drawerClosingComments").value = targetData.closingComments || "";
         }
 
         document.getElementById("ticketActionDrawer").classList.add("active");
@@ -417,43 +554,79 @@
         document.getElementById("ticketActionDrawer").classList.remove("active");
     });
 
-    // Process Form Updates and Save Directly Back to Cloud Firestore Document Reference
     document.getElementById("drawerActionForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+        const actionBtn = document.getElementById("saveDrawerUpdateBtn");
+        actionBtn.disabled = true;
+        actionBtn.innerText = "Synchronizing Media Data Layers...";
+
         const firestoreDocId = document.getElementById("targetDocumentFirestoreId").value;
+        const targetData = globalActiveTicketsCache.find(t => t.docId === firestoreDocId);
         const targetDocRef = doc(db, "maintenance_tickets", firestoreDocId);
         
         let updatePayload = {};
 
-        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
-            // Keep the assigned contractor intact for the facilities manager updates
-            if (authenticatedUserRole !== "facilities_manager") {
-                updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
-            }
-            updatePayload.status = document.getElementById("drawerStatusUpdate").value;
-            if(updatePayload.status === "resolved") {
-                updatePayload.resolvedDate = new Date().toISOString();
-            }
-        } else if (authenticatedUserRole.startsWith("contractor")) {
-            const techNotes = document.getElementById("drawerTechnicianNotes").value.trim();
-            updatePayload.technicianNotes = techNotes;
-            
-            if(techNotes.length > 5) {
-                updatePayload.status = "resolved";
-                updatePayload.resolvedDate = new Date().toISOString();
-            }
-        }
-
         try {
+            // Process Message Timeline Logging Loops
+            let commentsHistoryArray = targetData.commentsTimeline || [];
+            const newCommentText = document.getElementById("drawerNewCommentInput").value.trim();
+            if (newCommentText) {
+                commentsHistoryArray.push({
+                    senderRole: authenticatedUserRole,
+                    text: newCommentText,
+                    timestamp: new Date().toISOString()
+                });
+                updatePayload.commentsTimeline = commentsHistoryArray;
+            }
+
+            // Route updates based on specific profile privileges
+            if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
+                if (authenticatedUserRole !== "facilities_manager") {
+                    updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
+                }
+                updatePayload.status = document.getElementById("drawerStatusUpdate").value;
+                updatePayload.closingComments = document.getElementById("drawerClosingComments").value.trim();
+
+                if (updatePayload.status === "resolved") {
+                    updatePayload.resolvedDate = new Date().toISOString();
+                }
+            } else if (authenticatedUserRole.startsWith("contractor")) {
+                const techNotes = document.getElementById("drawerTechnicianNotes").value.trim();
+                updatePayload.technicianNotes = techNotes;
+                updatePayload.closingComments = document.getElementById("drawerClosingComments").value.trim();
+                
+                // Contractor auto-escalation upon notes entry execution
+                if (techNotes.length > 3) {
+                    updatePayload.status = "resolved";
+                    updatePayload.resolvedDate = new Date().toISOString();
+                }
+            }
+
+            // Handle Handover After Photograph Storage Sync Pipelines
+            const afterPhotoFileInput = document.getElementById("drawerAfterPhotoInput");
+            if (afterPhotoFileInput && afterPhotoFileInput.files.length > 0) {
+                const afterFileObj = afterPhotoFileInput.files[0];
+                const storageRefPath = ref(storage, `ticket_media_after/${targetData.ticketId || firestoreDocId}_handover_after.jpg`);
+                
+                const snapshotObj = await uploadBytes(storageRefPath, afterFileObj);
+                updatePayload.photoUrlAfter = await getDownloadURL(snapshotObj);
+            }
+
+            // Commit atomic updates directly to document reference
             await updateDoc(targetDocRef, updatePayload);
+            
             document.getElementById("ticketActionDrawer").classList.remove("active");
+            actionBtn.disabled = false;
+            actionBtn.innerText = "Save Operational Updates";
+            
             fetchTicketsDataPipeline();
         } catch (error) {
             alert("Operational Write Exception Error: " + error.message);
+            actionBtn.disabled = false;
+            actionBtn.innerText = "Save Operational Updates";
         }
     });
 
-    // Real-time Frontend Filtering Infrastructure Logic Engines (Location Selector + Search Bar Input)
     function executeLiveSearchAndFiltersPipeline() {
         const searchKeyword = document.getElementById("tableGlobalSearch").value.toLowerCase().trim();
         const selectedLocation = document.getElementById("globalLocationFilter").value;
