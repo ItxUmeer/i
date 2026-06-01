@@ -137,7 +137,7 @@
                 <div class="segment-metrics-row">
                     <div class="segment-datapoint"><span>Total Logs</span><val id="hq-total">0</val></div>
                     <div class="segment-datapoint"><span>Active Jobs</span><val id="hq-active" style="color:var(--primary);">0</val></div>
-                    <div class="segment-datapoint"><span>PPM Due</span><val id="hq-ppm" style="color:var(--warning);">0</val></div>
+                    <div class="segment-datapoint" id="hqPpmContainer"><span>PPM Due</span><val id="hq-ppm" style="color:var(--warning);">0</val></div>
                 </div>
             </div>
             <div class="summary-segment-box">
@@ -145,7 +145,7 @@
                 <div class="segment-metrics-row">
                     <div class="segment-datapoint"><span>Total Logs</span><val id="staff-total">0</val></div>
                     <div class="segment-datapoint"><span>Active Jobs</span><val id="staff-active" style="color:var(--primary);">0</val></div>
-                    <div class="segment-datapoint"><span>PPM Due</span><val id="staff-ppm" style="color:var(--warning);">0</val></div>
+                    <div class="segment-datapoint" id="staffPpmContainer"><span>PPM Due</span><val id="staff-ppm" style="color:var(--warning);">0</val></div>
                 </div>
             </div>
             <div class="summary-segment-box">
@@ -153,7 +153,7 @@
                 <div class="segment-metrics-row">
                     <div class="segment-datapoint"><span>Total Logs</span><val id="station-total">0</val></div>
                     <div class="segment-datapoint"><span>Active Jobs</span><val id="station-active" style="color:var(--primary);">0</val></div>
-                    <div class="segment-datapoint"><span>PPM Due</span><val id="station-ppm" style="color:var(--warning);">0</val></div>
+                    <div class="segment-datapoint" id="stationPpmContainer"><span>PPM Due</span><val id="station-ppm" style="color:var(--warning);">0</val></div>
                 </div>
             </div>
         </div>
@@ -163,11 +163,11 @@
             <div class="kpi-card"><h3>Active Open</h3><p id="global-active" style="color: var(--primary);">0</p></div>
             <div class="kpi-card"><h3>Rejected Jobs</h3><p id="global-rejected" style="color: var(--danger);">0</p></div>
             <div class="kpi-card"><h3>Resolved Logs</h3><p id="global-resolved" style="color: var(--success);">0</p></div>
-            <div class="kpi-card"><h3>Planned PPM</h3><p id="global-ppm-total">0</p></div>
-            <div class="kpi-card"><h3>Overdue Tasks</h3><p id="global-ppm-overdue" style="color: var(--warning);">0</p></div>
+            <div class="kpi-card" id="globalPpmTotalCard"><h3>Planned PPM</h3><p id="global-ppm-total">0</p></div>
+            <div class="kpi-card" id="globalPpmOverdueCard"><h3>Overdue Tasks</h3><p id="global-ppm-overdue" style="color: var(--warning);">0</p></div>
         </div>
 
-        <div class="analytics-chart-section">
+        <div class="analytics-chart-section" id="analyticsChartSectionWrapper">
             <div class="analytics-chart-card">
                 <h3>Service AMC Target vs Realized Delivery Rate (SLA %)</h3>
                 <div class="chart-bars-container" id="slaRealtimeBarsContainer">
@@ -197,7 +197,6 @@
     import { loadSidebar } from "./sidebar.js";
     import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-    // 🌟 Standardized 16 Core Services mapping precisely with assets.html register options
     const BASELINE_AMC_SERVICES_DEFINITIONS = [
         { id: "building-maintenance", num: "1", title: "Building Maintenance Services", scope: "Civil, Structural & Architectural Maintenance" },
         { id: "swimming-pool", num: "2", title: "Swimming Pool Maintenance Services", scope: "Filtration, Water Chemistry & Periodic Cleaning" },
@@ -221,10 +220,12 @@
 
     // 🛡️ Trigger the Role Access Shield Matrix
     checkAccess((validatedUserRole) => {
-        currentSessionUserRole = validatedUserRole;
+        currentSessionUserRole = validatedUserRole.toLowerCase().trim();
         document.getElementById("userRole").innerText = validatedUserRole.toUpperCase();
         loadSidebar(validatedUserRole);
         
+        // Adjust interface before processing backend pipeline calculations
+        enforceContextualLayoutPruning();
         executeLiveMetricsStreamingAggregationPipeline();
     });
 
@@ -233,20 +234,53 @@
         window.location.href = "index.html";
     };
 
+    /**
+     * Completely scrubs restricted features out of the DOM for the Facilities Manager
+     */
+    function enforceContextualLayoutPruning() {
+        if (currentSessionUserRole === "facilities_manager") {
+            // Change page header context
+            document.getElementById("dashboardTitleScope").innerText = "Active Maintenance Management Portal";
+
+            // Hide shortcuts bar to assets/ppm
+            const shortcuts = document.getElementById("dashboardShortcutsBar");
+            if (shortcuts) shortcuts.style.display = "none";
+
+            // Hide the 16 core contractual services panel
+            const servicesSection = document.getElementById("amcServicesWrapperSection");
+            if (servicesSection) servicesSection.style.display = "none";
+
+            // Hide SLA & KPI chart rows
+            const chartsSection = document.getElementById("analyticsChartSectionWrapper");
+            if (chartsSection) chartsSection.style.display = "none";
+
+            // Hide PPM-related metrics cards and labels
+            if (document.getElementById("globalPpmTotalCard")) document.getElementById("globalPpmTotalCard").style.display = "none";
+            if (document.getElementById("globalPpmOverdueCard")) document.getElementById("globalPpmOverdueCard").style.display = "none";
+            if (document.getElementById("hqPpmContainer")) document.getElementById("hqPpmContainer").style.display = "none";
+            if (document.getElementById("staffPpmContainer")) document.getElementById("staffPpmContainer").style.display = "none";
+            if (document.getElementById("stationPpmContainer")) document.getElementById("stationPpmContainer").style.display = "none";
+        }
+    }
+
     async function executeLiveMetricsStreamingAggregationPipeline() {
         try {
+            // 1. Fetch authorized collection
             const ticketsSnapshot = await getDocs(collection(db, "maintenance_tickets"));
             let rawTicketsList = [];
             ticketsSnapshot.forEach(doc => rawTicketsList.push(doc.data()));
 
-            const ppmSnapshot = await getDocs(collection(db, "ppm_schedules"));
+            // 2. Conditional Fetch: Only query PPM database if user is Admin or Planner
             let rawPpmList = [];
-            ppmSnapshot.forEach(doc => rawPpmList.push(doc.data()));
+            if (currentSessionUserRole !== "facilities_manager") {
+                try {
+                    const ppmSnapshot = await getDocs(collection(db, "ppm_schedules"));
+                    ppmSnapshot.forEach(doc => rawPpmList.push(doc.data()));
+                } catch (ppmSecurityErr) {
+                    console.warn("Bypassed ppm sub-fetch failure parameters:", ppmSecurityErr);
+                }
+            }
 
-            // ==========================================================================
-            // 🔒 BACKEND UNIFIED SYSTEM DATA PIPELINE (FACILITIES MANAGER DISPATCH)
-            // ==========================================================================
-            // Facilities Manager aggregates all matrix tokens globally across the enterprise
             let processedTicketsList = rawTicketsList;
             let processedPpmList = rawPpmList;
 
@@ -261,10 +295,10 @@
                 const scope = ticket.locationScope;
                 metricsCounters.global.requests++;
 
-                if (ticket.status === "active" || ticket.status === "pending_approval") {
+                if (ticket.status === "active" || ticket.status === "pending_approval" || ticket.status === "Assigned" || ticket.status === "In Progress") {
                     metricsCounters.global.active++;
                     if (metricsCounters[scope]) metricsCounters[scope].active++;
-                } else if (ticket.status === "resolved") {
+                } else if (ticket.status === "resolved" || ticket.status === "Closed") {
                     metricsCounters.global.resolved++;
                 } else if (ticket.status === "rejected") {
                     metricsCounters.global.rejected++;
@@ -273,6 +307,7 @@
                 if (metricsCounters[scope]) metricsCounters[scope].total++;
             });
 
+            // Iterate over PPM list only if records exist
             processedPpmList.forEach(ppm => {
                 const scope = ppm.locationScope;
                 metricsCounters.global.ppmTotal++;
@@ -283,7 +318,7 @@
                 }
             });
 
-            // UI updates
+            // DOM metrics population strings
             document.getElementById("hq-total").innerText = metricsCounters.hq.total.toLocaleString();
             document.getElementById("hq-active").innerText = metricsCounters.hq.active.toLocaleString();
             document.getElementById("hq-ppm").innerText = metricsCounters.hq.ppm.toLocaleString();
@@ -303,26 +338,25 @@
             document.getElementById("global-ppm-total").innerText = metricsCounters.global.ppmTotal.toLocaleString();
             document.getElementById("global-ppm-overdue").innerText = metricsCounters.global.ppmOverdue.toLocaleString();
 
-            // Render Dynamic Components
-            renderSlaAndKpiChartsVisualization(processedTicketsList, processedPpmList);
-            renderContractServicesMatrixCardsGrid(processedTicketsList);
+            // Run sub-renders only if authorized roles match
+            if (currentSessionUserRole !== "facilities_manager") {
+                renderSlaAndKpiChartsVisualization(processedTicketsList, processedPpmList);
+                renderContractServicesMatrixCardsGrid(processedTicketsList);
+            }
 
         } catch (error) {
             console.error("Aggregation Stream Exception Error: ", error);
         }
     }
 
-    // ==========================================================================
-    // 📊 CHART VISUALIZATION DISPATCH ROUTER (GLOBAL ENTERPRISE KPI VIEW)
-    // ==========================================================================
     function renderSlaAndKpiChartsVisualization(tickets, ppms) {
         const slaContainer = document.getElementById("slaRealtimeBarsContainer");
         const kpiContainer = document.getElementById("kpiVolumeBarsContainer");
+        if (!slaContainer || !kpiContainer) return;
         
         slaContainer.innerHTML = "";
         kpiContainer.innerHTML = "";
 
-        // Selection of dynamic key indicator rows to track on the main layout
         let targetCategories = [
             { id: "air-conditioning", label: "HVAC Systems" },
             { id: "building-maintenance", label: "Civil / Building Maintenance" },
@@ -331,10 +365,9 @@
         ];
 
         targetCategories.forEach(cat => {
-            // Compute SLA Real-time Delivery Rates
             const catTickets = tickets.filter(t => t.amcCategory === cat.id);
             const totalCatCount = catTickets.length;
-            const resolvedCatCount = catTickets.filter(t => t.status === "resolved").length;
+            const resolvedCatCount = catTickets.filter(t => t.status === "resolved" || t.status === "Closed").length;
             
             let slaPercentage = (totalCatCount > 0) ? Math.round((resolvedCatCount / totalCatCount) * 100) : 100;
             
@@ -354,7 +387,6 @@
                 </div>
             `);
 
-            // Compute PPM Volume Bounds (Planned vs Done)
             const catPpms = ppms.filter(p => p.amcCategory === cat.id);
             const totalPpmPlanned = catPpms.length;
             const completedPpm = catPpms.filter(p => p.status === "completed").length;
@@ -377,12 +409,12 @@
 
     function renderContractServicesMatrixCardsGrid(ticketsArray) {
         const gridContainer = document.getElementById("amcServicesCardsGridContainer");
+        if (!gridContainer) return;
         gridContainer.innerHTML = "";
 
-        // Facilities Manager retains system-wide visibility into all 16 foundational services
         BASELINE_AMC_SERVICES_DEFINITIONS.forEach(service => {
             const serviceBreakdownsCount = ticketsArray.filter(t => 
-                t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval")
+                t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval" || t.status === "Assigned" || t.status === "In Progress")
             ).length;
 
             const badgeClassificationClass = (serviceBreakdownsCount > 0) ? "badge-breakdown" : "badge-operational";
