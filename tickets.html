@@ -159,7 +159,7 @@
             </div>
 
             <div id="adminRoutingControls" style="display: none; flex-direction: column; gap: 14px;">
-                <div class="form-input-container">
+                <div class="form-input-container" id="contractorAssignmentContainer">
                     <label>Assign Specialized Service Contractor</label>
                     <select id="drawerContractorAssignment" required>
                         <option value="" disabled selected>Select execution contractor...</option>
@@ -184,9 +184,9 @@
                 <div class="form-input-container">
                     <label>Update Status Classification</label>
                     <select id="drawerStatusUpdate" required>
-                        <option value="pending_approval">Pending Triage Approval</option>
-                        <option value="active">Active (Dispatched to Field)</option>
-                        <option value="resolved">Resolved (Task Completed)</option>
+                        <option value="pending_approval" id="optPending">Pending Triage Approval</option>
+                        <option value="active" id="optActive">Active (Dispatched to Field)</option>
+                        <option value="resolved" id="optResolved">Resolved (Task Completed)</option>
                     </select>
                 </div>
             </div>
@@ -205,7 +205,7 @@
     import { db } from "./firebase.js";
     import { checkAccess } from "./roleguard.js";
     import { loadSidebar } from "./sidebar.js";
-    import { collection, getDocs, doc, updateDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { collection, getDocs, doc, updateDoc, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     let globalActiveTicketsCache = [];
     let authenticatedUserRole = "";
@@ -216,13 +216,25 @@
         document.getElementById("userRole").innerText = sessionValidatedRole.replace('_', ' ').toUpperCase();
         loadSidebar(sessionValidatedRole);
         
-        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
+        if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
             document.getElementById("openCreateTicketPanelBtn").style.display = "flex";
             document.getElementById("adminRoutingControls").style.display = "flex";
+            document.getElementById("contractorAssignmentContainer").style.display = "block";
             document.getElementById("contractorFeedbackControls").style.display = "none";
-            if (authenticatedUserRole === "facilities_manager") {
-                document.getElementById("ticketsPageTitleContext").innerText = "Facilities Manager Triage Deck";
-            }
+            document.getElementById("optPending").style.display = "block";
+            document.getElementById("optActive").style.display = "block";
+        } else if (authenticatedUserRole === "facilities_manager") {
+            // Facilities Manager Specific Setup
+            document.getElementById("ticketsPageTitleContext").innerText = "Facilities Manager Triage Deck";
+            document.getElementById("openCreateTicketPanelBtn").style.display = "none"; // Hide internal log capability
+            document.getElementById("adminRoutingControls").style.display = "flex";
+            document.getElementById("contractorAssignmentContainer").style.display = "none"; // Hide contractor assignment field
+            document.getElementById("contractorFeedbackControls").style.display = "none";
+            
+            // Limit management options to closing active/resolved logs
+            document.getElementById("optPending").style.display = "none";
+            document.getElementById("optActive").style.display = "block";
+            document.getElementById("optResolved").style.display = "block";
         } else if (authenticatedUserRole.startsWith("contractor")) {
             document.getElementById("openCreateTicketPanelBtn").style.display = "none";
             document.getElementById("adminRoutingControls").style.display = "none";
@@ -291,7 +303,19 @@
     async function fetchTicketsDataPipeline() {
         try {
             const ticketsRef = collection(db, "maintenance_tickets");
-            const q = query(ticketsRef, orderBy("reportedDate", "desc"));
+            let q;
+            
+            // 🛡️ Filter the queries based on identity to align with backend Firestore rules safely
+            if (authenticatedUserRole === "facilities_manager") {
+                q = query(
+                    ticketsRef, 
+                    where("status", "in", ["active", "resolved", "Closed", "Assigned", "In Progress"]),
+                    orderBy("reportedDate", "desc")
+                );
+            } else {
+                q = query(ticketsRef, orderBy("reportedDate", "desc"));
+            }
+            
             const querySnapshot = await getDocs(q);
             
             let rawCloudRecords = [];
@@ -390,7 +414,10 @@
         let updatePayload = {};
 
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner" || authenticatedUserRole === "facilities_manager") {
-            updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
+            // Keep the assigned contractor intact for the facilities manager updates
+            if (authenticatedUserRole !== "facilities_manager") {
+                updatePayload.assignedContractorUid = document.getElementById("drawerContractorAssignment").value;
+            }
             updatePayload.status = document.getElementById("drawerStatusUpdate").value;
             if(updatePayload.status === "resolved") {
                 updatePayload.resolvedDate = new Date().toISOString();
