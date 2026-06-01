@@ -7,12 +7,12 @@
 const PUBLIC_PAGES = ["index.html", "login.html", "reports.html"];
 
 // Define which roles are allowed to view which filenames
-// UPDATED: Removed standalone contractors/supervisors; added facilities_manager to everything
+// LOCKED DOWN: facilities_manager removed from assets.html and ppm.html strictly!
 const PAGE_ACCESS_RULES = {
     "dashboard.html": ["admin", "planner", "facilities_manager"], // Hub for SLA / KPIs
-    "assets.html": ["admin", "planner", "facilities_manager"],
-    "ppm.html": ["admin", "planner", "facilities_manager"],        // Hub for PPM List
-    "tickets.html": ["admin", "planner", "facilities_manager"]    // Hub for Issue List
+    "tickets.html": ["admin", "planner", "facilities_manager"],   // Hub for Issue List (Work Orders)
+    "assets.html": ["admin", "planner"],                          // BLOCKED from Facilities Manager
+    "ppm.html": ["admin", "planner"]                              // BLOCKED from Facilities Manager
 };
 
 /**
@@ -50,7 +50,6 @@ export function checkAccess(successCallback) {
             alert(`Unauthorized Access: Your role [${sessionRole.toUpperCase()}] does not have permission to view this console.`);
             
             // Smart routing based on role access depth
-            // UPDATED: Standard fallback pathing routes directly to dashboard or logout
             if (sessionRole === "facilities_manager") {
                 window.location.href = "dashboard.html";
             } else {
