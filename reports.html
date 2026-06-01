@@ -75,16 +75,6 @@
             transform: scale(0.98);
             background-color: var(--primary-hover);
         }
-        
-        /* Mobile-friendly custom photo uploader design adjustments */
-        .file-upload-input {
-            padding: 8px 12px !important;
-            line-height: 28px;
-            border: 2px dashed var(--border);
-            background: #f8fafc;
-            border-radius: 6px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -156,12 +146,7 @@
                 </select>
             </div>
 
-            <div class="form-input-container">
-                <label>Capture / Attach Photo (Optional)</label>
-                <input type="file" id="issuePhotoBefore" accept="image/*" class="file-upload-input">
-            </div>
-
-            <button type="submit" class="btn-primary" id="submitIssueBtn" style="margin-top:10px;">Submit Request</button>
+            <button type="submit" class="btn-primary" id="submitIssueBtn" style="margin-top:20px;">Submit Request</button>
         </form>
 
         <div class="success-state" id="successState">
@@ -176,32 +161,19 @@
 </div>
 
 <script type="module">
-    import { db, storage } from "./firebase.js";
+    import { db } from "./firebase.js";
     import { collection, addDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
 
     document.getElementById("publicIssueForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitIssueBtn");
         btn.disabled = true;
-        btn.innerText = "Transmitting Request & Media...";
+        btn.innerText = "Transmitting Request...";
 
         // Generate clean public tracking hash reference
         const referenceId = "TKT-" + Math.floor(100000 + Math.random() * 900000);
-        let photoBeforeUrlString = null;
 
         try {
-            // Process Image Storage Upload Step if a binary file is attached
-            const photoFileInput = document.getElementById("issuePhotoBefore");
-            if (photoFileInput && photoFileInput.files.length > 0) {
-                const targetFile = photoFileInput.files[0];
-                // Store inside designated storage bucket directory tree path
-                const imageStorageReference = ref(storage, `ticket_media_before/${referenceId}_initial_fault.jpg`);
-                
-                const metaSnapshot = await uploadBytes(imageStorageReference, targetFile);
-                photoBeforeUrlString = await getDownloadURL(metaSnapshot);
-            }
-
             const ticketPayload = {
                 ticketId: referenceId,
                 type: "reactive",
@@ -215,13 +187,14 @@
                 reportedDate: new Date().toISOString(),
                 assignedContractorUid: null,
                 resolvedDate: null,
-                photoUrlBefore: photoBeforeUrlString, // Saves direct secure link array
-                photoUrlAfter: null, // Initial placeholder
+                photoUrlBefore: null, // Set to null since image capture option is disabled
+                photoUrlAfter: null,  // Initial placeholder
                 closingComments: "",
-                commentsTimeline: [] // Emtpy communication vector array stack
+                commentsTimeline: []  // Empty communication vector array stack
             };
 
             await addDoc(collection(db, "maintenance_tickets"), ticketPayload);
+            
             document.getElementById("publicIssueForm").style.display = "none";
             document.getElementById("ticketTrackingId").innerHTML = `Tracking Code: <b style="color:#1e3a8a;">${referenceId}</b>`;
             document.getElementById("successState").style.display = "block";
