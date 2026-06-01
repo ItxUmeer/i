@@ -171,7 +171,7 @@
                         <option value="contractor_lift">Al Fajer (Elevator Maintenance)</option>
                         <option value="contractor_hvac">Al Fajer (Air Conditioning HVAC)</option>
                         <option value="contractor_fire">Al Fajer (Fire Systems)</option>
-                        <option value="contractor_security_systems">Al Fajer (Security Systems Systems)</option>
+                        <option value="contractor_security_systems">Al Fajer (Security Systems)</option>
                         <option value="contractor_audio_visual">Al Fajer (Audio-Visual Services)</option>
                         <option value="contractor_sewage">Al Fajer (Sewage Pumping)</option>
                         <option value="contractor_medical_waste">Al Fajer (Medical Waste Transport)</option>
@@ -214,6 +214,8 @@
     checkAccess((sessionValidatedRole) => {
         authenticatedUserRole = sessionValidatedRole.toLowerCase().trim();
         document.getElementById("userRole").innerText = sessionValidatedRole.replace('_', ' ').toUpperCase();
+        
+        // Load sidebar first to construct the DOM layout elements cleanly
         loadSidebar(sessionValidatedRole);
         
         if (authenticatedUserRole === "admin" || authenticatedUserRole === "planner") {
@@ -304,14 +306,15 @@
         try {
             const ticketsRef = collection(db, "maintenance_tickets");
             let q;
+            let clientSideSortRequired = false;
             
-            // 🛡️ Filter the queries based on identity to align with backend Firestore rules safely
+            // 🛡️ Safe query adjustments to follow security criteria without triggering Firestore multi-field Index limitations
             if (authenticatedUserRole === "facilities_manager") {
                 q = query(
                     ticketsRef, 
-                    where("status", "in", ["active", "resolved", "Closed", "Assigned", "In Progress"]),
-                    orderBy("reportedDate", "desc")
+                    where("status", "in", ["active", "resolved", "Closed", "Assigned", "In Progress"])
                 );
+                clientSideSortRequired = true; 
             } else {
                 q = query(ticketsRef, orderBy("reportedDate", "desc"));
             }
@@ -325,6 +328,15 @@
                     ...docSnap.data()
                 });
             });
+
+            // Apply safe memory triage sort if backend sorting conflicts with security matrices
+            if (clientSideSortRequired) {
+                rawCloudRecords.sort((a, b) => {
+                    const dateA = a.reportedDate || "";
+                    const dateB = b.reportedDate || "";
+                    return dateB.localeCompare(dateA);
+                });
+            }
 
             if (authenticatedUserRole.startsWith("contractor")) {
                 globalActiveTicketsCache = rawCloudRecords.filter(ticket => 
