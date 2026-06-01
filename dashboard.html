@@ -295,7 +295,8 @@
                 const scope = ticket.locationScope;
                 metricsCounters.global.requests++;
 
-                if (ticket.status === "active" || ticket.status === "pending_approval" || ticket.status === "Assigned" || ticket.status === "In Progress") {
+                // Fixed condition: Added ticket.status === "pending" to inclusion rules for active tracking
+                if (ticket.status === "active" || ticket.status === "pending" || ticket.status === "pending_approval" || ticket.status === "Assigned" || ticket.status === "In Progress") {
                     metricsCounters.global.active++;
                     if (metricsCounters[scope]) metricsCounters[scope].active++;
                 } else if (ticket.status === "resolved" || ticket.status === "Closed") {
@@ -413,8 +414,9 @@
         gridContainer.innerHTML = "";
 
         BASELINE_AMC_SERVICES_DEFINITIONS.forEach(service => {
+            // Fixed verification rule: Added ticket.status === "pending" to breakdown evaluation counters block
             const serviceBreakdownsCount = ticketsArray.filter(t => 
-                t.amcCategory === service.id && (t.status === "active" || t.status === "pending_approval" || t.status === "Assigned" || t.status === "In Progress")
+                t.amcCategory === service.id && (t.status === "active" || t.status === "pending" || t.status === "pending_approval" || t.status === "Assigned" || t.status === "In Progress")
             ).length;
 
             const badgeClassificationClass = (serviceBreakdownsCount > 0) ? "badge-breakdown" : "badge-operational";
