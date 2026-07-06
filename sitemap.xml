@@ -2,31 +2,25 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://muhammadumer.live/</loc>
-        <lastmod>2026-07-02</lastmod>
+        <lastmod>2026-07-06</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.00</priority>
     </url>
     <url>
-        <loc>https://muhammadumer.live/index.html</loc>
-        <lastmod>2026-07-02</lastmod>
+        <loc>https://muhammadumer.live/corporate</loc>
+        <lastmod>2026-07-06</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.80</priority>
     </url>
     <url>
-        <loc>https://muhammadumer.live/corporate.html</loc>
-        <lastmod>2026-07-02</lastmod>
+        <loc>https://muhammadumer.live/digital</loc>
+        <lastmod>2026-07-06</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.80</priority>
     </url>
     <url>
-        <loc>https://muhammadumer.live/digital.html</loc>
-        <lastmod>2026-07-02</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.80</priority>
-    </url>
-    <url>
-        <loc>https://muhammadumer.live/contact.html</loc>
-        <lastmod>2026-07-02</lastmod>
+        <loc>https://muhammadumer.live/contact</loc>
+        <lastmod>2026-07-06</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.50</priority>
     </url>
